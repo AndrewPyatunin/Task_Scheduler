@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Task Scheduler</string>
+    <string name="email">Enter your email:</string>
+    <string name="password">Enter your password:</string>
+    <string name="Sign_in">Sign in</string>
+    <string name="save">Save</string>
+    <string name="forgot_password">Forgot password</string>
+    <string name="register">Register</string>
+    <string name="forgot_password_fragment">Forgot password?</string>
+    <string name="email_forgot">Enter your email:</string>
+    <string name="reset_password">Reset password</string>
+    <string name="registration">Registration</string>
+    <string name="name">Name</string>
+    <string name="password_registration">Password</string>
+    <string name="email_registration">Email</string>
+    <string name="registration_reg">Sigh up</string>
+</resources>

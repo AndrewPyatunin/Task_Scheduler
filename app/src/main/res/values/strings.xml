@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Task Scheduler</string>
+    <string name="email">Введите ваш email или номер телефона:</string>
+    <string name="password">Введите пароль:</string>
+    <string name="Sign_in">Войти</string>
+    <string name="save">Сохранить</string>
+    <string name="forgot_password">Забыли пароль</string>
+    <string name="register">Регистрация</string>
+    <string name="forgot_password_fragment">Забыли пароль?</string>
+    <string name="email_forgot">Введите email:</string>
+    <string name="reset_password">Сбросить пароль</string>
+    <string name="registration">Регистрация</string>
+    <string name="name">Имя</string>
+    <string name="password_registration">Пароль</string>
+    <string name="email_registration">Email</string>
+    <string name="registration_reg">Зарегистрироваться</string>
 </resources>
