@@ -3,7 +3,7 @@
     <string name="app_name">Task Scheduler</string>
     <string name="email">Enter your email:</string>
     <string name="password">Enter your password:</string>
-    <string name="Sign_in">Sign in</string>
+    <string name="sign_in">Sign in</string>
     <string name="save">Save</string>
     <string name="forgot_password">Forgot password</string>
     <string name="register">Register</string>
@@ -15,4 +15,10 @@
     <string name="password_registration">Password</string>
     <string name="email_registration">Email</string>
     <string name="registration_reg">Sigh up</string>
+    <string name="logout">Logout</string>
+    <string name="last_name">Last name</string>
+    <string name="invite">Invite</string>
+    <string name="choose">Choose</string>
+    <string name="name_board_edit">Enter the name of the board:</string>
+    <string name="choose_background">Choose background</string>
 </resources>

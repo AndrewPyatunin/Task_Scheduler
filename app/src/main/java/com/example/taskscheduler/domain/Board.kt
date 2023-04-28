@@ -4,6 +4,10 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Board(val name: String, val members: ArrayList<User>, val listsOfNotes: List<Note>, val notes: ArrayList<Note>) :
-    Parcelable {
-}
+data class Board(
+    val id: String = "",
+    val name: String = "",
+    val members: List<String> = emptyList(),
+    val listsOfNotes: Map<String, List<Note>> = emptyMap()
+    ) :
+    Parcelable

@@ -4,7 +4,12 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class User(val id: Long, val name: String, val email: String, val boards: ArrayList<Board>) :
-    Parcelable {
-    private val password: String = ""
-}
+data class User(
+    val id: String = "",
+    val name: String = "",
+    val lastName: String = "",
+    val email: String = "",
+    var onlineStatus: Boolean = false,
+    var boards: List<String> = emptyList()
+) :
+    Parcelable

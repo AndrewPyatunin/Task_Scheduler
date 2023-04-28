@@ -8,6 +8,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcher
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentBoardBinding
 import com.example.taskscheduler.domain.Board
 
@@ -28,6 +29,12 @@ class BoardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.buttonInvite.setOnClickListener {
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, InviteUserFragment.newInstance())
+                .addToBackStack(null)
+                .commit()
+        }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 retryToListBoard()
@@ -53,7 +60,7 @@ class BoardFragment : Fragment() {
     }
 
     fun retryToListBoard() {
-        requireActivity().supportFragmentManager.popBackStack(NewBoardFragment.NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        requireActivity().supportFragmentManager.popBackStack()
     }
 
     companion object {
