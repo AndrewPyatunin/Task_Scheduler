@@ -12,6 +12,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.values
 import com.google.firebase.ktx.Firebase
 
 class InviteUserViewModel : ViewModel() {
@@ -27,6 +28,10 @@ class InviteUserViewModel : ViewModel() {
     private val _listUsers = MutableLiveData<List<User>>()
     val listUsers: LiveData<List<User>>
         get() = _listUsers
+
+    fun setUserStatus(isOnline: Boolean) {
+        databaseUsersReference.child(auth.currentUser?.uid ?: "").child("onlineStatus").setValue(isOnline)
+    }
 
     init {
         auth.addAuthStateListener {
@@ -45,7 +50,7 @@ class InviteUserViewModel : ViewModel() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                auth.signOut()
             }
 
         })

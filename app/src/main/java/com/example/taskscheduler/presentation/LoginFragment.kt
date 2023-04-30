@@ -56,7 +56,7 @@ class LoginFragment : Fragment() {
         })
         viewModel.success.observe(viewLifecycleOwner, Observer {
             if (it != null) {
-                launchBoardListFragment(User("$email", "name", "", email, true, ArrayList()))
+                launchBoardListFragment(it.uid)
             }
         })
     }
@@ -75,10 +75,10 @@ class LoginFragment : Fragment() {
             .commit()
     }
 
-    fun launchBoardListFragment(user: User) {
+    fun launchBoardListFragment(userId: String) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, BoardListFragment.newInstance(user))
-            .addToBackStack(null)
+            .replace(R.id.fragment_container, BoardListFragment.newInstance(userId))
+            .addToBackStack(BoardListFragment.NAME_BOARD_LIST)
             .commit()
     }
 

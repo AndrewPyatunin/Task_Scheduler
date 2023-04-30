@@ -28,7 +28,6 @@ class ForgotPasswordFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        parseArgs()
         binding.editTextEmailAddressForResetPassword.setText(email)
         binding.buttonResetPassword.setOnClickListener {
             email = binding.editTextEmailAddressForResetPassword.text.toString().trim()
@@ -42,6 +41,11 @@ class ForgotPasswordFragment: Fragment() {
                 }
             }
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        parseArgs()
     }
 
     fun parseArgs() {

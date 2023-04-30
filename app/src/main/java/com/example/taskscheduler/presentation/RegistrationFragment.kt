@@ -18,9 +18,7 @@ class RegistrationFragment: Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var binding: FragmentRegistrationBinding
     private lateinit var viewModel: RegistrationViewModel
-    var email = ""
-    var name = ""
-    var lastName = ""
+    private lateinit var user: User
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,12 +32,11 @@ class RegistrationFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[RegistrationViewModel::class.java]
-
         binding.buttonSignUp.setOnClickListener {
-            email = binding.editTextEmailAddressRegistration.text.toString().trim()
+            val email = binding.editTextEmailAddressRegistration.text.toString().trim()
             val password = binding.editTextPasswordRegistration.text.toString().trim()
-            name = binding.editTextPersonName.text.toString().trim()
-            lastName = binding.editTextPersonLastName.text.toString().trim()
+            val name = binding.editTextPersonName.text.toString().trim()
+            val lastName = binding.editTextPersonLastName.text.toString().trim()
             viewModel.signUp(email, password, name, lastName)
 
         }
@@ -53,15 +50,20 @@ class RegistrationFragment: Fragment() {
         })
         viewModel.success.observe(viewLifecycleOwner, Observer {
             if (it != null) {
-                launchBoardListFragment(User(it.uid, name, lastName, email, true, ArrayList()))
+                launchBoardListFragment(user)
+            }
+        })
+        viewModel.user.observe(viewLifecycleOwner, Observer {
+            if (it != null) {
+                user = it
             }
         })
     }
 
     fun launchBoardListFragment(user: User) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, BoardListFragment.newInstance(user))
-            .addToBackStack(NAME_LAUNCH)
+            .replace(R.id.fragment_container, BoardListFragment.newInstance(user.id))
+            .addToBackStack(BoardListFragment.NAME_BOARD_LIST)
             .commit()
     }
 

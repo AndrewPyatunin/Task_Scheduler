@@ -1,6 +1,7 @@
 package com.example.taskscheduler.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -21,7 +22,8 @@ class BoardListFragment: Fragment(), MenuProvider {
     private var _binding: FragmentBoardListBinding? = null
     private val binding: FragmentBoardListBinding
         get() = _binding ?: throw RuntimeException("FragmentBoardListBinding==null")
-    private lateinit var user: User
+    private lateinit var userId: String
+    lateinit var user: User
     private lateinit var viewModel: BoardListViewModel
     lateinit var recyclerViewBoardList: RecyclerView
     lateinit var boardsAdapter: BoardListAdapter
@@ -44,15 +46,16 @@ class BoardListFragment: Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel = ViewModelProvider(this)[BoardListViewModel::class.java]
+        observeViewModel()
         initViews()
-
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
-        viewModel = ViewModelProvider(this)[BoardListViewModel::class.java]
-        observeViewModel()
+
         binding.imageView.setOnClickListener {
-            launchNewBoardFragment(user)
+            Log.i("USER_BOARD_LIST", viewModel.user.value.toString())
+            viewModel.user.value?.let { it1 -> launchNewBoardFragment(it1) }
         }
         boardsAdapter.onItemClick = {
             launchBoardFragment(it)
@@ -67,14 +70,17 @@ class BoardListFragment: Fragment(), MenuProvider {
     }
 
     fun observeViewModel() {
-        viewModel.user.observe(viewLifecycleOwner, Observer {
+        viewModel.firebaseUser.observe(viewLifecycleOwner, Observer {
             if (it == null) {
                 launchLoginFragment()
             }
         })
         viewModel.boardList.observe(viewLifecycleOwner, Observer {
+            boardsAdapter.boards = it
+        })
+        viewModel.user.observe(viewLifecycleOwner, Observer {
             if (it != null) {
-                boardsAdapter.boards = it
+                user = it
             }
         })
     }
@@ -97,7 +103,7 @@ class BoardListFragment: Fragment(), MenuProvider {
     fun launchNewBoardFragment(user: User) {
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, NewBoardFragment.newInstance(user))
-            .addToBackStack(NewBoardFragment.NAME)
+            .addToBackStack(null)
             .commit()
     }
 
@@ -109,22 +115,22 @@ class BoardListFragment: Fragment(), MenuProvider {
     }
 
     private fun parseArgs() {
-        requireArguments().getParcelable<User>(KEY_USER)?.let {
-            user = it
+        requireArguments().getString(KEY_USER)?.let {
+            userId = it
         }
     }
 
 
     companion object {
 
-        const val NAME = "BoardListFragment"
+        const val NAME_BOARD_LIST = "BoardListFragment"
 
-        private const val KEY_USER = "user"
+        private const val KEY_USER = "userId"
 
-        fun newInstance(user: User): BoardListFragment {
+        fun newInstance(userId: String): BoardListFragment {
             return BoardListFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable(KEY_USER, user)
+                    putString(KEY_USER, userId)
                 }
             }
         }

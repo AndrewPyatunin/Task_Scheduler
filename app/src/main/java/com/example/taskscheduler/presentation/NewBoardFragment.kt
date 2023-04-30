@@ -20,7 +20,12 @@ class NewBoardFragment : Fragment() {
     private val binding: FragmentNewBoardBinding
         get() = _binding ?: throw RuntimeException("FragmentNewBoardBinding==null")
     private lateinit var viewModel: NewBoardViewModel
-    var user = User()
+    lateinit var user: User
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        user = parseArgs()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,12 +39,12 @@ class NewBoardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[NewBoardViewModel::class.java]
-        parseArgs()
+        observeViewModel()
         binding.saveNewBoard.setOnClickListener {
             val name = binding.nameBoard.text.toString().trim()
             viewModel.createNewBoard(name, user)
         }
-        observeViewModel()
+
     }
 
     override fun onDestroyView() {
@@ -53,11 +58,19 @@ class NewBoardFragment : Fragment() {
             .addToBackStack(null)
             .commit()
     }
+    fun launchLoginFragment() {
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, LoginFragment.newInstance())
+            .addToBackStack(null)
+            .commit()
+    }
 
-    fun parseArgs() {
+    fun parseArgs(): User {
+        var user = User()
         requireArguments().getParcelable<User>(USER)?.let {
             user = it
         }
+        return user
     }
 
     fun observeViewModel() {
@@ -69,6 +82,11 @@ class NewBoardFragment : Fragment() {
         viewModel.boardLiveData.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 launchBoardFragment(it)
+            }
+        })
+        viewModel.error.observe(viewLifecycleOwner, Observer {
+            if (it != null) {
+                launchLoginFragment()
             }
         })
     }

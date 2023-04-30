@@ -25,6 +25,10 @@ class RegistrationViewModel: ViewModel() {
     val error: LiveData<String>
         get() = _error
 
+    private val _user = MutableLiveData<User>()
+    val user: LiveData<User>
+        get() = _user
+
     val auth = Firebase.auth
     init {
         auth.addAuthStateListener {
@@ -37,9 +41,11 @@ class RegistrationViewModel: ViewModel() {
     fun signUp(email: String, password: String, name: String, lastName: String) {
         auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
             val userId = it.user?.uid ?: return@addOnSuccessListener
-            val user = User(userId, name, lastName, email, false, ArrayList())
+            val user = User(userId, name, lastName, email)
             databaseUsersReference.child(userId).setValue(user)
-            _success.value = it.user
+            _user.value = user
+
+            _success.value = auth.currentUser
         }.addOnFailureListener {
             _error.value = it.message
         }

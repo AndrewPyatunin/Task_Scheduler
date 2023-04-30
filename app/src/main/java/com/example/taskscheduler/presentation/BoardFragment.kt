@@ -17,6 +17,7 @@ class BoardFragment : Fragment() {
     private var _binding: FragmentBoardBinding? = null
     private val binding: FragmentBoardBinding
         get() = _binding ?: throw RuntimeException("FragmentBoardBinding==null")
+    lateinit var board: Board
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,12 +56,12 @@ class BoardFragment : Fragment() {
 
     fun parseArgs() {
         requireArguments().getParcelable<Board>(KEY_BOARD)?.let {
-
+            board = it
         }
     }
 
     fun retryToListBoard() {
-        requireActivity().supportFragmentManager.popBackStack()
+        requireActivity().supportFragmentManager.popBackStack(BoardListFragment.NAME_BOARD_LIST, 0)
     }
 
     companion object {

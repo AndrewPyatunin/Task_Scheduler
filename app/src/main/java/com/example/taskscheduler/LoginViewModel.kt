@@ -12,6 +12,7 @@ class LoginViewModel : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
 
     init {
+
         auth.addAuthStateListener {
             if (it.currentUser != null) {
                 _success.value = it.currentUser
@@ -29,7 +30,6 @@ class LoginViewModel : ViewModel() {
 
     fun login(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
-//            _success.value = it.user
         }.addOnFailureListener {
             _error.value = it.message
         }

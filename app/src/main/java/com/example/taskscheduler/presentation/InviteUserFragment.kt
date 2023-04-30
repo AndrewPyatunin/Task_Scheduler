@@ -30,20 +30,31 @@ class InviteUserFragment : Fragment(){
     lateinit var viewModel: InviteUserViewModel
 
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentInviteUserBinding.inflate(layoutInflater, container, false)
-        viewModel = ViewModelProvider(this)[InviteUserViewModel::class.java]
-        initViews()
-        observeViewModel()
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setUserStatus(true)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.setUserStatus(false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProvider(this)[InviteUserViewModel::class.java]
+        initViews()
+        observeViewModel()
         userAdapter.onItemClick = {
             val checkBox = requireActivity().findViewById<CheckBox>(R.id.checkBoxInvited)
             checkBox.isChecked = true
@@ -59,6 +70,7 @@ class InviteUserFragment : Fragment(){
         recyclerViewUser.adapter = userAdapter
 
     }
+
 
     fun observeViewModel() {
         viewModel.user.observe(viewLifecycleOwner, Observer {
