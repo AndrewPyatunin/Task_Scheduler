@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.ktx.Firebase
 
 class LoginViewModel : ViewModel() {
@@ -15,6 +16,7 @@ class LoginViewModel : ViewModel() {
 
         auth.addAuthStateListener {
             if (it.currentUser != null) {
+
                 _success.value = it.currentUser
             }
         }

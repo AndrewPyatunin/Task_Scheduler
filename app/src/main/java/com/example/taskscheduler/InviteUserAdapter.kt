@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
@@ -45,7 +46,8 @@ class InviteUserAdapter : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
     inner class InviteUserViewHolder
         (itemView: View,
          var textViewUserInfo: TextView = itemView.findViewById(R.id.textViewUserInfo),
-         var checkBoxInvited: CheckBox = itemView.findViewById(R.id.checkBoxInvited)
+         var checkBoxInvited: CheckBox = itemView.findViewById(R.id.checkBoxInvited),
+         var imageViewUserAvatar: ImageView = itemView.findViewById(R.id.imageViewAvatar)
     ): ViewHolder(itemView) {
         init {
             itemView.setOnClickListener {
@@ -64,6 +66,7 @@ class InviteUserAdapter : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
         val userInfo = String.format("%s %s", user.name, user.lastName)
 //        holder.checkBoxInvited.onTouchEvent()
         holder.textViewUserInfo.text = userInfo
+        holder.imageViewUserAvatar.setImageResource(R.drawable.download_image)
     }
 
     override fun getItemCount(): Int = users.size

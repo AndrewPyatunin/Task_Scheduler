@@ -21,4 +21,7 @@
     <string name="choose">Choose</string>
     <string name="name_board_edit">Enter the name of the board:</string>
     <string name="choose_background">Choose background</string>
+    <string name="add_avatar">Add avatar for user</string>
+    <string name="welcome_user">Welcome, %1$s %2$s \nYour boards</string>
+
 </resources>

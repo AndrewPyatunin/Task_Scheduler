@@ -17,6 +17,7 @@ import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentBoardListBinding
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
+import com.squareup.picasso.Picasso
 
 class BoardListFragment: Fragment(), MenuProvider {
     private var _binding: FragmentBoardListBinding? = null
@@ -51,7 +52,10 @@ class BoardListFragment: Fragment(), MenuProvider {
         initViews()
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-
+        user = viewModel.user.value ?: User()
+        Log.i("USER_URL_LIST", user.uri)
+        binding.textViewWelcomeUser.text = String.format(getString(R.string.welcome_user, user.name, user.lastName))
+        Picasso.get().load(user.uri).resize(50, 50).centerCrop().into(binding.imageViewUserAvatarBoardList)
 
         binding.imageView.setOnClickListener {
             Log.i("USER_BOARD_LIST", viewModel.user.value.toString())
@@ -115,8 +119,8 @@ class BoardListFragment: Fragment(), MenuProvider {
     }
 
     private fun parseArgs() {
-        requireArguments().getString(KEY_USER)?.let {
-            userId = it
+        requireArguments().getParcelable<User>(KEY_USER)?.let {
+            user = it
         }
     }
 
@@ -125,12 +129,12 @@ class BoardListFragment: Fragment(), MenuProvider {
 
         const val NAME_BOARD_LIST = "BoardListFragment"
 
-        private const val KEY_USER = "userId"
+        private const val KEY_USER = "user"
 
-        fun newInstance(userId: String): BoardListFragment {
+        fun newInstance(user: User): BoardListFragment {
             return BoardListFragment().apply {
                 arguments = Bundle().apply {
-                    putString(KEY_USER, userId)
+                    putParcelable(KEY_USER, user)
                 }
             }
         }

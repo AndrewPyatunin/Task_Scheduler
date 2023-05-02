@@ -20,4 +20,6 @@
     <string name="choose">Выбрать</string>
     <string name="name_board_edit">Введите название доски:</string>
     <string name="choose_background">Выберите фон</string>
+    <string name="add_avatar">Добавить аватар пользователя</string>
+    <string name="welcome_user">Добро пожаловать, %1$s %2$s \nВаши доски</string>
 </resources>

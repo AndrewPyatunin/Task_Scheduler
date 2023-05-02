@@ -20,6 +20,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/user_avatar_placeholder"
             app:shapeAppearanceOverlay="@style/ImageStyle_Circle"
             tools:srcCompat="@tools:sample/avatars" />
 

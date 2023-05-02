@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseUser
@@ -43,8 +42,8 @@ class BoardListViewModel: ViewModel() {
         databaseBoardsReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 readData(object : MyCallback {
-                    override fun onCallback(list: User) {
-                        val boardsId = list.boards ?: emptyList()
+                    override fun onCallback(user: User) {
+                        val boardsId = user.boards ?: emptyList()
                         Log.i("BOARD_ID", boardsId.toString())
                         val boardsFromDb = ArrayList<Board>()
                         for (dataSnapshot in snapshot.children) {
@@ -100,6 +99,6 @@ class BoardListViewModel: ViewModel() {
     }
 
     interface MyCallback {
-        fun onCallback(list: User)
+        fun onCallback(user: User)
     }
 }

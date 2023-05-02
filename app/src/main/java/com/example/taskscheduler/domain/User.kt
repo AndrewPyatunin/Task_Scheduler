@@ -1,5 +1,6 @@
 package com.example.taskscheduler.domain
 
+import android.net.Uri
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
@@ -10,6 +11,8 @@ data class User(
     val lastName: String = "",
     val email: String = "",
     var onlineStatus: Boolean = false,
-    var boards: List<String> = emptyList()
+    var boards: List<String> = emptyList(),
+    var uri: String = ""
+
 ) :
     Parcelable
