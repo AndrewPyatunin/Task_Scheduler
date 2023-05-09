@@ -18,6 +18,7 @@ class NewBoardViewModel : ViewModel() {
     private val firebaseDatabase = Firebase.database
     val databaseBoardsReference = firebaseDatabase.getReference("Boards")
     val databaseUsersReference = firebaseDatabase.getReference("Users")
+    val databaseImageUrlsReference = firebaseDatabase.getReference("ImageUrls")
     private val _boardLiveData = MutableLiveData<Board>()
     val boardLiveData: LiveData<Board>
         get() = _boardLiveData
@@ -30,11 +31,38 @@ class NewBoardViewModel : ViewModel() {
     val error: LiveData<String>
         get() = _error
 
-    fun createNewBoard(name: String, user: User) {
+    private val _urlImage = MutableLiveData<List<String>>()
+    val urlImage: LiveData<List<String>>
+        get() = _urlImage
+
+    init {
+        databaseImageUrlsReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val imageUrls = ArrayList<String>()
+                for (dataSnapshot in snapshot.children) {
+                    Log.i("USER_IMAGES", dataSnapshot.value.toString())
+                    imageUrls.add(dataSnapshot.value.toString())
+                }
+
+                _urlImage.value = imageUrls
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                _error.value = error.message
+                logout()
+            }
+
+        })
+    }
+
+
+    fun createNewBoard(name: String, user: User, urlBackground: String) {
         //Log.i("FIREBASE_USER", "${Firebase.auth.currentUser?.email}")
+        Log.i("BACKGROUND_URL", urlBackground)
         Log.i("USER_FROM_LIST", user.id)
         val url = databaseBoardsReference.push()
         val idBoard = url.key ?: ""
+
         databaseUsersReference.child(user.id).addListenerForSingleValueEvent(object : ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -55,16 +83,17 @@ class NewBoardViewModel : ViewModel() {
                 listMembersIds.add(user.id)
 
                 Log.i("VALUE_BOARD_ID", idBoard)
-                val board = Board(idBoard, name, listMembersIds, emptyMap())
+                val board = Board(idBoard, name, urlBackground, listMembersIds, emptyList())
 
                 url.setValue(board)
-                _boardLiveData.value = board
+
 
                 val userToDb =
-                    User(user.id, user.name, user.lastName, user.email, true, listBoardsIds)
+                    User(user.id, user.name, user.lastName, user.email, true, listBoardsIds, user.uri)
                 databaseUsersReference.child(user.id).child("boards").setValue(listBoardsIds)
 //                _user.value?.boards = listBoardsIds
                 _user.value = userToDb
+                _boardLiveData.value = board
 //                    callback.onBoardListCallback(listBoardsIds, userToDb)
             }
 
@@ -74,7 +103,6 @@ class NewBoardViewModel : ViewModel() {
             }
 
         })
-
 
     }
 

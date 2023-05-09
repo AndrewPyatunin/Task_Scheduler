@@ -14,7 +14,7 @@
         android:scaleType="centerCrop"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/user_avatar_placeholder"
+        app:srcCompat="@drawable/board_back_image_placeholder"
         app:shapeAppearanceOverlay="@style/ImageStyle_Circle"
         tools:srcCompat="@tools:sample/avatars" />
 

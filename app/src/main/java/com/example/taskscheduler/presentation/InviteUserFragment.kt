@@ -1,6 +1,7 @@
 package com.example.taskscheduler.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -59,6 +60,7 @@ class InviteUserFragment : Fragment(){
             val checkBox = requireActivity().findViewById<CheckBox>(R.id.checkBoxInvited)
             checkBox.isChecked = true
             listForInvite.add(it)
+            Log.i("USER_INVITE_LIST", listForInvite.joinToString { it -> it.toString() })
         }
     }
 

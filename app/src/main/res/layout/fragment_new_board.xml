@@ -24,7 +24,8 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
+        android:id="@+id/recyclerViewNewBoard"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/saveNewBoard"
         app:layout_constraintEnd_toEndOf="parent"

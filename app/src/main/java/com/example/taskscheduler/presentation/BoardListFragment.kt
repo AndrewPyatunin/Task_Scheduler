@@ -11,8 +11,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.taskscheduler.BoardListAdapter
 import com.example.taskscheduler.BoardListViewModel
+import com.example.taskscheduler.BoardListViewModelFactory
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentBoardListBinding
 import com.example.taskscheduler.domain.Board
@@ -25,7 +27,9 @@ class BoardListFragment: Fragment(), MenuProvider {
         get() = _binding ?: throw RuntimeException("FragmentBoardListBinding==null")
     private lateinit var userId: String
     lateinit var user: User
+    var boardList = ArrayList<Board>()
     private lateinit var viewModel: BoardListViewModel
+    private lateinit var viewModelFactory: BoardListViewModelFactory
     lateinit var recyclerViewBoardList: RecyclerView
     lateinit var boardsAdapter: BoardListAdapter
 
@@ -47,19 +51,25 @@ class BoardListFragment: Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this)[BoardListViewModel::class.java]
+        viewModelFactory = BoardListViewModelFactory(user)
+        viewModel = ViewModelProvider(this, viewModelFactory)[BoardListViewModel::class.java]
         observeViewModel()
         initViews()
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-        user = viewModel.user.value ?: User()
+//        user = viewModel.user.value ?: User()
         Log.i("USER_URL_LIST", user.uri)
         binding.textViewWelcomeUser.text = String.format(getString(R.string.welcome_user, user.name, user.lastName))
-        Picasso.get().load(user.uri).resize(50, 50).centerCrop().into(binding.imageViewUserAvatarBoardList)
+        Glide.with(this).load(user.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)
+//        Picasso.get().load(user.uri)
+//            .centerCrop()
+//            .placeholder(R.drawable.user_avatar_placeholder)
+//            .error(R.drawable.user_avatar_placeholder).into(binding.imageViewUserAvatarBoardList)
 
         binding.imageView.setOnClickListener {
-            Log.i("USER_BOARD_LIST", viewModel.user.value.toString())
-            viewModel.user.value?.let { it1 -> launchNewBoardFragment(it1) }
+            launchNewBoardFragment(user)
+//            Log.i("USER_BOARD_LIST", viewModel.user.value.toString())
+//            viewModel.user.value?.let { it1 -> launchNewBoardFragment(it1) }
         }
         boardsAdapter.onItemClick = {
             launchBoardFragment(it)
@@ -82,11 +92,11 @@ class BoardListFragment: Fragment(), MenuProvider {
         viewModel.boardList.observe(viewLifecycleOwner, Observer {
             boardsAdapter.boards = it
         })
-        viewModel.user.observe(viewLifecycleOwner, Observer {
-            if (it != null) {
-                user = it
-            }
-        })
+//        viewModel.user.observe(viewLifecycleOwner, Observer {
+//            if (it != null) {
+//                user = it
+//            }
+//        })
     }
 
     fun initViews() {
@@ -94,6 +104,7 @@ class BoardListFragment: Fragment(), MenuProvider {
         recyclerViewBoardList.layoutManager = GridLayoutManager(requireContext(), 2)
 //        recyclerViewBoardList.isNestedScrollingEnabled = false
         boardsAdapter = BoardListAdapter()
+        if (boardList.isNotEmpty()) boardsAdapter.boards = boardList
         recyclerViewBoardList.adapter = boardsAdapter
     }
 
@@ -113,12 +124,15 @@ class BoardListFragment: Fragment(), MenuProvider {
 
     fun launchBoardFragment(board: Board) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, BoardFragment.newInstance(board))
+            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
             .addToBackStack(null)
             .commit()
     }
 
     private fun parseArgs() {
+        requireArguments().getParcelableArrayList<Board>(KEY_BOARDS)?.let {
+            boardList = it
+        }
         requireArguments().getParcelable<User>(KEY_USER)?.let {
             user = it
         }
@@ -130,11 +144,13 @@ class BoardListFragment: Fragment(), MenuProvider {
         const val NAME_BOARD_LIST = "BoardListFragment"
 
         private const val KEY_USER = "user"
+        private const val KEY_BOARDS = "boards"
 
-        fun newInstance(user: User): BoardListFragment {
+        fun newInstance(user: User, listBoards: ArrayList<Board>): BoardListFragment {
             return BoardListFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(KEY_USER, user)
+                    putParcelableArrayList(KEY_BOARDS, listBoards)
                 }
             }
         }

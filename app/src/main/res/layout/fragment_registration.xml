@@ -100,6 +100,6 @@
         android:layout_margin="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextPersonLastName"
-        app:srcCompat="@drawable/download_image" />
+        app:srcCompat="@drawable/icon_get_image"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

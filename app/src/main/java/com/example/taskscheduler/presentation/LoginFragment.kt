@@ -1,6 +1,7 @@
 package com.example.taskscheduler.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.taskscheduler.LoginViewModel
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentLoginBinding
+import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseAuth
 
@@ -56,8 +58,15 @@ class LoginFragment : Fragment() {
         })
         viewModel.success.observe(viewLifecycleOwner, Observer {
             if (it != null) {
-                launchBoardListFragment(User())
+                launchBoardListFragment(viewModel.user.value as User, viewModel.boardList.value as ArrayList<Board>)
             }
+        })
+        viewModel.user.observe(viewLifecycleOwner, Observer {
+            user = it
+        })
+        viewModel.boardList.observe(viewLifecycleOwner, Observer {
+            if (viewModel.user.value != null && it != null)
+                launchBoardListFragment(viewModel.user.value as User, it)
         })
     }
 
@@ -75,9 +84,9 @@ class LoginFragment : Fragment() {
             .commit()
     }
 
-    fun launchBoardListFragment(user: User) {
+    fun launchBoardListFragment(user: User, listBoards: ArrayList<Board>) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, BoardListFragment.newInstance(user))
+            .replace(R.id.fragment_container, BoardListFragment.newInstance(user, listBoards))
             .addToBackStack(BoardListFragment.NAME_BOARD_LIST)
             .commit()
     }

@@ -1,18 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="100dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/board_item_card"
+    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    app:cardPreventCornerOverlap="false"
     xmlns:tools="http://schemas.android.com/tools"
     app:cardUseCompatPadding="true">
-
-    <TextView
-        android:id="@+id/textViewBoardName"
-        android:gravity="center"
+    <LinearLayout
+        android:id="@+id/linear_board_item"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textSize="24sp"
-        tools:text="My first board"/>
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/textViewBoardName"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textStyle="italic|bold"
+            android:textColor="#000000"
+            android:textSize="24sp"
+            tools:text="My first board"/>
+    </LinearLayout>
+
+
 
 </androidx.cardview.widget.CardView>

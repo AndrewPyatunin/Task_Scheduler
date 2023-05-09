@@ -9,7 +9,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.bumptech.glide.Glide
 import com.example.taskscheduler.domain.User
+import com.squareup.picasso.Picasso
 
 class UserListDiffCallback(
     private val oldList: List<User>,
@@ -47,7 +49,7 @@ class InviteUserAdapter : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
         (itemView: View,
          var textViewUserInfo: TextView = itemView.findViewById(R.id.textViewUserInfo),
          var checkBoxInvited: CheckBox = itemView.findViewById(R.id.checkBoxInvited),
-         var imageViewUserAvatar: ImageView = itemView.findViewById(R.id.imageViewAvatar)
+         var imageViewUserAvatar: ImageView = itemView.findViewById(R.id.imageViewUserAvatar)
     ): ViewHolder(itemView) {
         init {
             itemView.setOnClickListener {
@@ -66,7 +68,9 @@ class InviteUserAdapter : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
         val userInfo = String.format("%s %s", user.name, user.lastName)
 //        holder.checkBoxInvited.onTouchEvent()
         holder.textViewUserInfo.text = userInfo
-        holder.imageViewUserAvatar.setImageResource(R.drawable.download_image)
+        if (user.uri != "") {
+            Glide.with(holder.itemView.context).load(user.uri).into(holder.imageViewUserAvatar)
+        }
     }
 
     override fun getItemCount(): Int = users.size

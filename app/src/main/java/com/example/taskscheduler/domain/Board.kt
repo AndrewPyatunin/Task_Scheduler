@@ -7,7 +7,8 @@ import kotlinx.parcelize.Parcelize
 data class Board(
     val id: String = "",
     val name: String = "",
+    val backgroundUrl: String = "",
     val members: List<String> = emptyList(),
-    val listsOfNotes: Map<String, List<Note>> = emptyMap()
+    var listsOfNotesIds: List<String> = emptyList()
     ) :
     Parcelable

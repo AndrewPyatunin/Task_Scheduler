@@ -22,4 +22,9 @@
     <string name="choose_background">Выберите фон</string>
     <string name="add_avatar">Добавить аватар пользователя</string>
     <string name="welcome_user">Добро пожаловать, %1$s %2$s \nВаши доски</string>
+    <string name="add_note">+ Добавить заметку</string>
+    <string name="add_new_list">+ Добавить новый список</string>
+    <string name="add_list_title">Введите название списка</string>
+    <string name="save_button_new_list">Сохранить</string>
+    <string name="note_in_list">в списке %s</string>
 </resources>

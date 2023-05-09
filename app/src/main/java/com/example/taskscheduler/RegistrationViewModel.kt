@@ -7,7 +7,6 @@ import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -91,8 +90,8 @@ class RegistrationViewModel(application: Application): AndroidViewModel(applicat
             if (uri != null) {
                 upLoadUserAvatar(uri, object : UrlCallback {
                     override fun onUrlCallback(url: String) {
-                        Picasso.get().load(url).placeholder(R.drawable.user_avatar_placeholder)
-                            .error(R.drawable.user_avatar_placeholder)
+                        Picasso.get().load(url).placeholder(R.drawable.board_back_image_placeholder)
+                            .error(R.drawable.board_back_image_placeholder)
                         val user = User(userId, name, lastName, email, true, emptyList(), url)
                         databaseUsersReference.child(userId).setValue(user)
                         _user.value = user

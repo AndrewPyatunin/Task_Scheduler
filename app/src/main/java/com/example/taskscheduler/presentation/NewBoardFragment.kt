@@ -1,14 +1,16 @@
 package com.example.taskscheduler.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
+import com.example.taskscheduler.NewBoardAdapter
 import com.example.taskscheduler.NewBoardViewModel
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewBoardBinding
@@ -21,6 +23,9 @@ class NewBoardFragment : Fragment() {
         get() = _binding ?: throw RuntimeException("FragmentNewBoardBinding==null")
     private lateinit var viewModel: NewBoardViewModel
     lateinit var user: User
+    lateinit var newBoardAdapter: NewBoardAdapter
+    var listOfImageUrls = ArrayList<String>()
+    var urlBackground = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,9 +45,21 @@ class NewBoardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[NewBoardViewModel::class.java]
         observeViewModel()
+        initViews()
+
         binding.saveNewBoard.setOnClickListener {
             val name = binding.nameBoard.text.toString().trim()
-            viewModel.createNewBoard(name, user)
+            if (name != "" && urlBackground != "")
+                viewModel.createNewBoard(name, user, urlBackground)
+            else
+                Toast.makeText(
+                    requireContext(),
+                    "Заполните поле названия, а также выберите фон!",
+                    Toast.LENGTH_SHORT
+                ).show()
+        }
+        newBoardAdapter.onItemClick = {
+            urlBackground = it
         }
 
     }
@@ -52,10 +69,11 @@ class NewBoardFragment : Fragment() {
         _binding = null
     }
 
-    fun launchBoardFragment(board: Board) {
+    fun launchBoardFragment(board: Board, user: User) {
+        Log.i("USER_NEW_BOARD", user.name)
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, BoardFragment.newInstance(board))
-            .addToBackStack(null)
+            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
+//            .addToBackStack(null)
             .commit()
     }
     fun launchLoginFragment() {
@@ -63,6 +81,14 @@ class NewBoardFragment : Fragment() {
             .replace(R.id.fragment_container, LoginFragment.newInstance())
             .addToBackStack(null)
             .commit()
+    }
+
+    fun initViews() {
+        binding.recyclerViewNewBoard.layoutManager = GridLayoutManager(requireContext(), 2)
+        binding.recyclerViewNewBoard.setHasFixedSize(true)
+        newBoardAdapter = NewBoardAdapter()
+        if (listOfImageUrls.isNotEmpty()) newBoardAdapter.backgroundImageUrls = listOfImageUrls
+        binding.recyclerViewNewBoard.adapter = newBoardAdapter
     }
 
     fun parseArgs(): User {
@@ -81,13 +107,17 @@ class NewBoardFragment : Fragment() {
         })
         viewModel.boardLiveData.observe(viewLifecycleOwner, Observer {
             if (it != null) {
-                launchBoardFragment(it)
+                Log.i("USER_NEW_BOARD", user.name)
+                launchBoardFragment(it, user)
             }
         })
         viewModel.error.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 launchLoginFragment()
             }
+        })
+        viewModel.urlImage.observe(viewLifecycleOwner, Observer {
+            newBoardAdapter.backgroundImageUrls = it as ArrayList<String>
         })
     }
 

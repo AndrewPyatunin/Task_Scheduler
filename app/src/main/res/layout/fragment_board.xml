@@ -1,17 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.core.widget.NestedScrollView
+    android:id="@+id/scrollView"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/buttonInvite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:text="@string/invite"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/parent_recyclerViewBoard"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/cardViewBoard"/>
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewBoard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/parent_recyclerViewBoard"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/textViewAddList"
+                android:elevation="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/add_new_list"
+                android:padding="4dp"
+                android:layout_margin="4dp"/>
+        </androidx.cardview.widget.CardView>
+            <EditText
+                android:id="@+id/editTextAddList"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/add_list_title"
+                android:textSize="24sp"
+                android:visibility="invisible"
+                android:layout_margin="4dp"
+                android:padding="4dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/parent_recyclerViewBoard" />
+
+            <Button
+                android:id="@+id/buttonAddNewList"
+                android:elevation="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:layout_margin="4dp"
+                android:text="@string/save_button_new_list"
+                android:visibility="invisible"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/editTextAddList" />
+
+
+
+
+        <Button
+            android:id="@+id/buttonInvite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            android:text="@string/invite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageViewInvite"
+            android:elevation="4dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:tooltipText="@string/invite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/invite_user" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
+

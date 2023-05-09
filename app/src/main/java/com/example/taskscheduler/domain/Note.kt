@@ -5,10 +5,11 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Note(
-    val name: String,
-    val members: List<User>,
-    val description: String,
-    val labels: String,
-    val listOfTasks: List<String>
+    val id: String = "",
+    val title: String = "",
+    val members: List<User> = emptyList(),
+    val description: String = "",
+    val labels: String = "",
+    val listOfTasks: List<String> = emptyList()
     ) :
     Parcelable

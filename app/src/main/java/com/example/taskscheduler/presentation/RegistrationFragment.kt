@@ -102,7 +102,7 @@ class RegistrationFragment: Fragment() {
 
     fun launchBoardListFragment(user: User) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, BoardListFragment.newInstance(user))
+            .replace(R.id.fragment_container, BoardListFragment.newInstance(user, ArrayList()))
             .addToBackStack(BoardListFragment.NAME_BOARD_LIST)
             .commit()
     }
