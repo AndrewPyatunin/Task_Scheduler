@@ -9,10 +9,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.taskscheduler.NewBoardAdapter
 import com.example.taskscheduler.NewBoardViewModel
-import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewBoardBinding
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
@@ -27,9 +28,11 @@ class NewBoardFragment : Fragment() {
     var listOfImageUrls = ArrayList<String>()
     var urlBackground = ""
 
+    private val args by navArgs<NewBoardFragmentArgs>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        user = parseArgs()
+        user = args.user
     }
 
     override fun onCreateView(
@@ -69,21 +72,23 @@ class NewBoardFragment : Fragment() {
         _binding = null
     }
 
-    fun launchBoardFragment(board: Board, user: User) {
-        Log.i("USER_NEW_BOARD", user.name)
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
-//            .addToBackStack(null)
-            .commit()
+    private fun launchBoardFragment(board: Board, user: User) {
+        findNavController().navigate(NewBoardFragmentDirections.actionNewBoardFragmentToBoardFragment(board, user))
+//        Log.i("USER_NEW_BOARD", user.name)
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
+////            .addToBackStack(null)
+//            .commit()
     }
-    fun launchLoginFragment() {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, LoginFragment.newInstance())
-            .addToBackStack(null)
-            .commit()
+    private fun launchLoginFragment() {
+        findNavController().navigate(NewBoardFragmentDirections.actionNewBoardFragmentToLoginFragment())
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .replace(R.id.fragment_container, LoginFragment.newInstance())
+//            .addToBackStack(null)
+//            .commit()
     }
 
-    fun initViews() {
+    private fun initViews() {
         binding.recyclerViewNewBoard.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.recyclerViewNewBoard.setHasFixedSize(true)
         newBoardAdapter = NewBoardAdapter()
@@ -91,7 +96,7 @@ class NewBoardFragment : Fragment() {
         binding.recyclerViewNewBoard.adapter = newBoardAdapter
     }
 
-    fun parseArgs(): User {
+    private fun parseArgs(): User {
         var user = User()
         requireArguments().getParcelable<User>(USER)?.let {
             user = it
@@ -99,7 +104,7 @@ class NewBoardFragment : Fragment() {
         return user
     }
 
-    fun observeViewModel() {
+    private fun observeViewModel() {
         viewModel.user.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 user = it

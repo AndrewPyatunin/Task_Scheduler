@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -32,6 +34,8 @@ class BoardListFragment: Fragment(), MenuProvider {
     private lateinit var viewModelFactory: BoardListViewModelFactory
     lateinit var recyclerViewBoardList: RecyclerView
     lateinit var boardsAdapter: BoardListAdapter
+
+    private val args by navArgs<BoardListFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +69,10 @@ class BoardListFragment: Fragment(), MenuProvider {
 //            .centerCrop()
 //            .placeholder(R.drawable.user_avatar_placeholder)
 //            .error(R.drawable.user_avatar_placeholder).into(binding.imageViewUserAvatarBoardList)
+        binding.buttonInvites.setOnClickListener {
+            Log.i("USER_TO_INVITE", user.name)
+            launchMyInvitesFragment(user)
+        }
 
         binding.imageView.setOnClickListener {
             launchNewBoardFragment(user)
@@ -83,7 +91,7 @@ class BoardListFragment: Fragment(), MenuProvider {
         _binding = null
     }
 
-    fun observeViewModel() {
+    private fun observeViewModel() {
         viewModel.firebaseUser.observe(viewLifecycleOwner, Observer {
             if (it == null) {
                 launchLoginFragment()
@@ -99,7 +107,7 @@ class BoardListFragment: Fragment(), MenuProvider {
 //        })
     }
 
-    fun initViews() {
+    private fun initViews() {
         recyclerViewBoardList = binding.recyclerViewBoardList
         recyclerViewBoardList.layoutManager = GridLayoutManager(requireContext(), 2)
 //        recyclerViewBoardList.isNestedScrollingEnabled = false
@@ -108,34 +116,47 @@ class BoardListFragment: Fragment(), MenuProvider {
         recyclerViewBoardList.adapter = boardsAdapter
     }
 
-    fun launchLoginFragment() {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, LoginFragment.newInstance())
-            .addToBackStack(null)
-            .commit()
+    private fun launchMyInvitesFragment(user: User) {
+        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToMyInvitesFragment(user))
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .replace(R.id.fragment_container, MyInvitesFragment.newInstance(user))
+//            .addToBackStack(null)
+//            .commit()
     }
 
-    fun launchNewBoardFragment(user: User) {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, NewBoardFragment.newInstance(user))
-            .addToBackStack(null)
-            .commit()
+    private fun launchLoginFragment() {
+        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToLoginFragment())
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .replace(R.id.fragment_container, LoginFragment.newInstance())
+//            .addToBackStack(null)
+//            .commit()
     }
 
-    fun launchBoardFragment(board: Board) {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
-            .addToBackStack(null)
-            .commit()
+    private fun launchNewBoardFragment(user: User) {
+        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToNewBoardFragment(user))
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .replace(R.id.fragment_container, NewBoardFragment.newInstance(user))
+//            .addToBackStack(null)
+//            .commit()
+    }
+
+    private fun launchBoardFragment(board: Board) {
+        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToBoardFragment(board, user))
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
+//            .addToBackStack(null)
+//            .commit()
     }
 
     private fun parseArgs() {
-        requireArguments().getParcelableArrayList<Board>(KEY_BOARDS)?.let {
-            boardList = it
-        }
-        requireArguments().getParcelable<User>(KEY_USER)?.let {
-            user = it
-        }
+        boardList = args.boardList.listBoards
+        user = args.user
+//        requireArguments().getParcelableArrayList<Board>(KEY_BOARDS)?.let {
+//            boardList = it
+//        }
+//        requireArguments().getParcelable<User>(KEY_USER)?.let {
+//            user = it
+//        }
     }
 
 

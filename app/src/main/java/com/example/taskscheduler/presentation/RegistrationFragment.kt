@@ -1,6 +1,5 @@
 package com.example.taskscheduler.presentation
 
-import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.net.Uri
@@ -14,9 +13,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.taskscheduler.R
+import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.RegistrationViewModel
 import com.example.taskscheduler.databinding.FragmentRegistrationBinding
+import com.example.taskscheduler.domain.ListOfBoards
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseAuth
 
@@ -83,7 +83,7 @@ class RegistrationFragment: Fragment() {
 
     }
 
-    fun observeViewModel() {
+    private fun observeViewModel() {
         viewModel.error.observe(viewLifecycleOwner, Observer {
             if (it != null) Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
         })
@@ -100,11 +100,12 @@ class RegistrationFragment: Fragment() {
         })
     }
 
-    fun launchBoardListFragment(user: User) {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, BoardListFragment.newInstance(user, ArrayList()))
-            .addToBackStack(BoardListFragment.NAME_BOARD_LIST)
-            .commit()
+    private fun launchBoardListFragment(user: User) {
+        findNavController().navigate(RegistrationFragmentDirections.actionRegistrationFragmentToBoardListFragment(user, ListOfBoards(ArrayList())))
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .replace(R.id.fragment_container, BoardListFragment.newInstance(user, ArrayList()))
+//            .addToBackStack(BoardListFragment.NAME_BOARD_LIST)
+//            .commit()
     }
 
     companion object {

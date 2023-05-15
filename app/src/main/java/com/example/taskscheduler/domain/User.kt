@@ -12,7 +12,8 @@ data class User(
     val email: String = "",
     var onlineStatus: Boolean = false,
     var boards: List<String> = emptyList(),
-    var uri: String = ""
+    var uri: String = "",
+    var invites: Map<String, Boolean> = emptyMap()
 
 ) :
     Parcelable

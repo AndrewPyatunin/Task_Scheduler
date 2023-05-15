@@ -28,5 +28,7 @@
     <string name="add_list_title">Enter the list title</string>
     <string name="save_button_new_list">Save</string>
     <string name="note_in_list">in list %s</string>
+    <string name="invite_from">Invite from %s</string>
+    <string name="to_board">To board %s</string>
 
 </resources>

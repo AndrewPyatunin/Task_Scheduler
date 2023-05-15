@@ -54,6 +54,7 @@ class InviteUserAdapter : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
         init {
             itemView.setOnClickListener {
                 onItemClick?.invoke(users[adapterPosition])
+                checkBoxInvited.isChecked = !checkBoxInvited.isChecked
             }
         }
     }

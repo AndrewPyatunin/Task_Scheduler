@@ -12,6 +12,9 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavArgs
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -22,22 +25,21 @@ import com.example.taskscheduler.NewNoteViewModel
 import com.example.taskscheduler.ParentListNoteRVAdapter
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentBoardBinding
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.ListOfNotesItem
-import com.example.taskscheduler.domain.Note
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.*
 
 class BoardFragment : Fragment() {
 
-    private var _binding: FragmentBoardBinding? = null
-    private val binding: FragmentBoardBinding
-        get() = _binding ?: throw RuntimeException("FragmentBoardBinding==null")
+    lateinit var binding: FragmentBoardBinding
+//    private val binding: FragmentBoardBinding
+//        get() = _binding ?: throw RuntimeException("FragmentBoardBinding==null")
     lateinit var board: Board
     lateinit var user: User
     private lateinit var recyclerViewParent: RecyclerView
     lateinit var parentAdapter: ParentListNoteRVAdapter
     lateinit var viewModel: BoardViewModel
     private var parentList = ArrayList<ListOfNotesItem>()
+
+    private val args by navArgs<BoardFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +51,7 @@ class BoardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentBoardBinding.inflate(inflater, container, false)
+        binding = FragmentBoardBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -110,12 +112,12 @@ class BoardFragment : Fragment() {
 
 
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        _binding = null
+//    }
 
-    fun initViews() {
+    private fun initViews() {
         recyclerViewParent = binding.parentRecyclerViewBoard
         recyclerViewParent.setHasFixedSize(true)
         recyclerViewParent.layoutManager = LinearLayoutManager(requireContext())
@@ -155,40 +157,46 @@ class BoardFragment : Fragment() {
 ////        Log.i("USER_LIST_OF_NOTES", parentList[1].listNotes[1].toString())
 //    }
 
-    fun parseArgs(): User {
-        requireArguments().getParcelable<Board>(KEY_BOARD)?.let {
-            board = it
-        }
-        requireArguments().getParcelable<User>(KEY_USER)?.let {
-            Log.i("USER_FROM_NEW", it.name)
-            user = it
-        }
+    private fun parseArgs(): User {
+        board = args.board
+        user = args.user
+//        requireArguments().getParcelable<Board>(KEY_BOARD)?.let {
+//            board = it
+//        }
+//        requireArguments().getParcelable<User>(KEY_USER)?.let {
+//            Log.i("USER_FROM_NEW", it.name)
+//            user = it
+//        }
         return user
     }
 
-    fun launchInviteUserFragment() {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, InviteUserFragment.newInstance())
-            .addToBackStack(null)
-            .commit()
+    private fun launchInviteUserFragment() {
+        findNavController().navigate(BoardFragmentDirections.actionBoardFragmentToInviteUserFragment(board, user))
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .replace(R.id.fragment_container, InviteUserFragment.newInstance(board, user))
+//            .addToBackStack(null)
+//            .commit()
     }
 
     fun launchNewNoteFragment(listOfNotesItem: ListOfNotesItem) {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .addToBackStack(null)
-            .replace(R.id.fragment_container, NewNoteFragment.newInstance(listOfNotesItem, board, user))
-            .commit()
+        findNavController().navigate(
+            BoardFragmentDirections.actionBoardFragmentToNewNoteFragment(listOfNotesItem, board, user))
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .addToBackStack(null)
+//            .replace(R.id.fragment_container, NewNoteFragment.newInstance(listOfNotesItem, board, user))
+//            .commit()
     }
 
     fun retryToListBoard() {
+        findNavController().navigate(BoardFragmentDirections.actionBoardFragmentToBoardListFragment(user, ListOfBoards(ArrayList())))
 //        requireActivity().supportFragmentManager.popBackStack(BoardListFragment.NAME_BOARD_LIST, 0)
         Log.i("USER_BOARD_FRAG", user.name)
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, BoardListFragment.newInstance(user, ArrayList()))
-            .commit()
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .replace(R.id.fragment_container, BoardListFragment.newInstance(user, ArrayList()))
+//            .commit()
     }
 
-    fun observeViewModel() {
+    private fun observeViewModel() {
         viewModel.listLiveData.observe(viewLifecycleOwner, Observer {
             parentList = it as ArrayList<ListOfNotesItem>
 //            Log.i("USER_OBSERVE_LIST", parentList[1].title)

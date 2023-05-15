@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import com.example.taskscheduler.databinding.FragmentForgotPasswordBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -16,6 +17,8 @@ class ForgotPasswordFragment: Fragment() {
     private lateinit var binding: FragmentForgotPasswordBinding
     lateinit var auth: FirebaseAuth
     private var email = ""
+
+    private val args by navArgs<ForgotPasswordFragmentArgs>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,14 +51,15 @@ class ForgotPasswordFragment: Fragment() {
         parseArgs()
     }
 
-    fun parseArgs() {
-        requireArguments().getString(EMAIL_KEY)?.let {
-            email = it
-        }
+    private fun parseArgs() {
+//        requireArguments().getString(EMAIL_KEY)?.let {
+//            email = it
+//        }
+        email = args.email
     }
 
     companion object {
-        const val EMAIL_KEY = "email"
+        private const val EMAIL_KEY = "email"
 
         fun newInstance(email: String): ForgotPasswordFragment {
             return ForgotPasswordFragment().apply {

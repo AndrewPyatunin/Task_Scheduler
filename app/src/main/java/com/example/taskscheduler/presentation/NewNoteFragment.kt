@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.taskscheduler.NewNoteViewModel
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewNoteBinding
@@ -20,6 +22,8 @@ class NewNoteFragment : Fragment() {
     lateinit var board: Board
     lateinit var user: User
     lateinit var viewModel: NewNoteViewModel
+
+    private val args by navArgs<NewNoteFragmentArgs>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,12 +55,15 @@ class NewNoteFragment : Fragment() {
 
     }
 
-    fun parseArgs() {
-        board = requireArguments().getParcelable<Board>(KEY_BOARD) ?: Board()
-        listOfNotesItem = requireArguments().getParcelable<ListOfNotesItem>(KEY_LIST_NOTE) ?: ListOfNotesItem()
-        user = requireArguments().getParcelable<User>(KEY_USER) ?: User()
+    private fun parseArgs() {
+//        board = requireArguments().getParcelable<Board>(KEY_BOARD) ?: Board()
+//        listOfNotesItem = requireArguments().getParcelable<ListOfNotesItem>(KEY_LIST_NOTE) ?: ListOfNotesItem()
+//        user = requireArguments().getParcelable<User>(KEY_USER) ?: User()
+        board = args.board
+        listOfNotesItem = args.list
+        user = args.user
     }
-    fun observeViewModel() {
+    private fun observeViewModel() {
 //        viewModel.boardLiveData.observe(viewLifecycleOwner, Observer {
 //            board = it
 //
@@ -69,17 +76,19 @@ class NewNoteFragment : Fragment() {
         })
     }
 
-    fun launchBoardFragment(board: Board, user: User) {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .addToBackStack(null)
-            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
-            .commit()
+    private fun launchBoardFragment(board: Board, user: User) {
+        findNavController().navigate(NewNoteFragmentDirections.actionNewNoteFragmentToBoardFragment(board, user))
+//        requireActivity().supportFragmentManager.beginTransaction()
+//            .addToBackStack(null)
+//            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
+//            .commit()
     }
 
     companion object {
         const val KEY_LIST_NOTE = "list"
         const val KEY_BOARD = "board"
         const val KEY_USER = "user"
+
         fun newInstance(list: ListOfNotesItem, board: Board, user: User): NewNoteFragment {
             return NewNoteFragment().apply {
                 arguments = Bundle().apply {

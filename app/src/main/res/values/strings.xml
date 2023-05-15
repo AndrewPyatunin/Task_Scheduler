@@ -27,4 +27,6 @@
     <string name="add_list_title">Введите название списка</string>
     <string name="save_button_new_list">Сохранить</string>
     <string name="note_in_list">в списке %s</string>
+    <string name="invite_from">Приглашение от %s</string>
+    <string name="to_board">На доску %s</string>
 </resources>
