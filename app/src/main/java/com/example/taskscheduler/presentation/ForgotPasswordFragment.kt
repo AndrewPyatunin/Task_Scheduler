@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.taskscheduler.databinding.FragmentForgotPasswordBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -39,6 +40,7 @@ class ForgotPasswordFragment: Fragment() {
                 if (it.isSuccessful) {
                     Toast.makeText(context, "На ваш электронный адрес было отправлено письмо" +
                             " с ссылкой для восстановления пароля", Toast.LENGTH_LONG).show()
+                    findNavController().popBackStack()
                 } else {
 
                 }

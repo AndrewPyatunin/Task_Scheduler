@@ -15,11 +15,14 @@
         <TextView
             android:id="@+id/textViewBoardName"
             android:gravity="center"
+            android:elevation="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="4dp"
             android:textStyle="italic|bold"
-            android:textColor="#000000"
+            android:shadowColor="@color/text_shadow"
+            android:shadowRadius="3"
+            android:textColor="@color/light_font"
             android:textSize="24sp"
             tools:text="My first board"/>
     </LinearLayout>

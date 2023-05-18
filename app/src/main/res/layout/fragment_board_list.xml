@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.taskscheduler.presentation.BoardListFragment">
+    tools:context="com.example.taskscheduler.presentation.boardlist.BoardListFragment">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imageViewUserAvatarBoardList"
@@ -24,18 +24,21 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:padding="8dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewWelcomeUser" />
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:id="@+id/imageViewAddNewBoard"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:padding="8dp"
         android:scaleType="fitXY"
+        android:elevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/add_new_board" />
 
@@ -45,18 +48,39 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:padding="8dp"
+        android:visibility="gone"
         android:text="@string/welcome_user"
         android:textSize="16sp"
+        android:textStyle="bold"
+        android:shadowColor="@color/black"
+        android:shadowRadius="3"
         app:layout_constraintBottom_toBottomOf="@+id/imageViewUserAvatarBoardList"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageViewUserAvatarBoardList"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/buttonInvites"
-        android:layout_width="wrap_content"
+    <ProgressBar
+        android:id="@+id/loadingIndicator"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:indeterminateTint="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
+        android:id="@+id/pleaseWaitTextView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Invites"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="casual"
+        android:gravity="center"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp"
+        android:textColor="@color/black"
+        android:text="@string/loading_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/loadingIndicator"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

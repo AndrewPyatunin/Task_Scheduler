@@ -7,7 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.taskscheduler.presentation.BoardFragment">
+    tools:context="com.example.taskscheduler.presentation.board.BoardFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_marginStart="8dp"
@@ -45,6 +45,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/add_list_title"
+                android:textColorHint="@color/light_font"
+                android:shadowRadius="3"
+                android:shadowColor="@color/black"
+                android:textColor="@color/light_font"
                 android:textSize="24sp"
                 android:visibility="invisible"
                 android:layout_margin="4dp"
@@ -80,7 +84,6 @@
 
         <ImageView
             android:id="@+id/imageViewInvite"
-            android:elevation="4dp"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:tooltipText="@string/invite"

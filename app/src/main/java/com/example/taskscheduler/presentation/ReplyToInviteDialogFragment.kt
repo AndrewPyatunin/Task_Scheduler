@@ -5,14 +5,14 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import androidx.navigation.fragment.navArgs
 import com.example.taskscheduler.domain.Invite
+import com.example.taskscheduler.presentation.myinvites.MyInvitesFragment
 
 class ReplyToInviteDialogFragment : DialogFragment() {
 
     lateinit var invite: Invite
 
-    private val args by navArgs<ReplyToInviteDialogFragmentArgs>()
+//    private val args by navArgs<ReplyToInviteDialogFragmentArgs>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         parseArgs()
@@ -35,8 +35,8 @@ class ReplyToInviteDialogFragment : DialogFragment() {
 
     }
     private fun parseArgs() {
-//        invite = requireArguments().getParcelable<Invite>(KEY_INVITE)!!
-        invite = args.invite
+        invite = requireArguments().getParcelable<Invite>(KEY_INVITE)!!
+//        invite = args.invite
     }
 
     companion object {

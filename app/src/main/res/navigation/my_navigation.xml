@@ -6,31 +6,28 @@
     app:startDestination="@id/loginFragment">
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.taskscheduler.presentation.LoginFragment"
+        android:name="com.example.taskscheduler.presentation.login.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
-            android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
-            app:destination="@id/forgotPasswordFragment" />
-        <action
             android:id="@+id/action_loginFragment_to_registrationFragment"
-            app:destination="@id/registrationFragment" />
+            app:destination="@id/registrationFragment"
+            app:popUpTo="@id/loginFragment" />
         <action
-            android:id="@+id/action_loginFragment_to_boardListFragment"
-            app:destination="@id/boardListFragment" />
+            android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
+            app:destination="@id/forgotPasswordFragment"
+            app:popUpTo="@id/loginFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_tabsFragment"
+            app:destination="@id/tabsFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
-        android:id="@+id/registrationFragment"
-        android:name="com.example.taskscheduler.presentation.RegistrationFragment"
-        android:label="fragment_registration"
-        tools:layout="@layout/fragment_registration" >
-        <action
-            android:id="@+id/action_registrationFragment_to_takePhotoActivity"
-            app:destination="@id/takePhotoActivity" />
-        <action
-            android:id="@+id/action_registrationFragment_to_boardListFragment"
-            app:destination="@id/boardListFragment" />
-    </fragment>
+        android:id="@+id/tabsFragment"
+        android:name="com.example.taskscheduler.presentation.TabsFragment"
+        android:label="fragment_tabs"
+        tools:layout="@layout/fragment_tabs" />
     <fragment
         android:id="@+id/forgotPasswordFragment"
         android:name="com.example.taskscheduler.presentation.ForgotPasswordFragment"
@@ -41,121 +38,22 @@
             app:argType="string" />
     </fragment>
     <fragment
-        android:id="@+id/boardFragment"
-        android:name="com.example.taskscheduler.presentation.BoardFragment"
-        android:label="fragment_board"
-        tools:layout="@layout/fragment_board" >
+        android:id="@+id/registrationFragment"
+        android:name="com.example.taskscheduler.presentation.registration.RegistrationFragment"
+        android:label="fragment_registration"
+        tools:layout="@layout/fragment_registration" >
         <action
-            android:id="@+id/action_boardFragment_to_inviteUserFragment"
-            app:destination="@id/inviteUserFragment" />
+            android:id="@+id/action_registrationFragment_to_tabsFragment"
+            app:destination="@id/tabsFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
         <action
-            android:id="@+id/action_boardFragment_to_newNoteFragment"
-            app:destination="@id/newNoteFragment" />
-        <argument
-            android:name="board"
-            app:argType="com.example.taskscheduler.domain.Board" />
-        <argument
-            android:name="user"
-            app:argType="com.example.taskscheduler.domain.User" />
-        <action
-            android:id="@+id/action_boardFragment_to_boardListFragment"
-            app:destination="@id/boardListFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/myInvitesFragment"
-        android:name="com.example.taskscheduler.presentation.MyInvitesFragment"
-        android:label="fragment_my_invites"
-        tools:layout="@layout/fragment_my_invites" >
-        <action
-            android:id="@+id/action_myInvitesFragment_to_replyToInviteDialogFragment"
-            app:destination="@id/replyToInviteDialogFragment" />
-        <argument
-            android:name="user"
-            app:argType="com.example.taskscheduler.domain.User" />
-    </fragment>
-    <fragment
-        android:id="@+id/newBoardFragment"
-        android:name="com.example.taskscheduler.presentation.NewBoardFragment"
-        android:label="fragment_new_board"
-        tools:layout="@layout/fragment_new_board" >
-        <action
-            android:id="@+id/action_newBoardFragment_to_boardFragment"
-            app:destination="@id/boardFragment" />
-        <argument
-            android:name="user"
-            app:argType="com.example.taskscheduler.domain.User" />
-        <action
-            android:id="@+id/action_newBoardFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/inviteUserFragment"
-        android:name="com.example.taskscheduler.presentation.InviteUserFragment"
-        android:label="fragment_invite_user"
-        tools:layout="@layout/fragment_invite_user" >
-        <argument
-            android:name="board"
-            app:argType="com.example.taskscheduler.domain.Board" />
-        <argument
-            android:name="user"
-            app:argType="com.example.taskscheduler.domain.User" />
-        <action
-            android:id="@+id/action_inviteUserFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/newNoteFragment"
-        android:name="com.example.taskscheduler.presentation.NewNoteFragment"
-        android:label="fragment_new_note"
-        tools:layout="@layout/fragment_new_note" >
-        <action
-            android:id="@+id/action_newNoteFragment_to_boardFragment"
-            app:destination="@id/boardFragment" />
-        <argument
-            android:name="list"
-            app:argType="com.example.taskscheduler.domain.ListOfNotesItem" />
-        <argument
-            android:name="board"
-            app:argType="com.example.taskscheduler.domain.Board" />
-        <argument
-            android:name="user"
-            app:argType="com.example.taskscheduler.domain.User" />
+            android:id="@+id/action_registrationFragment_to_takePhotoActivity"
+            app:destination="@id/takePhotoActivity" />
     </fragment>
     <activity
         android:id="@+id/takePhotoActivity"
         android:name="com.example.taskscheduler.presentation.TakePhotoActivity"
         android:label="activity_take_photo"
         tools:layout="@layout/activity_take_photo" />
-    <dialog
-        android:id="@+id/replyToInviteDialogFragment"
-        android:name="com.example.taskscheduler.presentation.ReplyToInviteDialogFragment"
-        android:label="ReplyToInviteDialogFragment" >
-        <argument
-            android:name="invite"
-            app:argType="com.example.taskscheduler.domain.Invite" />
-    </dialog>
-    <fragment
-        android:id="@+id/boardListFragment"
-        android:name="com.example.taskscheduler.presentation.BoardListFragment"
-        android:label="fragment_board_list"
-        tools:layout="@layout/fragment_board_list" >
-        <action
-            android:id="@+id/action_boardListFragment_to_newBoardFragment"
-            app:destination="@id/newBoardFragment" />
-        <action
-            android:id="@+id/action_boardListFragment_to_boardFragment"
-            app:destination="@id/boardFragment" />
-        <action
-            android:id="@+id/action_boardListFragment_to_myInvitesFragment"
-            app:destination="@id/myInvitesFragment" />
-        <argument
-            android:name="user"
-            app:argType="com.example.taskscheduler.domain.User" />
-        <argument
-            android:name="boardList"
-            app:argType="com.example.taskscheduler.domain.ListOfBoards" />
-        <action
-            android:id="@+id/action_boardListFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
-    </fragment>
 </navigation>

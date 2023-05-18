@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/myMenuHome"
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/dashboard_nav"
         android:title="Home"
+        android:orderInCategory="1"
+        app:showAsAction="ifRoom"
         android:icon="@drawable/my_baseline_home"/>
-    <item android:id="@+id/myMenuProfile"
-        android:title="Profile"
-        android:icon="@drawable/my_baseline_account_circle"/>
+    <item android:id="@id/invites_nav"
+        android:title="Invites"
+        android:orderInCategory="3"
+        app:showAsAction="always"
+        android:icon="@drawable/my_baseline_notifications"/>
 
 </menu>

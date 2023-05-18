@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/invites_nav"
+    app:startDestination="@id/myInvitesFragment">
+
+    <fragment
+        android:id="@+id/myInvitesFragment"
+        android:name="com.example.taskscheduler.presentation.myinvites.MyInvitesFragment"
+        android:label="fragment_my_invites"
+        tools:layout="@layout/fragment_my_invites" >
+        <action
+            android:id="@+id/action_myInvitesFragment_to_replyToInviteDialogFragment"
+            app:destination="@id/replyToInviteDialogFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/replyToInviteDialogFragment"
+        android:name="com.example.taskscheduler.presentation.ReplyToInviteDialogFragment"
+        android:label="ReplyToInviteDialogFragment" >
+        <argument
+            android:name="invite"
+            app:argType="com.example.taskscheduler.domain.Invite" />
+    </dialog>
+</navigation>

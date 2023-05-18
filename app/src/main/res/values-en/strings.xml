@@ -30,5 +30,6 @@
     <string name="note_in_list">in list %s</string>
     <string name="invite_from">Invite from %s</string>
     <string name="to_board">To board %s</string>
+    <string name="loading_text">Loading, please wait</string>
 
 </resources>
