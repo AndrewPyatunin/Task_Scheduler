@@ -5,8 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.CheckBox
 import android.widget.Toast
+import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -21,7 +23,7 @@ import com.example.taskscheduler.domain.User
 class InviteUserFragment : Fragment(){
     lateinit var binding: FragmentInviteUserBinding
     lateinit var recyclerViewUser: RecyclerView
-    lateinit var userAdapter: InviteUserAdapter
+    private var userAdapter: InviteUserAdapter? = null
     private val listForInvite = ArrayList<User>()
     lateinit var viewModel: InviteUserViewModel
     lateinit var viewModelFactory: InviteUserViewModelFactory
@@ -59,23 +61,33 @@ class InviteUserFragment : Fragment(){
         super.onViewCreated(view, savedInstanceState)
         viewModelFactory = InviteUserViewModelFactory(board)
         viewModel = ViewModelProvider(this, viewModelFactory)[InviteUserViewModel::class.java]
-        initViews()
         observeViewModel()
-        userAdapter.onItemClick = {
-            val checkBox = requireActivity().findViewById<CheckBox>(R.id.checkBoxInvited)
-            if (it !in listForInvite) {
-//                checkBox.isChecked = true
-                listForInvite.add(it)
-            } else if (it in listForInvite) {
-//                checkBox.isChecked = false
-                listForInvite.remove(it)
+        initViews()
+        if (userAdapter != null)
+            userAdapter?.onItemClick = {
+                val checkBox = requireActivity().findViewById<CheckBox>(R.id.checkBoxInvited)
+                if (it !in listForInvite) {
+    //                checkBox.isChecked = true
+                    listForInvite.add(it)
+                } else if (it in listForInvite) {
+    //                checkBox.isChecked = false
+                    listForInvite.remove(it)
+                }
+                Log.i("USER_INVITE_LIST", listForInvite.joinToString { it -> it.toString() })
             }
-            Log.i("USER_INVITE_LIST", listForInvite.joinToString { it -> it.toString() })
-        }
         binding.buttonInviteUser.setOnClickListener {
             for (userForInvite in listForInvite) {
                 viewModel.inviteUser(userForInvite, user,  board)
             }
+        }
+        binding.recyclerViewInviteUser.afterMeasured {
+            Log.i("USER_RECYCLER", this.id.toString())
+            with(binding) {
+                buttonInviteUser.visibility = View.VISIBLE
+                pleaseWaitTextViewInvite.visibility = View.GONE
+                loadingIndicatorInvite.visibility = View.GONE
+            }
+
         }
     }
 
@@ -85,7 +97,6 @@ class InviteUserFragment : Fragment(){
 //        recyclerViewBoardList.isNestedScrollingEnabled = false
         userAdapter = InviteUserAdapter()
         recyclerViewUser.adapter = userAdapter
-
     }
 
     private fun parseArgs() {
@@ -93,6 +104,17 @@ class InviteUserFragment : Fragment(){
 //        user = requireArguments().getParcelable<User>(KEY_USER) ?: User()
         board = args.board
         user = args.user
+    }
+
+    inline fun <T: View> T.afterMeasured(crossinline f: T.() -> Unit) {
+        viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                if (measuredWidth > 0 && measuredHeight > 0) {
+                    viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    f()
+                }
+            }
+        })
     }
 
 
@@ -107,7 +129,17 @@ class InviteUserFragment : Fragment(){
             }
         })
         viewModel.listUsers.observe(viewLifecycleOwner, Observer {
-            userAdapter.users = it as ArrayList<User>
+
+//            initViews(it as ArrayList<User>)
+            userAdapter?.users = it as ArrayList<User>
+
+            with(binding) {
+                buttonInviteUser.visibility = View.VISIBLE
+                pleaseWaitTextViewInvite.visibility = View.GONE
+                loadingIndicatorInvite.visibility = View.GONE
+            }
+            recyclerViewUser.visibility = View.VISIBLE
+            recyclerViewUser.adapter = userAdapter
         })
 
         viewModel.success.observe(viewLifecycleOwner, Observer {

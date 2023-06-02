@@ -30,4 +30,9 @@
     <string name="invite_from">Приглашение от %s</string>
     <string name="to_board">На доску %s</string>
     <string name="loading_text">Загрузка, пожалуйста подождите</string>
+    <string name="change_user_avatar">Сменить фото профиля</string>
+    <string name="logout_profile">Выйти</string>
+    <string name="full_name">%1$s %2$s</string>
+    <string name="welcome">Добро пожаловать,\n %s</string>
+    <string name="check_percent">%d %s</string>
 </resources>

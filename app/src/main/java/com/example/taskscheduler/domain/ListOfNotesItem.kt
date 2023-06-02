@@ -5,8 +5,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class ListOfNotesItem(
-    val id: String = "",
+    var id: String = "",
     val title: String = "",
-    val listNotes: Map<String, Note> = HashMap()//ArrayList<Note> = ArrayList()
+    var listNotes: Map<String, Note> = HashMap()//ArrayList<Note> = ArrayList()
     ) : Parcelable {
 }

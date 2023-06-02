@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.taskscheduler.presentation.userprofile.UserProfileFragment">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/profile_picture"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_margin="5dp"
+        android:layout_marginTop="48dp"
+        android:padding="5dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/ImageStyle_Circle"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/textViewUserName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:maxWidth="200dp"
+        android:text="Андреич"
+        android:textColor="@color/purple_500"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="@+id/profile_picture"
+        app:layout_constraintStart_toStartOf="@+id/profile_picture"
+        app:layout_constraintTop_toBottomOf="@+id/profile_picture" />
+
+    <ImageView
+        android:id="@+id/imageViewLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:foregroundGravity="center_horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/textViewLogout"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/my_baseline_logout_24" />
+
+    <TextView
+        android:id="@+id/textViewLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:foregroundGravity="center_horizontal"
+        android:text="@string/logout_profile"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewLogout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageViewLogout"
+        app:layout_constraintTop_toTopOf="@+id/imageViewLogout" />
+
+    <ImageView
+        android:id="@+id/imageViewUserEmail"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewDescriptionUser2"
+        app:srcCompat="@drawable/my_baseline_email_24" />
+
+    <ImageView
+        android:id="@+id/imageViewUserDescription"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewDescriptionUser3"
+        app:srcCompat="@drawable/my_baseline_notes_24" />
+
+    <ImageView
+        android:id="@+id/imageViewChangeAvatar"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:src="@drawable/profile_picture_baseline_add_a_photo_24"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewUserEmail" />
+
+    <TextView
+        android:id="@+id/textViewChangeAvatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/change_user_avatar"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewChangeAvatar"
+        app:layout_constraintStart_toEndOf="@+id/imageViewChangeAvatar"
+        app:layout_constraintTop_toTopOf="@+id/imageViewChangeAvatar" />
+
+    <TextView
+        android:id="@+id/textViewEmail"
+        android:layout_width="175dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="TextView"
+        android:textColor="@color/purple_500"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewUserEmail"
+        app:layout_constraintStart_toEndOf="@+id/imageViewUserEmail"
+        app:layout_constraintTop_toTopOf="@+id/imageViewUserEmail" />
+
+    <TextView
+        android:id="@+id/textViewDescriptionUser"
+        android:layout_width="175dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="TextView"
+        android:textColor="@color/purple_500"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewUserDescription"
+        app:layout_constraintStart_toEndOf="@+id/imageViewUserDescription"
+        app:layout_constraintTop_toTopOf="@+id/imageViewUserDescription" />
+
+    <TextView
+        android:id="@+id/textViewDescriptionUser3"
+        android:layout_width="175dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Расскажите о себе"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/imageViewUserDescription"
+        app:layout_constraintTop_toBottomOf="@+id/textViewUserName" />
+
+    <TextView
+        android:id="@+id/textViewDescriptionUser2"
+        android:layout_width="175dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Электронный адрес"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/imageViewUserDescription"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewUserDescription" />
+
+    <ImageView
+        android:id="@+id/imageViewEditUserDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/my_baseline_edit_24"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewDescriptionUser"
+        app:layout_constraintStart_toEndOf="@+id/textViewDescriptionUser"
+        app:layout_constraintTop_toTopOf="@+id/textViewDescriptionUser" />
+
+    <ImageView
+        android:id="@+id/imageViewEditUserEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:src="@drawable/my_baseline_edit_24"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewEmail"
+        app:layout_constraintStart_toEndOf="@+id/textViewEmail"
+        app:layout_constraintTop_toTopOf="@+id/textViewEmail" />
+
+    <EditText
+        android:id="@+id/editTextPersonDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textShortMessage"
+        android:maxLength="40"
+        android:padding="8dp"
+        android:text="Name"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@+id/imageViewUserDescription"
+        app:layout_constraintTop_toTopOf="@+id/imageViewUserDescription" />
+
+    <EditText
+        android:id="@+id/editTextPersonEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textEmailAddress"
+        android:maxLength="30"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@+id/imageViewUserDescription"
+        app:layout_constraintTop_toTopOf="@+id/imageViewUserEmail" />
+
+    <ImageView
+        android:id="@+id/imageViewSaveDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/my_baseline_save_24"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextPersonDescription"
+        app:layout_constraintStart_toEndOf="@+id/editTextPersonDescription"
+        app:layout_constraintTop_toTopOf="@+id/editTextPersonDescription" />
+
+    <ImageView
+        android:id="@+id/imageViewSaveEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/my_baseline_save_24"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextPersonEmail"
+        app:layout_constraintStart_toEndOf="@+id/editTextPersonEmail"
+        app:layout_constraintTop_toTopOf="@+id/editTextPersonEmail" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

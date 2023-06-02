@@ -5,6 +5,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -12,10 +14,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.taskscheduler.NewBoardAdapter
 import com.example.taskscheduler.databinding.FragmentNewBoardBinding
+import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.presentation.boardupdated.RecyclerViewReadyCallback
 
 class NewBoardFragment : Fragment() {
     private var _binding: FragmentNewBoardBinding? = null
@@ -26,6 +31,7 @@ class NewBoardFragment : Fragment() {
     lateinit var newBoardAdapter: NewBoardAdapter
     var listOfImageUrls = ArrayList<String>()
     var urlBackground = ""
+    private var recyclerViewReadyCallback: RecyclerViewReadyCallback? = null
 
     private val args by navArgs<NewBoardFragmentArgs>()
 
@@ -46,11 +52,11 @@ class NewBoardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[NewBoardViewModel::class.java]
-        observeViewModel()
         initViews()
+        observeViewModel()
 
         binding.saveNewBoard.setOnClickListener {
-            val name = binding.nameBoard.text.toString().trim()
+            val name = binding.editNameBoard.text.toString().trim()
             if (name != "" && urlBackground != "")
                 viewModel.createNewBoard(name, user, urlBackground)
             else
@@ -61,7 +67,7 @@ class NewBoardFragment : Fragment() {
                 ).show()
         }
         newBoardAdapter.onItemClick = {
-            urlBackground = it
+            urlBackground = it.imageUrl
         }
 
     }
@@ -72,7 +78,7 @@ class NewBoardFragment : Fragment() {
     }
 
     private fun launchBoardFragment(board: Board, user: User) {
-        findNavController().navigate(NewBoardFragmentDirections.actionNewBoardFragmentToBoardFragment(board, user))
+        findNavController().navigate(NewBoardFragmentDirections.actionNewBoardFragmentToOuterBoardFragment(user, board))
 //        Log.i("USER_NEW_BOARD", user.name)
 //        requireActivity().supportFragmentManager.beginTransaction()
 //            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
@@ -88,12 +94,64 @@ class NewBoardFragment : Fragment() {
     }
 
     private fun initViews() {
-        binding.recyclerViewNewBoard.layoutManager = GridLayoutManager(requireContext(), 2)
-        binding.recyclerViewNewBoard.setHasFixedSize(true)
-        newBoardAdapter = NewBoardAdapter()
-        if (listOfImageUrls.isNotEmpty()) newBoardAdapter.backgroundImageUrls = listOfImageUrls
-        binding.recyclerViewNewBoard.adapter = newBoardAdapter
+        val recyclerView = binding.recyclerViewNewBoard
+        recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+        recyclerView.setHasFixedSize(true)
+        newBoardAdapter = NewBoardAdapter(requireContext())
+//        if (listOfImageUrls.isNotEmpty()) {
+//            newBoardAdapter.backgroundImageUrls = buildImageList(listOfImageUrls)
+//
+//        }
+        recyclerView.adapter = newBoardAdapter
+        with(binding) {
+            loadingIndicatorNewBoard.visibility = View.GONE
+            pleaseWaitTextViewNewBoard.visibility = View.GONE
+            recyclerViewNewBoard.visibility = View.VISIBLE
+            saveNewBoard.visibility = View.VISIBLE
+
+        }
+//        recyclerViewReadyCallback = object: RecyclerViewReadyCallback {
+//            override fun onLayoutReady() {
+//                with(binding) {
+//                    loadingIndicatorNewBoard.visibility = View.GONE
+//                    pleaseWaitTextViewNewBoard.visibility = View.GONE
+//                    recyclerViewNewBoard.visibility = View.VISIBLE
+//                    saveNewBoard.visibility = View.VISIBLE
+//
+//                }
+//            }
+//
+//        }
+//
+//        recyclerView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+//            override fun onGlobalLayout() {
+//                if (recyclerViewReadyCallback != null) {
+//                    recyclerViewReadyCallback?.onLayoutReady()
+//                }
+//                recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+//            }
+//
+//        })
+
     }
+
+    private fun RecyclerView.runWhenReady(action: () -> Unit) {
+        val globalLayoutListener = object: OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                action()
+                viewTreeObserver.removeOnGlobalLayoutListener(this)
+            }
+        }
+        viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+    }
+
+//    private fun buildImageList(list: List<String>): ArrayList<BackgroundImage> {
+//        val listOfBackgroundImage = ArrayList<BackgroundImage>()
+//        for ((i, item) in list.withIndex()) {
+//            listOfBackgroundImage.add(BackgroundImage(/*"${System.currentTimeMillis()}"*/"$i", item, false))
+//        }
+//        return listOfBackgroundImage
+//    }
 
     private fun parseArgs(): User {
         var user = User()
@@ -121,8 +179,14 @@ class NewBoardFragment : Fragment() {
             }
         })
         viewModel.urlImage.observe(viewLifecycleOwner, Observer {
-            newBoardAdapter.backgroundImageUrls = it as ArrayList<String>
+
+            newBoardAdapter.backgroundImageUrls = it as ArrayList<BackgroundImage>
+
         })
+
+//        viewModel.recyclerIsReady.observe(viewLifecycleOwner, Observer {
+//
+//        })
     }
 
     companion object {

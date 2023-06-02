@@ -6,15 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentSplashBinding
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 
 class SplashFragment : Fragment(R.layout.fragment_splash) {
 
     private lateinit var binding: FragmentSplashBinding
-    val auth = Firebase.auth
+    private lateinit var viewModel: SplashViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,21 +27,22 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        launchMainScreen(auth.currentUser != null)
+        viewModel = ViewModelProvider(this)[SplashViewModel::class.java]
+        observeViewModel()
     }
 
     private fun launchMainScreen(isSignedIn: Boolean) {
-//        val db = Database.getDbConnection()
-//        auth.currentUser?.let { db.query(it) }
-//        val extras = ActivityNavigator.Extras.Builder()
-//            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-//            .build()
-//        findNavController().navigate(SplashFragmentDirections.actionSplashFragmentToMainActivity2(isSignedIn), extras)
         val intent = Intent(requireContext(), MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         val args = MainActivityArgs(isSignedIn)
         intent.putExtras(args.toBundle())
         startActivity(intent)
     }
+
+    private fun observeViewModel() {
+        viewModel.firebaseUser.observe(viewLifecycleOwner, Observer {
+            launchMainScreen(it != null)
+        })
+    }
+
 }

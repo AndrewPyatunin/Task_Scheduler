@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.ktx.auth
@@ -15,9 +16,9 @@ import com.google.firebase.ktx.Firebase
 
 class NewBoardViewModel : ViewModel() {
     private val firebaseDatabase = Firebase.database
-    val databaseBoardsReference = firebaseDatabase.getReference("Boards")
+    private val databaseBoardsReference = firebaseDatabase.getReference("Boards")
     val databaseUsersReference = firebaseDatabase.getReference("Users")
-    val databaseImageUrlsReference = firebaseDatabase.getReference("ImageUrls")
+    private val databaseImageUrlsReference = firebaseDatabase.getReference("ImageUrls")
     private val _boardLiveData = MutableLiveData<Board>()
     val boardLiveData: LiveData<Board>
         get() = _boardLiveData
@@ -30,9 +31,13 @@ class NewBoardViewModel : ViewModel() {
     val error: LiveData<String>
         get() = _error
 
-    private val _urlImage = MutableLiveData<List<String>>()
-    val urlImage: LiveData<List<String>>
+    private val _urlImage = MutableLiveData<List<BackgroundImage>>()
+    val urlImage: LiveData<List<BackgroundImage>>
         get() = _urlImage
+
+//    private val _recyclerIsReady = MutableLiveData<Int>()
+//    val recyclerIsReady: LiveData<Int>
+//        get() = _recyclerIsReady
 
     init {
         databaseImageUrlsReference.addValueEventListener(object : ValueEventListener {
@@ -43,7 +48,7 @@ class NewBoardViewModel : ViewModel() {
                     imageUrls.add(dataSnapshot.value.toString())
                 }
 
-                _urlImage.value = imageUrls
+                _urlImage.value = buildImageList(imageUrls)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -54,55 +59,62 @@ class NewBoardViewModel : ViewModel() {
         })
     }
 
+    private fun buildImageList(list: List<String>): ArrayList<BackgroundImage> {
+        val listOfBackgroundImage = ArrayList<BackgroundImage>()
+        for ((i, item) in list.withIndex()) {
+            listOfBackgroundImage.add(BackgroundImage("$i", item, false))
+        }
+        return listOfBackgroundImage
+    }
+
+    fun recyclerIsReady() {
+        Log.i("USER_RECYCLER", "12")
+//        _recyclerIsReady.value = 1
+    }
+
 
     fun createNewBoard(name: String, user: User, urlBackground: String) {
-        //Log.i("FIREBASE_USER", "${Firebase.auth.currentUser?.email}")
-        Log.i("BACKGROUND_URL", urlBackground)
-        Log.i("USER_FROM_LIST", user.id)
-        val url = databaseBoardsReference.push()
-        val idBoard = url.key ?: ""
+        val urlForBoard = databaseBoardsReference.push()
+        val idBoard = urlForBoard.key ?: ""
 
-        databaseUsersReference.child(user.id).addListenerForSingleValueEvent(object : ValueEventListener {
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-
-                databaseUsersReference.removeEventListener(this)
-                var listBoardsIds = ArrayList<String>()
-                if (snapshot.child("boards").value == null) {
-                    listBoardsIds.add(idBoard)
-                } else {
-                    for (dataSnapshot in snapshot.child("boards").children) {
-                        val data = dataSnapshot.value as String
-                        Log.i("VALUE_CHILD_FROM_USERS", data)
-                        listBoardsIds.add(data)
+        databaseUsersReference.child(user.id)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    databaseUsersReference.removeEventListener(this)
+                    val listBoardsIds = ArrayList<String>()
+                    if (snapshot.child("boards").value == null) {
+                        listBoardsIds.add(idBoard)
+                    } else {
+                        for (dataSnapshot in snapshot.child("boards").children) {
+                            val data = dataSnapshot.value as String
+                            listBoardsIds.add(data)
+                        }
+                        listBoardsIds.add(idBoard)
                     }
-                    listBoardsIds.add(idBoard)
+                    val listMembersIds = ArrayList<String>()
+                    listMembersIds.add(user.id)
+                    val board = Board(idBoard, name, urlBackground, listMembersIds, emptyList())
+                    urlForBoard.setValue(board)
+                    val userToDb =
+                        User(
+                            user.id,
+                            user.name,
+                            user.lastName,
+                            user.email,
+                            true,
+                            listBoardsIds,
+                            user.uri
+                        )
+                    databaseUsersReference.child(user.id).child("boards")
+                        .setValue(listBoardsIds)
+                    _user.value = userToDb
+                    _boardLiveData.value = board
                 }
-                val listMembersIds = ArrayList<String>()
-                listMembersIds.add(user.id)
-
-                Log.i("VALUE_BOARD_ID", idBoard)
-                val board = Board(idBoard, name, urlBackground, listMembersIds, emptyList())
-
-                url.setValue(board)
-
-
-                val userToDb =
-                    User(user.id, user.name, user.lastName, user.email, true, listBoardsIds, user.uri)
-                databaseUsersReference.child(user.id).child("boards").setValue(listBoardsIds)
-//                _user.value?.boards = listBoardsIds
-                _user.value = userToDb
-                _boardLiveData.value = board
-//                    callback.onBoardListCallback(listBoardsIds, userToDb)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                _error.value = error.message
-                logout()
-            }
-
-        })
-
+                override fun onCancelled(error: DatabaseError) {
+                    _error.value = error.message
+                    logout()
+                }
+            })
     }
 
 
@@ -112,7 +124,6 @@ class NewBoardViewModel : ViewModel() {
     fun logout() {
         Firebase.auth.signOut()
     }
-
 
 
     interface BoardListCallback {

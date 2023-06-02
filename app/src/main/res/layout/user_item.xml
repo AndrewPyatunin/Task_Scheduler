@@ -8,7 +8,9 @@
     android:layout_height="wrap_content"
     app:cardUseCompatPadding="true">
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintInviteItem"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -24,6 +26,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ImageStyle_Circle"
             tools:srcCompat="@tools:sample/avatars" />
+
 
 
         <View

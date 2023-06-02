@@ -50,7 +50,7 @@ class BoardViewModel: ViewModel() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+
             }
 
         })

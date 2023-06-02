@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/home_nav"
+    app:startDestination="@id/boardListFragment">
+    <fragment
+        android:id="@+id/boardListFragment"
+        android:name="com.example.taskscheduler.presentation.boardlist.BoardListFragment"
+        android:label="Board list"
+        tools:layout="@layout/fragment_board_list">
+        <action
+            android:id="@+id/action_boardListFragment_to_newBoardFragment"
+            app:destination="@id/newBoardFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpTo="@id/boardListFragment" />
+        <action
+            android:id="@+id/action_boardListFragment_to_outerBoardFragment"
+            app:destination="@id/outerBoardFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpTo="@id/boardListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/inviteUserFragment"
+        android:name="com.example.taskscheduler.presentation.inviteuser.InviteUserFragment"
+        android:label="Invite User"
+        tools:layout="@layout/fragment_invite_user">
+        <argument
+            android:name="board"
+            app:argType="com.example.taskscheduler.domain.Board" />
+        <argument
+            android:name="user"
+            app:argType="com.example.taskscheduler.domain.User" />
+    </fragment>
+    <fragment
+        android:id="@+id/newNoteFragment"
+        android:name="com.example.taskscheduler.presentation.newnote.NewNoteFragment"
+        android:label="Note"
+        tools:layout="@layout/fragment_new_note">
+        <argument
+            android:name="listOfNotesItem"
+            app:argType="com.example.taskscheduler.domain.ListOfNotesItem" />
+        <argument
+            android:name="board"
+            app:argType="com.example.taskscheduler.domain.Board" />
+        <argument
+            android:name="user"
+            app:argType="com.example.taskscheduler.domain.User" />
+        <argument
+            android:name="note"
+            app:argType="com.example.taskscheduler.domain.Note" />
+        <action
+            android:id="@+id/action_newNoteFragment_to_outerBoardFragment"
+            app:destination="@id/outerBoardFragment"
+            app:enterAnim="@anim/slide_in_up"
+            app:popExitAnim="@anim/slide_out_down"
+            app:popUpTo="@id/newNoteFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/newBoardFragment"
+        android:name="com.example.taskscheduler.presentation.newboard.NewBoardFragment"
+        android:label="Create new board"
+        tools:layout="@layout/fragment_new_board">
+        <argument
+            android:name="user"
+            app:argType="com.example.taskscheduler.domain.User" />
+        <action
+            android:id="@+id/action_newBoardFragment_to_outerBoardFragment"
+            app:destination="@id/outerBoardFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpTo="@id/newBoardFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <action
+        android:id="@+id/logout"
+        app:popUpTo="@id/my_navigation"
+        app:popUpToInclusive="true" />
+    <fragment
+        android:id="@+id/outerBoardFragment"
+        android:name="com.example.taskscheduler.presentation.boardupdated.OuterBoardFragment"
+        android:label="Board"
+        tools:layout="@layout/fragment_outer_board">
+        <argument
+            android:name="user"
+            app:argType="com.example.taskscheduler.domain.User" />
+        <argument
+            android:name="board"
+            app:argType="com.example.taskscheduler.domain.Board" />
+        <action
+            android:id="@+id/action_outerBoardFragment_to_innerBoardFragment"
+            app:destination="@id/innerBoardFragment"
+            app:popUpTo="@id/outerBoardFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_outerBoardFragment_to_inviteUserFragment"
+            app:destination="@id/inviteUserFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpTo="@id/outerBoardFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/innerBoardFragment"
+        android:name="com.example.taskscheduler.presentation.boardupdated.InnerBoardFragment"
+        tools:layout="@layout/fragment_inner_board">
+        <argument
+            android:name="listOfNotesItem"
+            app:argType="com.example.taskscheduler.domain.ListOfNotesItem" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_newNoteFragment"
+        app:destination="@id/newNoteFragment"
+        app:enterAnim="@anim/slide_in_up"
+        app:popExitAnim="@anim/slide_out_down"
+        app:popUpTo="@id/innerBoardFragment"
+        app:popUpToInclusive="false" />
+</navigation>

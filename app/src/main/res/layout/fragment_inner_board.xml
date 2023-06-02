@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<com.google.android.material.card.MaterialCardView-->
+<!--    android:id="@+id/inner_fragment"-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    xmlns:tools="http://schemas.android.com/tools"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:layout_marginHorizontal="8dp"-->
+<!--    app:cardCornerRadius="8dp"-->
+<!--    app:cardElevation="4dp"-->
+<!--    app:cardUseCompatPadding="true"-->
+<!--    tools:context="com.example.taskscheduler.presentation.boardupdated.InnerBoardFragment">-->
+
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/inner_fragment"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.taskscheduler.presentation.boardupdated.InnerBoardFragment">
+
+    <ProgressBar
+        android:id="@+id/loadingIndicatorList"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:indeterminateTint="@color/purple_500"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardListTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardElevation="3dp"
+        app:cardCornerRadius="4dp"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/list_of_notes_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black"
+            android:textSize="28sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    </androidx.cardview.widget.CardView>
+
+
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/child_recyclerViewBoard"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardAddNewCard">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardAddNewCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="2dp"
+        app:layout_constraintTop_toBottomOf="@id/cardListTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/textViewAddCard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="4dp"
+            android:elevation="2dp"
+            android:padding="4dp"
+            android:text="@string/add_note" />
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+<!--</com.google.android.material.card.MaterialCardView>-->

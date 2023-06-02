@@ -9,24 +9,54 @@
     android:layout_height="match_parent"
     tools:context="com.example.taskscheduler.presentation.board.BoardFragment">
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <ProgressBar
+            android:id="@+id/loadingIndicatorBoard"
+            android:layout_width="68dp"
+            android:layout_height="68dp"
+            android:indeterminateTint="@color/purple_500"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/pleaseWaitTextViewBoard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:fontFamily="casual"
+            android:gravity="center"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/purple_500"
+            android:text="@string/loading_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/loadingIndicatorBoard"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/parent_recyclerViewBoard"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/cardViewBoard"/>
         <androidx.cardview.widget.CardView
             android:id="@+id/cardViewBoard"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:cardUseCompatPadding="true"
+            app:cardCornerRadius="5dp"
             app:layout_constraintTop_toBottomOf="@+id/parent_recyclerViewBoard"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -40,33 +70,34 @@
                 android:padding="4dp"
                 android:layout_margin="4dp"/>
         </androidx.cardview.widget.CardView>
-            <EditText
-                android:id="@+id/editTextAddList"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:hint="@string/add_list_title"
-                android:textColorHint="@color/light_font"
-                android:shadowRadius="3"
-                android:shadowColor="@color/black"
-                android:textColor="@color/light_font"
-                android:textSize="24sp"
-                android:visibility="invisible"
-                android:layout_margin="4dp"
-                android:padding="4dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/parent_recyclerViewBoard" />
 
-            <Button
-                android:id="@+id/buttonAddNewList"
-                android:elevation="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="4dp"
-                android:layout_margin="4dp"
-                android:text="@string/save_button_new_list"
-                android:visibility="invisible"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/editTextAddList" />
+        <EditText
+            android:id="@+id/editTextAddList"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/add_list_title"
+            android:textColorHint="@color/light_font"
+            android:shadowRadius="3"
+            android:shadowColor="@color/black"
+            android:textColor="@color/light_font"
+            android:textSize="24sp"
+            android:visibility="invisible"
+            android:layout_margin="4dp"
+            android:padding="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/parent_recyclerViewBoard" />
+
+        <Button
+            android:id="@+id/buttonAddNewList"
+            android:elevation="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:layout_margin="4dp"
+            android:text="@string/save_button_new_list"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/editTextAddList" />
 
 
 
@@ -86,6 +117,7 @@
             android:id="@+id/imageViewInvite"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:visibility="gone"
             android:tooltipText="@string/invite"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

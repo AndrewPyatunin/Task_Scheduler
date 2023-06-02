@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.example.taskscheduler.domain.ListOfNotesItem
 import com.example.taskscheduler.domain.Note
 import com.example.taskscheduler.presentation.board.BoardFragment
 
@@ -32,17 +33,17 @@ class ChildNoteDiffCallback(
 
 }
 
-class ChildNoteRVAdapter(listOfNotesFrom: List<Note>, val clickHandler: BoardFragment.MyNoteClickHandler): Adapter<ChildNoteRVAdapter.NoteViewHolder>()
+class ChildNoteRVAdapter(listOfNotesFrom: ListOfNotesItem, val clickHandler: BoardFragment.MyNoteClickHandler): Adapter<ChildNoteRVAdapter.NoteViewHolder>()
     {
     private val internalClickHandler: InternalClickDelegate = object : InternalClickDelegate {
         override fun onItemClickedAt(position: Int) {
             clickHandler.run {
-                onNoteClicked(listOfNotesFrom[position])
+                onNoteClicked(listOfNotes[position], listOfNotesFrom)
             }
         }
 
     }
-    var listOfNotes = listOfNotesFrom
+    var listOfNotes = listOfNotesFrom.listNotes.values.toList()
         set(newValue) {
             val diffCallback = ChildNoteDiffCallback(field, newValue)
             val diffResult = DiffUtil.calculateDiff(diffCallback)

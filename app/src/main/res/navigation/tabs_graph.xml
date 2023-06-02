@@ -2,8 +2,9 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/tabs_graph"
-    app:startDestination="@id/dashboard_nav">
+    app:startDestination="@id/home_nav">
 
-    <include app:graph="@navigation/dashboard_nav" />
     <include app:graph="@navigation/invites_nav" />
+    <include app:graph="@navigation/user_profile_nav" />
+    <include app:graph="@navigation/home_nav" />
 </navigation>

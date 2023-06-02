@@ -35,7 +35,9 @@ class InviteUserViewModel(board: Board) : ViewModel() {
         get() = _success
 
     fun setUserStatus(isOnline: Boolean) {
-        databaseUsersReference.child(auth.currentUser?.uid ?: "").child("onlineStatus").setValue(isOnline)
+        databaseUsersReference.child(auth.currentUser?.uid ?: "")
+            .child("onlineStatus")
+            .setValue(isOnline)
     }
 
     init {
@@ -49,7 +51,8 @@ class InviteUserViewModel(board: Board) : ViewModel() {
                 val usersFromDb = ArrayList<User>()
                 for (dataSnapshot in snapshot.children) {
                     val user = dataSnapshot.getValue(User::class.java)
-                    if (user != null && user.id != auth.currentUser?.uid && user.id !in board.members && board.id !in user.invites.keys) {
+                    if (user != null && user.id != auth.currentUser?.uid &&
+                        user.id !in board.members && board.id !in user.invites.keys) {
                         usersFromDb.add(user)
                     }
                 }
@@ -64,30 +67,40 @@ class InviteUserViewModel(board: Board) : ViewModel() {
     }
 
     fun inviteUser(userForInvite: User, currentUser: User, board: Board) {
-        databaseInvitesReference.child(userForInvite.id).child(board.id).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.hasChildren()) {
+        databaseInvitesReference.child(userForInvite.id).child(board.id)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.hasChildren()) {
 
-                } else {
-                    val pushInvite = databaseInvitesReference.child(userForInvite.id).child(board.id).push()
-                    val inviteId = pushInvite.key.toString()
-                    pushInvite.setValue(Invite(inviteId, board.id, currentUser.id, currentUser.name, currentUser.lastName, board.name))
-                    val ref = databaseUsersReference.child(userForInvite.id).child("invites")
-//                    val key = ref.child(board.id).push().key.toString()
-                    val map = HashMap<String, Any>()
-                    map[board.id] = true
-                    ref.updateChildren(map)
-                    _success.value = "Приглашение успешно отправлено"
+                    } else {
+                        val pushInvite =
+                            databaseInvitesReference.child(userForInvite.id).child(board.id).push()
+                        val inviteId = pushInvite.key.toString()
+                        pushInvite.setValue(
+                            Invite(
+                                inviteId,
+                                board.id,
+                                currentUser.id,
+                                currentUser.name,
+                                currentUser.lastName,
+                                board.name
+                            )
+                        )
+                        val ref = databaseUsersReference.child(userForInvite.id).child("invites")
+                        val map = HashMap<String, Any>()
+                        map[board.id] = true
+                        ref.updateChildren(map)
+                        _success.value = "Приглашение успешно отправлено"
+
+                    }
 
                 }
 
-            }
+                override fun onCancelled(error: DatabaseError) {
 
-            override fun onCancelled(error: DatabaseError) {
+                }
 
-            }
-
-        })
+            })
 
     }
 }

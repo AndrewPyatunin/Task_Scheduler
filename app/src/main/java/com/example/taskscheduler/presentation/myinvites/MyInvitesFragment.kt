@@ -13,7 +13,6 @@ import com.example.taskscheduler.MyInvitesAdapter
 import com.example.taskscheduler.databinding.FragmentMyInvitesBinding
 import com.example.taskscheduler.domain.Invite
 import com.example.taskscheduler.domain.User
-import com.example.taskscheduler.presentation.ReplyToInviteDialogFragment
 
 class MyInvitesFragment : Fragment() {
     lateinit var binding: FragmentMyInvitesBinding
@@ -73,9 +72,10 @@ class MyInvitesFragment : Fragment() {
         viewModel.acceptInvite(user, invite)
     }
 
-    fun cancelClicked() {
-
+    fun cancelClicked(invite: Invite) {
+        viewModel.declineInvite(user, invite)
     }
+
 
     companion object {
         const val KEY_USER = "user"

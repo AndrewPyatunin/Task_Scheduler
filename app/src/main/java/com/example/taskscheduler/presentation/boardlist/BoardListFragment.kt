@@ -119,47 +119,20 @@ class BoardListFragment: Fragment(), MenuProvider {
     }
 
     private fun launchMyInvitesFragment(user: User) {
-//        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToMyInvitesFragment(user))
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, MyInvitesFragment.newInstance(user))
-//            .addToBackStack(null)
-//            .commit()
     }
 
     private fun launchLoginFragment() {
 //        findNavController().navigate(.actionBoardListFragmentToLoginFragment())
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, LoginFragment.newInstance())
-//            .addToBackStack(null)
-//            .commit()
     }
 
     private fun launchNewBoardFragment(user: User) {
         findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToNewBoardFragment(user))
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, NewBoardFragment.newInstance(user))
-//            .addToBackStack(null)
-//            .commit()
     }
 
     private fun launchBoardFragment(board: Board) {
-        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToBoardFragment(board, user))
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
-//            .addToBackStack(null)
-//            .commit()
+        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToOuterBoardFragment(user, board))
     }
 
-//    private fun parseArgs() {
-//        boardList = args.boardList.listBoards
-//        user = args.user
-////        requireArguments().getParcelableArrayList<Board>(KEY_BOARDS)?.let {
-////            boardList = it
-////        }
-////        requireArguments().getParcelable<User>(KEY_USER)?.let {
-////            user = it
-////        }
-//    }
 
 
     companion object {

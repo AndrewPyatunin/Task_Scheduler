@@ -53,12 +53,20 @@ class MyInvitesViewModel : ViewModel() {
             override fun onCancelled(error: DatabaseError) {
                 logout()
             }
-
         })
-        databaseInvitesReference.child(user.id).child(inviteBoardId).removeValue()
-        databaseUsersReference.child(user.id).child("invites").child(inviteBoardId).removeValue()
-
+        clearInviteInDatabase(user.id, inviteBoardId)
     }
+
+    fun declineInvite(user: User, invite: Invite) {
+        clearInviteInDatabase(user.id, invite.boardId)
+    }
+
+    private fun clearInviteInDatabase(userId: String, inviteBoardId: String) {
+
+        databaseInvitesReference.child(userId).child(inviteBoardId).removeValue()
+        databaseUsersReference.child(userId).child("invites").child(inviteBoardId).removeValue()
+    }
+
 
     private fun getUserInfo() {
         databaseUsersReference.child(auth.currentUser?.uid ?: "").addValueEventListener(object : ValueEventListener {

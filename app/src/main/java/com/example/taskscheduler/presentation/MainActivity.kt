@@ -1,27 +1,23 @@
 package com.example.taskscheduler.presentation
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
+import android.graphics.Rect
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
-import android.widget.LinearLayout
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navArgs
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 import com.example.taskscheduler.R
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity() {
+//    val auth = Firebase.auth
 //    private val navController by lazy {
 //    val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
 //    navHostFragment.navController
@@ -29,7 +25,7 @@ class MainActivity : AppCompatActivity() {
     private var navController: NavController? = null
 //    val args by navArgs<MainActivityArgs>()
 //    val auth = Firebase.auth
-    private val topLevelDestinations = setOf(getTabsDestination(), getLoginDestination())
+    private val topLevelDestinations = setOf(getWelcomeDestination(), getLoginDestination())
 
     private val fragmentListener = object : FragmentManager.FragmentLifecycleCallbacks() {
         override fun onFragmentViewCreated(fm: FragmentManager, f: Fragment, v: View, savedInstanceState: Bundle?) {
@@ -41,39 +37,35 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        setSupportActionBar(findViewById(R.id.toolbar))
+        setSupportActionBar(findViewById(R.id.toolbar))
 
         val navController = getRootNavController()
         prepareRootNavController(isSignedIn(), navController)
         onNavControllerActivated(navController)
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, true)
-//        val navView: BottomNavigationView = findViewById(R.id.nav_view)
-//        val appBarConfiguration = AppBarConfiguration(setOf(
-//            R.id.boardListFragment,
-//            R.id.loginFragment,
-//            R.id.myInvitesFragment
-//        ))
-//        navController.addOnDestinationChangedListener { _, destination, _ ->
-//            when (destination.id) {
-//                R.id.loginFragment, R.id.registrationFragment, R.id.forgotPasswordFragment -> navView.visibility = View.GONE
-//                else -> navView.visibility = View.VISIBLE
-//            }
-//
-//        }
-//        setupActionBarWithNavController(navController, appBarConfiguration)
-//        NavigationUI.setupWithNavController(navView, navController)
-//        navView.setupWithNavController(navController)
 
+    }
 
-        if (savedInstanceState == null) {
-//            val fragment = LoginFragment.newInstance()
-//            supportFragmentManager.beginTransaction()
-//                .add(R.id.fragment_container, fragment)
-//                .addToBackStack(null)
-//                .commit()
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        if (ev?.action == MotionEvent.ACTION_DOWN) {
+            val v = currentFocus
+            if (v is EditText) {
+                val outRect = Rect()
+                v.getLocalVisibleRect(outRect)
+                if (!outRect.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
+                    v.clearFocus()
+                    hideKeyboard(v)
+                }
+            }
         }
+        return super.dispatchTouchEvent(ev)
+    }
 
+    private fun hideKeyboard(editText: EditText) {
+        val imm: InputMethodManager =
+            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(editText.windowToken, 0)
     }
 
     override fun onDestroy() {
@@ -103,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         val graph = navController.navInflater.inflate(getMainNavigationGraphId())
         graph.setStartDestination(
             if (isSignedIn) {
-                getTabsDestination()
+                getWelcomeDestination()
             } else
                 getLoginDestination()
         )
@@ -128,11 +120,13 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getMainNavigationGraphId() = R.navigation.my_navigation
+    private fun getMainNavigationGraphId() = R.navigation.main_navigation
 
     private fun getTabsDestination() = R.id.tabsFragment
 
     private fun getLoginDestination() = R.id.loginFragment
+
+    private fun getWelcomeDestination() = R.id.welcomeFragment
 
 
     override fun onBackPressed() {

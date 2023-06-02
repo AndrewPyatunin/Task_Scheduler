@@ -8,15 +8,18 @@
     <fragment
         android:id="@+id/myInvitesFragment"
         android:name="com.example.taskscheduler.presentation.myinvites.MyInvitesFragment"
-        android:label="fragment_my_invites"
-        tools:layout="@layout/fragment_my_invites" >
+        android:label="My invites"
+        tools:layout="@layout/fragment_my_invites">
         <action
             android:id="@+id/action_myInvitesFragment_to_replyToInviteDialogFragment"
-            app:destination="@id/replyToInviteDialogFragment" />
+            app:destination="@id/replyToInviteDialogFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpTo="@id/myInvitesFragment" />
     </fragment>
     <dialog
         android:id="@+id/replyToInviteDialogFragment"
-        android:name="com.example.taskscheduler.presentation.ReplyToInviteDialogFragment"
+        android:name="com.example.taskscheduler.presentation.myinvites.ReplyToInviteDialogFragment"
         android:label="ReplyToInviteDialogFragment" >
         <argument
             android:name="invite"

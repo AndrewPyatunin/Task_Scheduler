@@ -14,7 +14,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
-class BoardListViewModel(user: User): ViewModel() {
+class BoardListViewModel(user: User) : ViewModel() {
     private val auth = Firebase.auth
     private val firebaseDatabase = Firebase.database
     val databaseBoardsReference = firebaseDatabase.getReference("Boards")
@@ -40,12 +40,12 @@ class BoardListViewModel(user: User): ViewModel() {
         }
         auth.addAuthStateListener {
             if (it.currentUser != null) {
-                databaseBoardsReference.addValueEventListener(object : ValueEventListener {
+                databaseBoardsReference.addValueEventListener(
+                    object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         readData(object : MyCallback {
                             override fun onCallback(user: User) {
                                 val boardsId = user.boards ?: emptyList()
-                                Log.i("BOARD_ID", boardsId.toString())
                                 val boardsFromDb = ArrayList<Board>()
                                 for (dataSnapshot in snapshot.children) {
                                     val board = dataSnapshot.getValue(Board::class.java)
@@ -53,46 +53,17 @@ class BoardListViewModel(user: User): ViewModel() {
                                         boardsFromDb.add(board)
                                     }
                                 }
-                                Log.i("BOARDS_FROM_DB", boardsFromDb.forEach { it.name + " " }.toString())
                                 _boardList.value = boardsFromDb
-//                                _success.value = it.currentUser
                             }
-
                         })
-
                     }
-
                     override fun onCancelled(error: DatabaseError) {
                         logout()
                     }
-
                 })
-
             }
         }
-
-//        databaseBoardsReference.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                val boardsId = user.boards ?: emptyList()
-//                Log.i("BOARD_ID", boardsId.toString())
-//                val boardsFromDb = ArrayList<Board>()
-//                for (dataSnapshot in snapshot.children) {
-//                    val board = dataSnapshot.getValue(Board::class.java)
-//                    if (board != null && dataSnapshot.key in boardsId) {
-//                        boardsFromDb.add(board)
-//                    }
-//                }
-//                Log.i("BOARDS_FROM_DB", boardsFromDb.forEach { it.name + " " }.toString())
-//                _boardList.value = boardsFromDb
-//
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                logout()
-//            }
-//
-//        })
-}
+    }
 
     fun readData(callback: MyCallback) {
         databaseUsersReference.addValueEventListener(object : ValueEventListener {
@@ -101,29 +72,25 @@ class BoardListViewModel(user: User): ViewModel() {
                 for (userSnapshot in snapshot.children) {
                     if (userSnapshot.key == auth.currentUser?.uid) {
                         userFromDb = userSnapshot.getValue(User::class.java)
-                        //Log.i("BOARD_FROM_USER", userFromDb.boards[0])
                     }
-                    if(userFromDb != null && userFromDb.id == auth.currentUser?.uid) {
+                    if (userFromDb != null && userFromDb.id == auth.currentUser?.uid) {
 
                     }
                 }
-                //Log.i("BOARD_USER", userFromDb?.name)
                 _user.value = userFromDb as User
                 callback.onCallback(userFromDb)
             }
-
             override fun onCancelled(error: DatabaseError) {
                 logout()
             }
-
         })
-    }
-
-    fun logout() {
-        auth.signOut()
     }
 
     interface MyCallback {
         fun onCallback(user: User)
+    }
+
+    fun logout() {
+        auth.signOut()
     }
 }

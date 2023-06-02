@@ -1,14 +1,15 @@
 package com.example.taskscheduler.presentation
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentTabsBinding
+import com.example.taskscheduler.presentation.boardupdated.OuterBoardFragment
 
 class TabsFragment : Fragment() {
 
@@ -28,4 +29,6 @@ class TabsFragment : Fragment() {
         val navHost = childFragmentManager.findFragmentById(R.id.tabsContainer) as NavHostFragment
         NavigationUI.setupWithNavController(binding.bottomNavView, navHost.navController)
     }
+
+
 }

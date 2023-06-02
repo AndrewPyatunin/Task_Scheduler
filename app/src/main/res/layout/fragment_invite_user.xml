@@ -6,10 +6,36 @@
     android:layout_height="match_parent"
     tools:context="com.example.taskscheduler.presentation.inviteuser.InviteUserFragment">
 
+    <ProgressBar
+        android:id="@+id/loadingIndicatorInvite"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:indeterminateTint="@color/light_font"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
+        android:id="@+id/pleaseWaitTextViewInvite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="casual"
+        android:gravity="center"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp"
+        android:textColor="@color/light_font"
+        android:text="@string/loading_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/loadingIndicatorInvite"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewInviteUser"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -19,6 +45,7 @@
         android:id="@+id/buttonInviteUser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:text="@string/invite"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

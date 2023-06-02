@@ -4,7 +4,11 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.os.StrictMode
+import android.os.StrictMode.VmPolicy
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,12 +18,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentRegistrationBinding
 import com.example.taskscheduler.domain.User
 import com.example.taskscheduler.presentation.TakePhotoActivity
 import com.google.firebase.auth.FirebaseAuth
+import java.io.File
+
 
 class RegistrationFragment: Fragment() {
+    lateinit var directory: File
     private lateinit var auth: FirebaseAuth
     private lateinit var binding: FragmentRegistrationBinding
     private lateinit var viewModel: RegistrationViewModel
@@ -39,12 +47,11 @@ class RegistrationFragment: Fragment() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 uri = result.data?.data
+//                uri = generateFileUri()
                 Toast.makeText(requireContext(), "$uri", Toast.LENGTH_SHORT).show()
-//                if (data?.getBooleanExtra(App.IS_SIGN_OUT, false) == true) {
-//                    // exit fun
-//                }
             }
         }
+
 
     private val pickImageFromGalleryForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -58,6 +65,41 @@ class RegistrationFragment: Fragment() {
         takePhotoForResult.launch(Intent(requireActivity(), TakePhotoActivity::class.java))
     }
 
+    private fun takePhotoFromCamera() {
+        val builder = VmPolicy.Builder()
+        StrictMode.setVmPolicy(builder.build())
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, generateFileUri());
+        takePhotoForResult.launch(intent)
+//        startActivityForResult(intent, CAMERA)
+    }
+
+    private fun generateFileUri(): Uri? {
+        var file: File? = null
+
+        file = File(
+            directory.path + "/" + "photo_"
+                    + System.currentTimeMillis() + ".jpg"
+        )
+        Log.d("USER_TAG", "fileName = $file")
+//        return FileProvider.getUriForFile(
+//            requireContext(),
+//            "com.example.taskscheduler.provider",
+//            file
+//        )
+        return Uri.fromFile(file)
+    }
+
+    private fun createDirectory() {
+        directory = File(
+            Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+            "MyFolder"
+        )
+        if (!directory.exists()) directory.mkdirs()
+    }
+
     private fun pickImageFromGallery() {
         val pickIntent = Intent(Intent.ACTION_PICK)
         pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
@@ -67,7 +109,9 @@ class RegistrationFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[RegistrationViewModel::class.java]
+        createDirectory()
         binding.imageViewAvatar.setOnClickListener {
+//            ChooseAvatarOptionFragment().newInstance().show(childFragmentManager, "ChooseAvatarDialog")
             pickImageFromGallery()
         }
         binding.buttonSignUp.setOnClickListener {
@@ -75,7 +119,11 @@ class RegistrationFragment: Fragment() {
             val password = binding.editTextPasswordRegistration.text.toString().trim()
             val name = binding.editTextPersonName.text.toString().trim()
             val lastName = binding.editTextPersonLastName.text.toString().trim()
-            viewModel.signUp(email, password, name, lastName, uri)
+            if (email == "" || password == "" || name == "" || lastName == "") {
+                Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()
+            } else {
+                viewModel.signUp(email, password, name, lastName, uri)
+            }
 
         }
         observeViewModel()
@@ -88,15 +136,23 @@ class RegistrationFragment: Fragment() {
         })
         viewModel.success.observe(viewLifecycleOwner, Observer {
             if (it != null) {
+                launchWelcomeFragment()
 //                launchBoardListFragment(viewModel.user.value)
             }
         })
         viewModel.user.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 user = it
-                launchBoardListFragment(it)
+//                launchBoardListFragment(it)
+
             }
+
         })
+    }
+
+    private fun launchWelcomeFragment() {
+        val userName = String.format(getString(R.string.full_name), user.name, user.lastName)
+        findNavController().navigate(RegistrationFragmentDirections.actionRegistrationFragmentToWelcomeFragment(userName))
     }
 
     private fun launchBoardListFragment(user: User) {
@@ -105,6 +161,14 @@ class RegistrationFragment: Fragment() {
 //            .replace(R.id.fragment_container, BoardListFragment.newInstance(user, ArrayList()))
 //            .addToBackStack(BoardListFragment.NAME_BOARD_LIST)
 //            .commit()
+    }
+
+    fun galleryClicked() {
+        pickImageFromGallery()
+    }
+
+    fun cameraClicked() {
+        takePhotoFromCamera()
     }
 
     companion object {

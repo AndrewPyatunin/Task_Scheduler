@@ -1,4 +1,4 @@
-package com.example.taskscheduler
+package com.example.taskscheduler.presentation.board
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,8 +7,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.taskscheduler.ChildNoteRVAdapter
+import com.example.taskscheduler.R
+import com.example.taskscheduler.domain.DiffCallback
 import com.example.taskscheduler.domain.ListOfNotesItem
-import com.example.taskscheduler.presentation.board.BoardFragment
 
 class ParentListDiffCallback(
     private val oldList: List<ListOfNotesItem>,
@@ -33,9 +35,9 @@ class ParentListDiffCallback(
 }
 class ParentListNoteRVAdapter(var parentListFrom: List<ListOfNotesItem>, val clickHandler: BoardFragment.MyNoteClickHandler): RecyclerView.Adapter<ParentListNoteRVAdapter.ParentViewHolder>() {
     var onItemClick: ((ListOfNotesItem) -> Unit)? = null
-    var parentList = parentListFrom
+    var parentList = ArrayList(parentListFrom)
     set(newValue) {
-        val diffCallback = ParentListDiffCallback(field, newValue)
+        val diffCallback = DiffCallback(field, newValue)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         diffResult.dispatchUpdatesTo(this)
         field = newValue
@@ -73,7 +75,7 @@ class ParentListNoteRVAdapter(var parentListFrom: List<ListOfNotesItem>, val cli
         holder.textViewAddNote.setOnClickListener {
             clickHandler.onTextClicked(R.id.textViewAddCard, position)
         }
-        val childAdapter = ChildNoteRVAdapter(parentItem.listNotes.values.toList(), clickHandler)
+        val childAdapter = ChildNoteRVAdapter(parentItem, clickHandler)
 //        childAdapter.onItemClick = {
 //            Toast.makeText(holder.itemView.context, it.title, Toast.LENGTH_SHORT).show()
 //        }

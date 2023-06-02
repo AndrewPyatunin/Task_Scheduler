@@ -10,12 +10,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.databinding.FragmentLoginBinding
-import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class LoginFragment : Fragment() {
-    lateinit var auth: FirebaseAuth
+    private val auth = Firebase.auth
     lateinit var binding : FragmentLoginBinding
     lateinit var user: User
     private var email = ""
@@ -26,7 +27,7 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentLoginBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -35,11 +36,15 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
         observeViewModel()
-//        auth.signOut()
         binding.buttonLogin.setOnClickListener {
             val password = binding.editTextTextPassword.text.toString().trim()
             email = binding.editTextTextEmailAddress.text.toString().trim()
-            viewModel.login(email, password)
+            if (email != "" && password != "") {
+                viewModel.login(email, password)
+            } else
+                Toast.makeText(requireContext(), "Заполните поля email и пароль!",
+                    Toast.LENGTH_SHORT).show()
+
         }
         binding.textViewRegistr.setOnClickListener {
             launchRegistrationFragment()
@@ -52,48 +57,33 @@ class LoginFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.error.observe(viewLifecycleOwner, Observer {
-            if (it != null) Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            if (it != null) Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
         })
         viewModel.success.observe(viewLifecycleOwner, Observer {
             if (it != null) {
-                launchTabsFragment()
+//                launchTabsFragment()
+                launchWelcomeFragment()
             }
         })
         viewModel.user.observe(viewLifecycleOwner, Observer {
             user = it
         })
-//        viewModel.boardList.observe(viewLifecycleOwner, Observer {
-//            if (viewModel.user.value != null && it != null)
-//                launchBoardListFragment(viewModel.user.value as User, it)
-//        })
+    }
+
+    private fun launchWelcomeFragment() {
+        findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToWelcomeFragment(auth.currentUser?.displayName.toString()))
     }
 
     private fun launchRegistrationFragment() {
         findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToRegistrationFragment())
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, RegistrationFragment.newInstance())
-//            .addToBackStack(null)
-//            .commit()
     }
 
     private fun launchForgotPasswordFragment(email: String) {
         findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToForgotPasswordFragment(email))
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, ForgotPasswordFragment.newInstance(email))
-//            .addToBackStack(null)
-//            .commit()
     }
 
     private fun launchTabsFragment() {
         findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToTabsFragment())
-    }
-
-    private fun launchBoardListFragment(user: User, listBoards: ArrayList<Board>) {
-//        findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToTabsFragment(user, ListOfBoards(listBoards)))
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, BoardListFragment.newInstance(user, listBoards))
-//            .addToBackStack(BoardListFragment.NAME_BOARD_LIST)
-//            .commit()
     }
 
 

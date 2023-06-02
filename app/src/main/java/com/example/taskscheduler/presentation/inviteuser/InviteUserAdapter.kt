@@ -5,7 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -35,7 +37,7 @@ class UserListDiffCallback(
 
 }
 
-class InviteUserAdapter : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
+class InviteUserAdapter() : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
     var onItemClick: ((User) -> Unit)? = null
     var users = ArrayList<User>()
     set(newValue) {

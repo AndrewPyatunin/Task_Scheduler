@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <CheckBox
+        android:id="@+id/checkBoxNoteItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewNoteItemTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/checkBoxNoteItem"
+        app:layout_constraintStart_toEndOf="@+id/checkBoxNoteItem"
+        app:layout_constraintTop_toTopOf="@+id/checkBoxNoteItem" />
+    <ImageView
+        android:id="@+id/saveStateCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        android:src="@drawable/my_baseline_save_24"
+        app:layout_constraintStart_toEndOf="@id/textViewNoteItemTitle"
+        app:layout_constraintTop_toTopOf="@id/textViewNoteItemTitle"
+        app:layout_constraintBottom_toBottomOf="@id/textViewNoteItemTitle"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

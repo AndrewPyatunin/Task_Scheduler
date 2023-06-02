@@ -1,4 +1,4 @@
-package com.example.taskscheduler.presentation
+package com.example.taskscheduler.presentation.myinvites
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -6,7 +6,6 @@ import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.example.taskscheduler.domain.Invite
-import com.example.taskscheduler.presentation.myinvites.MyInvitesFragment
 
 class ReplyToInviteDialogFragment : DialogFragment() {
 
@@ -25,11 +24,10 @@ class ReplyToInviteDialogFragment : DialogFragment() {
                         (parentFragment as MyInvitesFragment).okClicked(invite)
                     }
 
-                }).setNegativeButton("Нет", object : DialogInterface.OnClickListener {
+                }).setNegativeButton("Отклонить", object : DialogInterface.OnClickListener {
                     override fun onClick(dialog: DialogInterface?, which: Int) {
-                        (parentFragment as MyInvitesFragment).cancelClicked()
+                        (parentFragment as MyInvitesFragment).cancelClicked(invite)
                     }
-
                 }).create()
         }
 
@@ -42,7 +40,7 @@ class ReplyToInviteDialogFragment : DialogFragment() {
     companion object {
         const val KEY_INVITE = "invite"
 
-        fun newInstance(invite: Invite): ReplyToInviteDialogFragment{
+        fun newInstance(invite: Invite): ReplyToInviteDialogFragment {
             return ReplyToInviteDialogFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(KEY_INVITE, invite)

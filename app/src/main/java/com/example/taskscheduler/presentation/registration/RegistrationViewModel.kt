@@ -15,13 +15,12 @@ import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import com.squareup.picasso.Picasso
 
-class RegistrationViewModel(application: Application): AndroidViewModel(application) {
+class RegistrationViewModel(application: Application) : AndroidViewModel(application) {
     private val firebaseDatabase = Firebase.database
     private var urlToFile = ""
     val databaseUsersReference = firebaseDatabase.getReference("Users")
-    val storageReference = Firebase.storage.reference
+    private val storageReference = Firebase.storage.reference
 
     private val _success = MutableLiveData<FirebaseUser>()
     val success: LiveData<FirebaseUser>
@@ -36,14 +35,17 @@ class RegistrationViewModel(application: Application): AndroidViewModel(applicat
         get() = _user
 
     val auth = Firebase.auth
+
     init {
+
         auth.addAuthStateListener {
             if (it.currentUser == null) {
 
             }
         }
     }
-    fun upLoadUserAvatar(uri: Uri, callback: UrlCallback) {
+
+    private fun upLoadUserAvatar(uri: Uri, name: String, callback: UrlCallback) {
 //        val imageStorage = storageReference.child("images")
         val imageRef = storageReference.child("images/${uri.lastPathSegment}")
         imageRef.putFile(uri).continueWithTask {
@@ -56,30 +58,35 @@ class RegistrationViewModel(application: Application): AndroidViewModel(applicat
         }.addOnCompleteListener {
             Log.i("USER_URL", it.result.toString())
             if (it.isSuccessful) {
-                updateUserProfile(it.result)
-                urlToFile  = it.result.toString()
+                updateUserProfile(it.result, name)
+                urlToFile = it.result.toString()
                 callback.onUrlCallback(urlToFile)
-            }
-            else {
+            } else {
                 Toast.makeText(getApplication(), "${it.result}", Toast.LENGTH_SHORT).show()
             }
         }
 
 
     }
-    fun updateUserProfile(uri: Uri) {
+
+    private fun updateUserProfile(uri: Uri, name: String) {
         val user = auth.currentUser
         val profileUpdates = userProfileChangeRequest {
             photoUri = uri
+            displayName = name
         }
+
+
         user?.updateProfile(profileUpdates)
             ?.addOnCompleteListener {
                 if (it.isSuccessful) {
                     Toast.makeText(
                         getApplication(),
-                        "Обновление аватара пользователя прошло успешно",
-                        Toast.LENGTH_SHORT)
+                        "Обновление данных пользователя прошло успешно",
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
+                    _success.value = auth.currentUser
                 }
             }
     }
@@ -89,20 +96,17 @@ class RegistrationViewModel(application: Application): AndroidViewModel(applicat
         auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
             val userId = it.user?.uid ?: return@addOnSuccessListener
             if (uri != null) {
-                upLoadUserAvatar(uri, object : UrlCallback {
+                upLoadUserAvatar(uri, "$name $lastName", object : UrlCallback {
                     override fun onUrlCallback(url: String) {
-                        Picasso.get().load(url).placeholder(R.drawable.board_back_image_placeholder)
-                            .error(R.drawable.board_back_image_placeholder)
                         val user = User(userId, name, lastName, email, true, emptyList(), url)
                         databaseUsersReference.child(userId).setValue(user)
                         _user.value = user
-                        _success.value = auth.currentUser
+
                     }
 
                 })
 
             }
-
 
         }.addOnFailureListener {
             _error.value = it.message
