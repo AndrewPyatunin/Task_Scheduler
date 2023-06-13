@@ -1,16 +1,16 @@
 package com.example.taskscheduler.presentation.newnote
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
-import androidx.navigation.Navigation
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
@@ -18,11 +18,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewNoteBinding
 import com.example.taskscheduler.domain.*
-import com.example.taskscheduler.findTopNavController
-import com.example.taskscheduler.presentation.boardupdated.InnerBoardFragment
 import kotlin.math.roundToInt
 
-class NewNoteFragment : Fragment() {
+class NewNoteFragment : Fragment(), MenuProvider {
     lateinit var binding: FragmentNewNoteBinding
     lateinit var listOfNotesItem: ListOfNotesItem
     lateinit var board: Board
@@ -31,6 +29,7 @@ class NewNoteFragment : Fragment() {
     lateinit var viewModel: NewNoteViewModel
     lateinit var newNoteAdapter: NewNoteCheckItemAdapter
     lateinit var recyclerView: RecyclerView
+    lateinit var listOfLists: Array<ListOfNotesItem>
     var list = ArrayList<String>()
 
     private val args by navArgs<NewNoteFragmentArgs>()
@@ -41,6 +40,7 @@ class NewNoteFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentNewNoteBinding.inflate(inflater, container, false)
+        binding.calendarView.visibility = View.GONE
         return binding.root//super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -58,25 +58,47 @@ class NewNoteFragment : Fragment() {
         binding.newNoteCard.background.alpha = 0
         initViews()
         if (note.id != "") {
+            val menuHost: MenuHost = requireActivity()
+            menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
             with(binding) {
                 newNoteTitle.visibility = View.GONE
                 editTextDescription.visibility = View.GONE
                 textViewDescription.text = note.description
                 textViewNewNoteTitle.text = note.title
+                textViewDate.text = note.date
                 switchVisibility(buttonNewNote)
                 switchVisibility(textViewDescription)
                 switchVisibility(textViewNewNoteTitle)
+                switchVisibility(imageViewCalendarEdit)
+                switchVisibility(textViewDate)
                 for (item in note.listOfTasks) {
-                    if(item.isChecked) list.add(item.id)
+                    if (item.isChecked) list.add(item.id)
                 }
+
+
                 calculateProgress()
+                imageViewCalendarEdit.setOnClickListener {
+                    switchVisibilityForCalendar()
+                    calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
+
+
+//                        textViewDate.text = "$dayOfMonth.$newMonth.$year"
+                        textViewDate.text = String.format(
+                            getString(R.string.date),
+                            dateIntToString(dayOfMonth, 0), dateIntToString(month, 1), year
+                        )
+                        note.date = textViewDate.text.toString()
+                        switchVisibilityForCalendar()
+                        viewModel.updateNote(note)
+                    }
+                }
 
 //                buttonNewNote.visibility = View.GONE
 //                textViewDescription.visibility = View.VISIBLE
 //                textViewNewNoteTitle.visibility = View.VISIBLE
                 imageViewEditDescription.visibility = View.VISIBLE
                 imageViewEditDescription.setOnClickListener {
-                    switchVisibility(textViewCheckPercent)
+//                    switchVisibility(textViewCheckPercent)
 //                    switchVisibility(progressBar)
                     switchVisibility(textViewDescription)
                     switchVisibility(editTextDescription)
@@ -100,14 +122,18 @@ class NewNoteFragment : Fragment() {
                     if (title != "") {
                         (note.listOfTasks as ArrayList).add(CheckNoteItem(title, false, "$id"))
                         calculateProgress()
-                        viewModel.updateNote(note, board, listOfNotesItem)
+                        viewModel.updateNote(note)
 //                        newNoteAdapter.checkItemsList = note.listOfTasks
 //                        newNoteAdapter.notifyDataSetChanged()
                         buttonAddCheckListItem.visibility = View.VISIBLE
                         buttonAddItemToCheckList.visibility = View.GONE
                         editTextCheckTitle.visibility = View.GONE
                     } else
-                        Toast.makeText(requireContext(), "Введите название элемента", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Введите название элемента",
+                            Toast.LENGTH_SHORT
+                        ).show()
                 }
 
             }
@@ -116,33 +142,60 @@ class NewNoteFragment : Fragment() {
 
 
         binding.buttonNewNote.setOnClickListener {
-            val title: String = binding.newNoteTitle.text.toString().trim()
-            val description: String = binding.editTextDescription.text.toString().trim()
-            if (note.title == "") {
-                if (title.isNotEmpty()) {
-                    viewModel.createNewNote(title, description, board, listOfNotesItem)
+            with(binding) {
+                val title: String = newNoteTitle.text.toString().trim()
+                val description: String = editTextDescription.text.toString().trim()
+                if (note.title == "") {
+                    if (title.isNotEmpty()) {
+                        viewModel.createNewNote(title, description, board, listOfNotesItem, user)
+                    }
+                } else {
+                    note.description = description
+                    switchVisibility(buttonNewNote)
+                    textViewDescription.text = description.trim()
+                    switchVisibility(textViewDescription)
+                    switchVisibility(editTextDescription)
+                    viewModel.updateNote(note)
                 }
-            } else {
-                note.description = description
-                viewModel.updateNote(note, board, listOfNotesItem)
             }
         }
-        binding.textInList.text = String.format(getString(R.string.note_in_list), listOfNotesItem.title)
+        binding.textInList.text =
+            String.format(getString(R.string.note_in_list), listOfNotesItem.title)
 
 
+    }
+
+    private fun dateIntToString(item: Int, predicate: Int): String {
+        var newItem = ""
+        newItem = if (item + predicate < 10) "0${item + predicate}"
+        else "${item + predicate}"
+        return newItem
     }
 
     private fun calculateProgress() {
         with(binding) {
             var size: Double = note.listOfTasks.size.toDouble()
-            if (size != 0.0) size = 1/size
+            if (size != 0.0) size = 1 / size
             val progressPercent = (list.size * 100 * size).roundToInt()
             progressBar.progress = progressPercent
-            textViewCheckPercent.text = String.format(getString(R.string.check_percent), progressPercent, "%")
+            textViewCheckPercent.text =
+                String.format(getString(R.string.check_percent), progressPercent, "%")
             progressBar.visibility = View.VISIBLE
             textViewCheckPercent.visibility = View.VISIBLE
         }
 
+    }
+
+    private fun switchVisibilityForCalendar() {
+        with(binding) {
+            switchVisibility(calendarView)
+            switchVisibility(textViewCheckPercent)
+            switchVisibility(recyclerViewCheckList)
+            switchVisibility(textViewCheckList)
+            switchVisibility(imageViewChecklist)
+            switchVisibility(buttonAddCheckListItem)
+            switchVisibility(progressBar)
+        }
     }
 
     private fun switchVisibility(view: View) {
@@ -151,6 +204,7 @@ class NewNoteFragment : Fragment() {
         } else
             view.visibility = View.VISIBLE
     }
+
     private fun initViews() {
         recyclerView = binding.recyclerViewCheckList
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
@@ -181,21 +235,24 @@ class NewNoteFragment : Fragment() {
             val index = note.listOfTasks.indexOf(it)
             note.listOfTasks[index].isChecked = !it.isChecked
             calculateProgress()
-            viewModel.updateNote(note, board, listOfNotesItem)
+            viewModel.updateNote(note)
 
         }
     }
+
     private fun parseArgs() {
 //        board = requireArguments().getParcelable<Board>(KEY_BOARD) ?: Board()
 //        listOfNotesItem = requireArguments().getParcelable<ListOfNotesItem>(KEY_LIST_NOTE) ?: ListOfNotesItem()
 //        user = requireArguments().getParcelable<User>(KEY_USER) ?: User()
 //        note = requireArguments().getParcelable(KEY_NOTE) ?: Note()
+        listOfLists = args.listOfLists
         note = args.note
         board = args.board
         listOfNotesItem = args.listOfNotesItem
         user = args.user
 
     }
+
     private fun observeViewModel() {
 //        viewModel.boardLiveData.observe(viewLifecycleOwner, Observer {
 //            board = it
@@ -220,7 +277,12 @@ class NewNoteFragment : Fragment() {
 //            .commit()
 
 //        findNavController().navigate(NewNoteFragmentDirections.actionNewNoteFragmentToInnerBoardFragment(listOfNotesItem))
-        findNavController().navigate(NewNoteFragmentDirections.actionNewNoteFragmentToOuterBoardFragment(user, board))
+        findNavController().navigate(
+            NewNoteFragmentDirections.actionNewNoteFragmentToOuterBoardFragment(
+                user,
+                board
+            )
+        )
 //        findNavController().navigate(NewNoteFragmentDirections.actionNewNoteFragmentToBoardFragment(board, user))
     }
 
@@ -230,7 +292,12 @@ class NewNoteFragment : Fragment() {
         const val KEY_USER = "user"
         const val KEY_NOTE = "note"
 
-        fun newInstance(list: ListOfNotesItem, board: Board, user: User, note: Note): NewNoteFragment {
+        fun newInstance(
+            list: ListOfNotesItem,
+            board: Board,
+            user: User,
+            note: Note
+        ): NewNoteFragment {
             return NewNoteFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(KEY_LIST_NOTE, list)
@@ -240,5 +307,58 @@ class NewNoteFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menu.clear()
+
+        if (note.creatorId == user.id) {
+            menuInflater.inflate(R.menu.note_menu, menu)
+        }
+    }
+
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.item_move_note -> {
+
+                ListDialogFragment(listOfLists.toList()).show(
+                    childFragmentManager,
+                    "ListDialogFragment"
+                )
+            }
+            R.id.item_delete_note -> {
+                viewModel.deleteNote(note, board, listOfNotesItem)
+                findNavController().popBackStack()
+            }
+            R.id.item_change_priority -> {
+                val array = arrayOf(
+                    "High",
+                    "Medium",
+                    "Low"
+                )
+                val builder = AlertDialog.Builder(requireActivity())
+                builder.setTitle("Выберите приоритет")
+                builder.setItems(array, object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface?, which: Int) {
+                        note.priority = when (array[which]) {
+                            "High" -> UrgencyOfNote.HIGH
+                            "Medium" -> UrgencyOfNote.MIDDLE
+                            "Low" -> UrgencyOfNote.LOW
+                            else -> UrgencyOfNote.LOW
+                        }
+                        viewModel.updateNote(note)
+                    }
+
+                })
+                builder.create().show()
+            }
+            android.R.id.home -> findNavController().popBackStack()
+        }
+        return true
+    }
+
+    fun moveNote(listItem: ListOfNotesItem) {
+        viewModel.moveNote(note, listItem, board, user)
     }
 }

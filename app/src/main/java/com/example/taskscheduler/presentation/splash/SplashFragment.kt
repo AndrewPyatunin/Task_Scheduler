@@ -1,4 +1,4 @@
-package com.example.taskscheduler.presentation
+package com.example.taskscheduler.presentation.splash
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,6 +10,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentSplashBinding
+import com.example.taskscheduler.presentation.MainActivity
+import com.example.taskscheduler.presentation.MainActivityArgs
 
 class SplashFragment : Fragment(R.layout.fragment_splash) {
 

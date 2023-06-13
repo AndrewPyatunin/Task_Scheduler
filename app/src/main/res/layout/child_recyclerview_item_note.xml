@@ -13,7 +13,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/label_note"
@@ -32,6 +32,17 @@
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/label_note" />
+
+        <TextView
+            android:id="@+id/view_priority"
+            android:layout_width="100dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginStart="-50dp"
+            android:gravity="bottom"
+            android:layout_height="25dp"
+            android:rotation="-90"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -48,7 +48,7 @@ class UserProfileFragment : Fragment() {
         onClick(binding.textViewLogout)
         onClick(binding.imageViewLogout)
         with(binding) {
-            textViewEmail.text = user!!.email
+            textViewEmail.text = user?.email
             imageViewEditUserDescription.setOnClickListener {
                 editTextPersonDescription.setText(textViewDescriptionUser.text)
                 changeVisibilityForAllDescriptionElements()
@@ -103,11 +103,11 @@ class UserProfileFragment : Fragment() {
         viewModel.uriLiveData.observe(viewLifecycleOwner, Observer {
             Glide.with(this).load(uri).into(binding.profilePicture)
         })
-        viewModel.userLiveData.observe(viewLifecycleOwner, Observer {
+        viewModel.userLiveData.observe(viewLifecycleOwner) {
             userInfo = String.format(getString(R.string.full_name), it.name, it.lastName)
             viewModel.update(null, userInfo)
             binding.textViewUserName.text = userInfo
-        })
+        }
     }
 
     private fun changeVisibility(view: View) {
@@ -118,6 +118,7 @@ class UserProfileFragment : Fragment() {
 
     private fun onClick(view: View) {
         view.setOnClickListener {
+            viewModel.updateStatus()
             auth.signOut()
             findTopNavController().navigate(R.id.loginFragment, null, navOptions {
                 popUpTo(R.id.tabsFragment) {

@@ -47,15 +47,15 @@ class InviteUserFragment : Fragment(){
         return binding.root
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.setUserStatus(true)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.setUserStatus(false)
-    }
+//    override fun onResume() {
+//        super.onResume()
+//        viewModel.setUserStatus(true)
+//    }
+//
+//    override fun onPause() {
+//        super.onPause()
+//        viewModel.setUserStatus(false)
+//    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

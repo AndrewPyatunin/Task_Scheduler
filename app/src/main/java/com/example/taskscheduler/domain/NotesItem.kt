@@ -4,4 +4,5 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class BackgroundImage(val id: String, val imageUrl: String, var isChosen: Boolean) : Parcelable
+data class NotesItem(var listNotes: List<Note> = emptyList()): Parcelable {
+}

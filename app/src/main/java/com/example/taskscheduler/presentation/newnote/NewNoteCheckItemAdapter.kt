@@ -16,7 +16,6 @@ import com.example.taskscheduler.domain.DiffCallback
 class NewNoteCheckItemAdapter(checkItems: List<CheckNoteItem> = ArrayList()):
     RecyclerView.Adapter<NewNoteCheckItemAdapter.NewNoteCheckItemViewHolder>() {
 
-    var onImageClick: ((ImageView) -> Unit)? = null
     var onItemClick: ((CheckNoteItem) -> Unit)? = null
     var checkItemsList = emptyList<CheckNoteItem>()
         set(value) {
@@ -52,6 +51,9 @@ class NewNoteCheckItemAdapter(checkItems: List<CheckNoteItem> = ArrayList()):
     override fun onBindViewHolder(holder: NewNoteCheckItemViewHolder, position: Int) {
         holder.itemTitleText.text = checkItemsList[position].itemTitle
         holder.checkBox.isChecked = checkItemsList[position].isChecked
+        holder.checkBox.setOnClickListener {
+            onItemClick?.invoke(checkItemsList[position])
+        }
     }
 
     override fun getItemCount(): Int = checkItemsList.size

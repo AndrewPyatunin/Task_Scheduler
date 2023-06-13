@@ -33,7 +33,7 @@ class BoardViewModel: ViewModel() {
         val ref = databaseListsOfNotesRef.child(board.id).push()
         val listId = ref.key.toString()
         readData(board.id)
-        ref.setValue(ListOfNotesItem(listId, title, emptyMap()))
+        ref.setValue(ListOfNotesItem(listId, title, "", emptyMap()))
         databaseBoardsRef.child(board.id).addListenerForSingleValueEvent(object : ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -45,7 +45,6 @@ class BoardViewModel: ViewModel() {
                 }
                 listOfNotesIds.add(listId)
                 databaseBoardsRef.child(board.id).child("listOfNotes").setValue(listOfNotesIds)
-                board.listsOfNotesIds = listOfNotesIds
                 _boardLiveData.value = board
             }
 

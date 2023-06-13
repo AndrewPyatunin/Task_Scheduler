@@ -3,6 +3,9 @@ package com.example.taskscheduler.presentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.taskscheduler.MyDatabaseConnection
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -13,10 +16,8 @@ class WelcomeViewModel: ViewModel() {
         get() = _launchReady
 
     init {
-        val time = System.currentTimeMillis()
-        var i = 0
-        while (System.currentTimeMillis()-time < 2000) {
-            i++
+        viewModelScope.launch(Dispatchers.IO) {
+            MyDatabaseConnection.onCallbackReady()
         }
         launchPrepare()
     }

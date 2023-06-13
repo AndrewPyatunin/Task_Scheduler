@@ -1,6 +1,8 @@
 package com.example.taskscheduler
 
 import androidx.lifecycle.LiveData
+import com.example.taskscheduler.domain.BackgroundImage
+import com.example.taskscheduler.domain.NewCallback
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -10,14 +12,14 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
-class MyDatabaseConnection : DatabaseConnection {
+object MyDatabaseConnection : DatabaseConnection {
     val database = Firebase.database
-    val databaseUsersRef = database.getReference("Users")
+    private val databaseUsersRef = database.getReference("Users")
     val databaseBoardsRef = database.getReference("Boards")
-    companion object {
-        var userFrom = User()
-    }
-
+    private val databaseImagesReference = database.getReference("ImageUrls")
+    var userFrom = User()
+    var currentPosition = 0
+    var list = emptyList<BackgroundImage>()
 //    override fun <T>queryUser(ref: DatabaseReference, liveData: LiveData<T>) {
 //        ref.addValueEventListener(object : ValueEventListener {
 //            override fun onDataChange(snapshot: DataSnapshot) {
@@ -30,6 +32,22 @@ class MyDatabaseConnection : DatabaseConnection {
 //
 //        })
 //    }
+    fun onCallbackReady() {
+        getBackgroundImages(object : NewCallback {
+            override fun callbackNew(list: List<BackgroundImage>) {
+                this@MyDatabaseConnection.list = list
+            }
+
+        })
+    }
+    override fun getBackgroundImages(callback: NewCallback)  {
+        databaseImagesReference.get().addOnSuccessListener {
+            val items = it.children.mapIndexed { index, dataSnapshot ->
+                BackgroundImage("$index", dataSnapshot.value.toString(), false)
+            }
+            callback.callbackNew(items)
+        }
+    }
 
     override fun query(user: FirebaseUser) {
         databaseUsersRef.child(user.uid).addValueEventListener(object : ValueEventListener {
@@ -45,6 +63,10 @@ class MyDatabaseConnection : DatabaseConnection {
     }
 
     override fun getBoard() {
+        TODO("Not yet implemented")
+    }
+
+    override fun getBackgroundImages(): List<BackgroundImage> {
         TODO("Not yet implemented")
     }
 

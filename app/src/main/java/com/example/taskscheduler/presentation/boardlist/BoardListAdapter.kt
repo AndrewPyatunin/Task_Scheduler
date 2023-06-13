@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -70,7 +69,7 @@ class BoardListAdapter: Adapter<BoardListAdapter.BoardListViewHolder>() {
 
     override fun onBindViewHolder(holder: BoardListViewHolder, position: Int) {
         val board = boards[position]
-        val boardInfo = String.format("%s", board.name)
+        val boardInfo = String.format("%s", board.title)
         holder.textViewBoardName.text = boardInfo
 
         if (board.backgroundUrl != "") {

@@ -1,6 +1,7 @@
 package com.example.taskscheduler.presentation.myinvites
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -69,6 +70,7 @@ class MyInvitesFragment : Fragment() {
 //    }
 
     fun okClicked(invite: Invite) {
+        Log.i("USER_AFTER_INVITE_CLICK", user.name)
         viewModel.acceptInvite(user, invite)
     }
 

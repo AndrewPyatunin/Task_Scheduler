@@ -53,6 +53,7 @@ class NewBoardDiffCallback(
     class NewBoardAdapter(context: Context): RecyclerView.Adapter<NewBoardAdapter.NewBoardViewHolder>()  {
 //        val viewModel = ViewModelProvider((context as FragmentActivity))[NewBoardViewModel::class.java]
         private var selectedPosition = -1
+        var urlBackground: String = ""
         var onItemClick:((BackgroundImage) -> Unit)? = null
 
 //        private val _isReadyData = MutableLiveData<Boolean>()
@@ -98,7 +99,6 @@ class NewBoardDiffCallback(
 
         override fun getItemCount(): Int = backgroundImageUrls.size
 
-
         override fun onBindViewHolder(holder: NewBoardViewHolder, position: Int) {
             val backgroundImage = backgroundImageUrls[position]
             Log.i("USER_WORKKKKKing", "$position")
@@ -128,16 +128,20 @@ class NewBoardDiffCallback(
 
             })
 
+
             holder.checkBox.isChecked = (selectedPosition == position)
             click(holder.imageViewBackground, holder)
             click(holder.checkBox, holder)
-
+            if (urlBackground == backgroundImage.imageUrl) {
+                holder.checkBox.isChecked = true
+            }
         }
 
         private fun click(view: View, holder: NewBoardViewHolder) {
             view.setOnClickListener(object : View.OnClickListener {
 
                 override fun onClick(v: View?) {
+                    urlBackground = ""
                     selectedPosition = holder.adapterPosition
                     onItemClick?.invoke(backgroundImageUrls[holder.adapterPosition])
                     notifyDataSetChanged()

@@ -118,7 +118,7 @@ class UserProfileViewModel(application: Application): AndroidViewModel(applicati
     }
     fun update(uri: Uri?, name: String) {
         if (uri != null) {
-            upLoadUserAvatar(uri, name ,object : UrlCallback {
+            upLoadUserAvatar(uri, name, object : UrlCallback {
                 override fun onUrlCallback(url: String) {
                     databaseUsersRef.child(user!!.uid).child("uri").setValue(url)
                     _uriLiveData.value = uri!!
@@ -145,6 +145,12 @@ class UserProfileViewModel(application: Application): AndroidViewModel(applicati
                     _emailLiveData.value = email
                 }
             }
+    }
+
+    fun updateStatus() {
+        if (user != null) {
+            databaseUsersRef.child(user.uid).child("onlineStatus").setValue(false)
+        }
     }
 
     interface UrlCallback {

@@ -7,7 +7,7 @@ class Database {
         var connection: DatabaseConnection? = null
         fun getDbConnection(): DatabaseConnection {
             if (connection == null) {
-                connection = MyDatabaseConnection()
+                connection = MyDatabaseConnection
             }
             return connection as DatabaseConnection
         }

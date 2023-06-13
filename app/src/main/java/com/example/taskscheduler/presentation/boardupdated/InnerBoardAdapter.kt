@@ -4,16 +4,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Priority
 import com.example.taskscheduler.R
+import com.example.taskscheduler.domain.Colors
 import com.example.taskscheduler.domain.DiffCallback
-import com.example.taskscheduler.domain.ListOfNotesItem
 import com.example.taskscheduler.domain.Note
+import com.example.taskscheduler.domain.UrgencyOfNote
 
-class InnerBoardAdapter(listOfNotesFrom: ListOfNotesItem): RecyclerView.Adapter<InnerBoardAdapter.NoteViewHolder>()
+class InnerBoardAdapter(listOfNotesFrom: List<Note>): RecyclerView.Adapter<InnerBoardAdapter.NoteViewHolder>()
 {
-    var listOfNotes = listOfNotesFrom.listNotes.values.toList()
+    var listOfNotes = listOfNotesFrom
         set(newValue) {
             val diffCallback = DiffCallback(field, newValue)
             val diffResult = DiffUtil.calculateDiff(diffCallback)
@@ -25,7 +28,8 @@ class InnerBoardAdapter(listOfNotesFrom: ListOfNotesItem): RecyclerView.Adapter<
     inner class NoteViewHolder(
         itemView: View,
         val textViewLabel: TextView = itemView.findViewById(R.id.label_note),
-        val textViewTitle: TextView = itemView.findViewById(R.id.note_title)
+        val textViewTitle: TextView = itemView.findViewById(R.id.note_title),
+        val viewPriority: TextView = itemView.findViewById(R.id.view_priority)
     ) : RecyclerView.ViewHolder(itemView) {
         init {
             itemView.setOnClickListener {
@@ -42,8 +46,14 @@ class InnerBoardAdapter(listOfNotesFrom: ListOfNotesItem): RecyclerView.Adapter<
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
         val currentItem = listOfNotes[position]
-        holder.textViewLabel.text = currentItem.labels
+        holder.textViewLabel.text = currentItem.date
         holder.textViewTitle.text = currentItem.title
+        val color = when (currentItem.priority) {
+            UrgencyOfNote.LOW -> Colors.GREEN
+            UrgencyOfNote.MIDDLE -> Colors.YELLOW
+            UrgencyOfNote.HIGH -> Colors.RED
+        }
+        holder.viewPriority.background = ResourcesCompat.getDrawable(holder.itemView.resources, color.res, null)
     }
 
     override fun getItemCount(): Int = listOfNotes.size

@@ -28,6 +28,7 @@ class NewBoardFragment : Fragment() {
         get() = _binding ?: throw RuntimeException("FragmentNewBoardBinding==null")
     private lateinit var viewModel: NewBoardViewModel
     lateinit var user: User
+    lateinit var board: Board
     lateinit var newBoardAdapter: NewBoardAdapter
     var listOfImageUrls = ArrayList<String>()
     var urlBackground = ""
@@ -38,6 +39,7 @@ class NewBoardFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         user = args.user
+        board = args.board
     }
 
     override fun onCreateView(
@@ -54,11 +56,16 @@ class NewBoardFragment : Fragment() {
         viewModel = ViewModelProvider(this)[NewBoardViewModel::class.java]
         initViews()
         observeViewModel()
-
+        if (board.id != "") {
+            binding.editNameBoard.setText(board.title)
+            urlBackground = board.backgroundUrl
+            newBoardAdapter.urlBackground = urlBackground
+        }
         binding.saveNewBoard.setOnClickListener {
+
             val name = binding.editNameBoard.text.toString().trim()
             if (name != "" && urlBackground != "")
-                viewModel.createNewBoard(name, user, urlBackground)
+                viewModel.createNewBoard(name, user, urlBackground, board)
             else
                 Toast.makeText(
                     requireContext(),
@@ -96,12 +103,13 @@ class NewBoardFragment : Fragment() {
     private fun initViews() {
         val recyclerView = binding.recyclerViewNewBoard
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
-        recyclerView.setHasFixedSize(true)
+//        recyclerView.setHasFixedSize(true)
         newBoardAdapter = NewBoardAdapter(requireContext())
 //        if (listOfImageUrls.isNotEmpty()) {
 //            newBoardAdapter.backgroundImageUrls = buildImageList(listOfImageUrls)
 //
 //        }
+//        recyclerView.runWhenReady {  }
         recyclerView.adapter = newBoardAdapter
         with(binding) {
             loadingIndicatorNewBoard.visibility = View.GONE
@@ -179,9 +187,15 @@ class NewBoardFragment : Fragment() {
             }
         })
         viewModel.urlImage.observe(viewLifecycleOwner, Observer {
-
+            Log.i("USER_OBSERVE", Thread.currentThread().name)
             newBoardAdapter.backgroundImageUrls = it as ArrayList<BackgroundImage>
+            with(binding) {
+                loadingIndicatorNewBoard.visibility = View.GONE
+                pleaseWaitTextViewNewBoard.visibility = View.GONE
+                recyclerViewNewBoard.visibility = View.VISIBLE
+                saveNewBoard.visibility = View.VISIBLE
 
+            }
         })
 
 //        viewModel.recyclerIsReady.observe(viewLifecycleOwner, Observer {

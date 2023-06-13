@@ -17,15 +17,15 @@
             app:cardCornerRadius="5dp"
             app:cardUseCompatPadding="true"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imageView"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintStart_toStartOf="@+id/textViewTitle"
+            app:layout_constraintTop_toBottomOf="@id/textViewTitle">
 
             <EditText
                 android:id="@+id/newNoteTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
-                android:hint="Название"
+                android:hint="@string/select_note_title"
                 android:minHeight="48dp"
                 android:padding="4dp"
                 android:textColor="@color/black"
@@ -62,7 +62,7 @@
             android:layout_margin="4dp"
             android:layout_marginTop="4dp"
             android:padding="4dp"
-            android:text="Описание"
+            android:text="@string/description_note"
             android:textColor="@color/black"
             android:textSize="20sp"
             app:layout_constraintStart_toEndOf="@+id/imageViewDescription"
@@ -87,7 +87,7 @@
                 android:ems="10"
                 android:gravity="start|top"
                 android:padding="4dp"
-                android:text="TextView"
+                android:text=""
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:visibility="gone" />
@@ -99,7 +99,7 @@
                 android:layout_margin="4dp"
                 android:ems="10"
                 android:gravity="start|top"
-                android:hint="Введите описание заметки"
+                android:hint="@string/select_note_description"
                 android:inputType="textMultiLine"
                 android:minHeight="48dp"
                 android:padding="4dp"
@@ -115,18 +115,43 @@
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:padding="4dp"
-            android:text="Список задач"
+            android:text="@string/check_list"
             android:textColor="@color/black"
             android:textSize="20sp"
             app:layout_constraintStart_toEndOf="@+id/imageViewChecklist"
+            app:layout_constraintTop_toBottomOf="@+id/textViewDate" />
+
+        <TextView
+            android:id="@+id/textViewDeadLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:padding="4dp"
+            android:text="@string/deadline"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@+id/imageViewDeadline"
             app:layout_constraintTop_toBottomOf="@id/cardNewNoteDescription" />
+
+        <TextView
+            android:id="@+id/textViewTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_marginTop="8dp"
+            android:padding="4dp"
+            android:text="@string/note_title"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@+id/imageView"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/buttonNewNote"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
-            android:text="Сохранить"
+            android:text="@string/save"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/buttonAddCheckListItem" />
@@ -156,11 +181,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
             android:src="@drawable/my_baseline_title_24"
-            app:layout_constraintBottom_toBottomOf="@+id/newNoteCard"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewTitle"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/textViewTitle" />
 
         <ImageView
             android:id="@+id/imageViewEditDescription"
@@ -187,7 +211,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:text="Добавить элемент"
+            android:text="@string/add_item"
             android:textSize="11sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recyclerViewCheckList" />
@@ -198,7 +222,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
             android:ems="10"
-            android:text="Name"
+            android:text="@string/name_name"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="@+id/buttonAddCheckListItem"
             app:layout_constraintTop_toTopOf="@+id/buttonAddCheckListItem" />
@@ -207,7 +231,7 @@
             android:id="@+id/buttonAddItemToCheckList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Добавить"
+            android:text="@string/add"
             android:textSize="11sp"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="@+id/editTextCheckTitle"
@@ -237,6 +261,50 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textViewCheckList"
             app:layout_constraintEnd_toStartOf="@id/progressBar"/>
+
+        <ImageView
+            android:id="@+id/imageViewCalendarEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewDate"
+            app:layout_constraintStart_toEndOf="@+id/textViewDate"
+            app:layout_constraintTop_toBottomOf="@+id/textViewDeadLine"
+            app:srcCompat="@drawable/my_baseline_edit_calendar_24" />
+
+        <CalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:selectedWeekBackgroundColor="#ff0000"
+            android:weekNumberColor="#0000ff"
+            android:weekSeparatorLineColor="#00ff00"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewDate" />
+
+        <ImageView
+            android:id="@+id/imageViewDeadline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewDeadLine"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textViewDeadLine"
+            app:srcCompat="@drawable/my_baseline_calendar_month_24" />
+
+        <TextView
+            android:id="@+id/textViewDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textSize="20sp"
+            android:text=""
+            android:layout_margin="4dp"
+            android:padding="4dp"
+            app:layout_constraintStart_toEndOf="@+id/imageViewDeadline"
+            app:layout_constraintTop_toBottomOf="@+id/textViewDeadLine" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

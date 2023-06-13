@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.DialogFragment
 import com.example.taskscheduler.domain.Invite
 
@@ -15,6 +16,7 @@ class ReplyToInviteDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         parseArgs()
+        Log.i("USER_INVITE_SHOW", invite.boardName)
         return requireActivity().let {
             val builder = AlertDialog.Builder(it)
             builder.setTitle("Принять приглашение?")
@@ -33,7 +35,7 @@ class ReplyToInviteDialogFragment : DialogFragment() {
 
     }
     private fun parseArgs() {
-        invite = requireArguments().getParcelable<Invite>(KEY_INVITE)!!
+        invite = requireArguments().getParcelable(KEY_INVITE) ?: Invite()
 //        invite = args.invite
     }
 

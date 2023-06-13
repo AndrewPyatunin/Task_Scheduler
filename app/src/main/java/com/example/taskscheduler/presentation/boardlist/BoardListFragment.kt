@@ -17,6 +17,8 @@ import com.example.taskscheduler.*
 import com.example.taskscheduler.databinding.FragmentBoardListBinding
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 
 class BoardListFragment: Fragment(), MenuProvider {
     private var _binding: FragmentBoardListBinding? = null
@@ -29,7 +31,7 @@ class BoardListFragment: Fragment(), MenuProvider {
     private lateinit var viewModelFactory: BoardListViewModelFactory
     lateinit var recyclerViewBoardList: RecyclerView
     lateinit var boardsAdapter: BoardListAdapter
-
+    private val databaseImageUrlsReference = Firebase.database.getReference("ImageUrls")
 //    private val args by navArgs<BoardListFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,7 +128,7 @@ class BoardListFragment: Fragment(), MenuProvider {
     }
 
     private fun launchNewBoardFragment(user: User) {
-        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToNewBoardFragment(user))
+        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToNewBoardFragment(user, Board()))
     }
 
     private fun launchBoardFragment(board: Board) {

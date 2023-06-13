@@ -53,6 +53,27 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
+        <EditText
+            android:id="@+id/list_title_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:maxWidth="200dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black"
+            android:hint="@string/add_list_title"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+        <Button
+            android:id="@+id/button_save_list_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="top|end"
+            android:text="@string/save"/>
+
     </androidx.cardview.widget.CardView>
 
 

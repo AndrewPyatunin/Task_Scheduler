@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseUser
@@ -13,12 +15,14 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class BoardListViewModel(user: User) : ViewModel() {
     private val auth = Firebase.auth
     private val firebaseDatabase = Firebase.database
-    val databaseBoardsReference = firebaseDatabase.getReference("Boards")
-    val databaseUsersReference = firebaseDatabase.getReference("Users")
+    private val databaseBoardsReference = firebaseDatabase.getReference("Boards")
+    private val databaseUsersReference = firebaseDatabase.getReference("Users")
 
     private val _firebaseUser = MutableLiveData<FirebaseUser>()
     val firebaseUser: LiveData<FirebaseUser>
@@ -91,6 +95,9 @@ class BoardListViewModel(user: User) : ViewModel() {
     }
 
     fun logout() {
+        if (user.value != null) {
+            databaseUsersReference.child(user.value!!.id).child("onlineStatus").setValue(false)
+        }
         auth.signOut()
     }
 }

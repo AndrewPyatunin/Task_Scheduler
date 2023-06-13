@@ -1,29 +1,40 @@
 package com.example.taskscheduler.presentation.boardupdated
 
-import android.app.ActionBar.LayoutParams
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
+import android.view.*
+import android.widget.Toast
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentInnerBoardBinding
 import com.example.taskscheduler.domain.*
+import com.example.taskscheduler.findTopNavController
 import com.google.android.material.tabs.TabLayout
 
 
-class InnerBoardFragment: Fragment() {
+class InnerBoardFragment : Fragment(), MenuProvider {
 
     lateinit var binding: FragmentInnerBoardBinding
-    lateinit var list : ListOfNotesItem
+    lateinit var list: ListOfNotesItem
+    lateinit var notesItem: NotesItem
     lateinit var user: User
     lateinit var board: Board
+    lateinit var listNotes: List<Note>
     lateinit var recyclerView: RecyclerView
     lateinit var innerAdapter: InnerBoardAdapter
+    lateinit var viewModel: InnerBoardViewModel
+    lateinit var listOfLists: ArrayList<ListOfNotesItem>
+    var position: Int = 0
     private var recyclerViewReadyCallback: RecyclerViewReadyCallback? = null
     var currentPosition = 0
     var tabLayout: TabLayout? = null
@@ -32,27 +43,16 @@ class InnerBoardFragment: Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        list = requireArguments().getParcelable<ListOfNotesItem>(LIST) ?: ListOfNotesItem()
-        user = requireArguments().getParcelable(USER) ?: User()
-        board = requireArguments().getParcelable(BOARD) ?: Board()
+        position = requireArguments().getInt(POSITION)
+        listOfLists =
+            requireArguments().getParcelableArrayList(LIST) ?: ArrayList<ListOfNotesItem>()
+        list = listOfLists[position]
+        user = requireArguments().getParcelable(USER)!!
+        board = requireArguments().getParcelable(BOARD)!!
+        Log.i("USER_BOARD_FROM_OUTER", board.title)
+//        notesItem = requireArguments().getParcelable(NOTES) ?: NotesItem()
     }
 
-
-//    override fun onHiddenChanged(hidden: Boolean) {
-//        super.onHiddenChanged(hidden)
-//        if (!hidden) {
-//            if (tabLayout != null)
-//                tabLayout?.getTabAt(currentPosition)?.select()
-//        }
-//    }
-//
-//    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
-//        super.setUserVisibleHint(isVisibleToUser)
-//        if (isVisibleToUser)
-//            if (tabLayout != null) {
-//                tabLayout?.getTabAt(currentPosition)?.select()
-//            }
-//    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,131 +60,183 @@ class InnerBoardFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentInnerBoardBinding.inflate(inflater, container, false)
-//        tabLayout = view?.findViewById(R.id.tab_layout)
-//        tabLayout?.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-//            override fun onTabSelected(tab: TabLayout.Tab?) {
-//                if (tab?.position != null)
-//                    currentPosition = tab.position
-//            }
-//
-//            override fun onTabUnselected(tab: TabLayout.Tab?) {
-//            }
-//
-//            override fun onTabReselected(tab: TabLayout.Tab?) {
-//            }
-//
-//        })
-        viewPager = activity?.findViewById(R.id.view_pager)
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        viewModel = ViewModelProvider(this)[InnerBoardViewModel::class.java]
+        viewModel.getNotes(list.listNotes.keys.toList())
+//        registerForContextMenu()
+        observeViewModel()
+        viewPager = requireActivity().findViewById(R.id.view_pager)
+        tabLayout = requireActivity().findViewById(R.id.tab_layout)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 //        list = arguments?.getParcelable<ListOfNotesItem>(LIST) ?: ListOfNotesItem()
-        initViews(ListOfNotesItem(list.id, list.title, list.listNotes))
         binding.listOfNotesTitle.text = list.title
         binding.textViewAddCard.setOnClickListener {
             launchNewNoteFragment(Note())
         }
-//        if (parentFragment is OuterBoardFragment) {
-//            // Проверьте, является ли фрагмент текущим
-//            if ((parentFragment as OuterBoardFragment?)?.childFragmentManager?.findFragmentById(R.id.innerBoardFragment) === this) {
-//
-//                // Обновите высоту элементов интерфейса
-//                val params: ViewGroup.LayoutParams = recyclerView.layoutParams
-//                params.height =  LayoutParams.WRAP_CONTENT//новая высота
-//                recyclerView.layoutParams = params
-//            }
-//        }
 
     }
 
-
-//    override fun onResume() {
-//        super.onResume()
-//        binding.root.requestLayout()
-//    }
 
     private fun launchNewNoteFragment(note: Note) {
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .addToBackStack(null)
-//            .replace(R.id.fragment_container, NewNoteFragment.newInstance(list, Board(), User(), note))
-//            .commit()
-//        val navController = Navigation.findNavController(requireActivity().findViewById(R.id.fragment_container))
-//        navController.navigateUp()
-        findNavController().navigate(InnerBoardFragmentDirections.actionGlobalNewNoteFragment(list, board, user, note))
-//        findNavController().navigate(OuterBoardFragmentDirections.actionOuterBoardFragmentToNewNoteFragment(list, Board(), User(), note))
-//        findNavController().navigate(InnerBoardFragmentDirections.actionInnerBoardFragmentToNewNoteFragment(list, Board(), User(), note))
-//        findTopNavController().navigate(InnerBoardFragmentDirections.actionInnerBoardFragmentToNewNoteFragment(list, Board(), User(), note))
-//        NewNoteFragment.newInstance()
-//        findTopNavController().navigate(InnerBoardFragmentDirections.actionInnerBoardFragmentToNewNoteFragment(list, Board(), User(), note))
+        findNavController().navigate(
+            InnerBoardFragmentDirections.actionGlobalNewNoteFragment(
+                list,
+                board,
+                user,
+                note,
+                listOfLists.toTypedArray()
+            )
+        )
     }
 
-//    override fun onResume() {
-//        super.onResume()
-//        binding.root.requestLayout()
-//    }
+    private fun dateToInt(date: String): Int {
+        Log.i("USER_note_date", date)
+        var dateForm = ""
+        date.forEach { if (it!='.') dateForm += it }
+        Log.i("USER_NOTE_DATE", dateForm)
+//        val a = date.length
+//        val fromDate = "${date[a-4]}${date[a-3]}${date[a-2]}${date[a-1]}"
+        val num = dateForm.toIntOrNull()
+        var newDate: Int = Int.MAX_VALUE
+        if (num != null) {
+            val year = num % 10000
+            val month = num / 10000 % 100
+            val day = num / 1000000
+            newDate = year * 10000 + month * 100 + day
+        }
+        Log.i("USER_NEWDATE", newDate.toString())
+        return newDate
+    }
 
-    private fun initViews(list: ListOfNotesItem) {
+
+    private fun initViews(list: List<Note>) {
 //        Log.i("USER_LIST_INNER_BOARD", list.title)
         recyclerView = binding.childRecyclerViewBoard
 //        recyclerView.visibility = View.GONE
-        val newList = list
+        var newList = list
+        newList = newList.sortedWith(Comparator { ln, rn ->
+            if (ln.priority < rn.priority || (ln.priority == rn.priority &&
+                        dateToInt(ln.date) < dateToInt(rn.date))
+            ) -1 else if (ln.priority > rn.priority) 1 else 0
+        })
+//        newList = newList.sortedWith(Comparator { ln, rn ->
+//            if (ln.priority < rn.priority || (ln.priority == rn.priority &&
+//                        dateToInt(ln.date) < dateToInt(rn.date))
+//            ) 1 else if (ln.priority > rn.priority) -1 else 0
+//        })
+        newList.forEach { Log.i("USER_NEW_LIST", it.title)}
+
         innerAdapter = InnerBoardAdapter(newList)
-        recyclerView.layoutManager = GridLayoutManager(requireContext(), 1,
-            GridLayoutManager.VERTICAL, false)
+        recyclerView.layoutManager = GridLayoutManager(
+            requireContext(), 1,
+            GridLayoutManager.VERTICAL, false
+        )
         recyclerView.adapter = innerAdapter
         recyclerView.setHasFixedSize(true)
 
         binding.loadingIndicatorList.visibility = View.GONE
         recyclerView.visibility = View.VISIBLE
 
-//        val bundle = parentFragmentManager.findFragmentById(R.id.fragment_container)
-//            ?.arguments
-//        val nameList = list.title
-//            if (Constant.fragmentTabs.containsKey(list.title)) {
-//                tabLayout?.getTabAt(Constant.fragmentTabs[list.title])
-//                    ?.select()
-//            }
-//        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-//            override fun onPageSelected(position: Int) {
-//                Constant.fragmentTabs[bundle.getString("TAB_NAME")] = position
-//            }
-//        })
-//        recyclerViewReadyCallback = object: RecyclerViewReadyCallback {
-//            override fun onLayoutReady() {
-//                binding.loadingIndicatorList.visibility = View.GONE
-//                recyclerView.visibility = View.VISIBLE
-//            }
-//
-//        }
-//        recyclerView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-//            override fun onGlobalLayout() {
-//                if (recyclerViewReadyCallback != null) {
-//                    recyclerViewReadyCallback?.onLayoutReady()
-//                }
-//                recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
-//            }
-//
-//        })
         innerAdapter.onItemClick = {
             launchNewNoteFragment(it)
         }
 
     }
+
+    private fun observeViewModel() {
+        viewModel.listNotesLiveData.observe(viewLifecycleOwner, Observer {
+            initViews(it)
+        })
+    }
+
+
     companion object {
         const val USER = "user"
         const val LIST = "list"
         const val BOARD = "board"
+        const val POSITION = "position"
 
-        fun newInstance(listOfNotesItem: ListOfNotesItem, board: Board, user: User): InnerBoardFragment {
+        fun newInstance(
+            listOfNotesItems: ArrayList<ListOfNotesItem>,
+            position: Int,
+            board: Board,
+            user: User
+        ): InnerBoardFragment {
             return InnerBoardFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable(LIST, listOfNotesItem)
+                    putParcelableArrayList(LIST, listOfNotesItems)
+                    putInt(POSITION, position)
                     putParcelable(BOARD, board)
                     putParcelable(USER, user)
                 }
             }
         }
+    }
+
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menu.clear()
+        menuInflater.inflate(R.menu.list_menu, menu)
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
+        super.onPrepareMenu(menu)
+        if (list.creatorId != user.id) {
+            menu.findItem(R.id.item_delete_list).isVisible = false
+            menu.findItem(R.id.item_change_list_name).isVisible = false
+        }
+        if (board.creatorId != user.id) {
+            menu.findItem(R.id.item_delete_board).isVisible = false
+            menu.findItem(R.id.item_change_board).isVisible = false
+        }
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+
+        when (menuItem.itemId) {
+            R.id.item_change_list_name -> {
+                with(binding) {
+                    listOfNotesTitle.visibility = View.INVISIBLE
+                    listTitleEdit.visibility = View.VISIBLE
+                    buttonSaveListTitle.visibility = View.VISIBLE
+                    buttonSaveListTitle.setOnClickListener {
+                        if (listTitleEdit.text.toString().trim() != "") {
+                            Log.i("USER_BOARD_NAME", board.title)
+                            viewModel.renameList(list, board, listTitleEdit.text.toString().trim())
+                            buttonSaveListTitle.visibility = View.GONE
+                            listTitleEdit.visibility = View.GONE
+                            listOfNotesTitle.visibility = View.VISIBLE
+                        } else {
+                            Toast.makeText(
+                                requireContext(), "Нельзя задать пустое название!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+
+            }
+            R.id.item_change_board -> {
+                findNavController().navigate(InnerBoardFragmentDirections.actionGlobalNewBoardFragment(user, board))
+            }
+            R.id.item_delete_list -> {
+                if (board.listsOfNotesIds.size < 2) {
+                    tabLayout?.visibility = View.GONE
+                }
+                viewModel.deleteList(list.id, board, true)
+
+            }
+            R.id.item_delete_board -> {
+                viewModel.deleteBoard(board, user)
+                findNavController().popBackStack()
+            }
+            android.R.id.home -> findNavController().popBackStack()
+        }
+        return true
     }
 }

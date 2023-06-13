@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/item_change_list_name"
+        android:title="@string/change_list_name"
+        app:showAsAction="never"/>
+    <item android:id="@+id/item_change_board"
+        android:title="@string/change_board_parameters"
+        app:showAsAction="never"/>
+    <item android:id="@+id/item_delete_list"
+        android:title="@string/delete_list"
+        app:showAsAction="never"/>
+    <item android:id="@+id/item_delete_board"
+        android:title="@string/delete_board"
+        app:showAsAction="never"/>
+</menu>

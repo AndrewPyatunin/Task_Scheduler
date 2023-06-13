@@ -13,6 +13,8 @@
             android:id="@+id/action_boardListFragment_to_newBoardFragment"
             app:destination="@id/newBoardFragment"
             app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_right"
             app:popExitAnim="@anim/slide_out_right"
             app:popUpTo="@id/boardListFragment" />
         <action
@@ -54,10 +56,17 @@
         <action
             android:id="@+id/action_newNoteFragment_to_outerBoardFragment"
             app:destination="@id/outerBoardFragment"
-            app:enterAnim="@anim/slide_in_up"
-            app:popExitAnim="@anim/slide_out_down"
-            app:popUpTo="@id/newNoteFragment"
-            app:popUpToInclusive="true" />
+            app:enterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpTo="@id/boardListFragment"
+            app:popUpToInclusive="false" />
+        <argument
+            android:name="listOfLists"
+            app:argType="com.example.taskscheduler.domain.ListOfNotesItem[]" />
+        <action
+            android:id="@+id/action_newNoteFragment_to_innerBoardFragment"
+            app:destination="@id/innerBoardFragment"
+            app:popUpTo="@id/boardListFragment" />
     </fragment>
     <fragment
         android:id="@+id/newBoardFragment"
@@ -74,6 +83,9 @@
             app:popExitAnim="@anim/slide_out_right"
             app:popUpTo="@id/newBoardFragment"
             app:popUpToInclusive="true" />
+        <argument
+            android:name="board"
+            app:argType="com.example.taskscheduler.domain.Board" />
     </fragment>
     <action
         android:id="@+id/logout"
@@ -113,8 +125,12 @@
     <action
         android:id="@+id/action_global_newNoteFragment"
         app:destination="@id/newNoteFragment"
-        app:enterAnim="@anim/slide_in_up"
-        app:popExitAnim="@anim/slide_out_down"
+        app:enterAnim="@anim/slide_in_left"
+        app:popExitAnim="@anim/slide_out_right"
         app:popUpTo="@id/innerBoardFragment"
-        app:popUpToInclusive="false" />
+        app:popUpToInclusive="true" />
+    <action
+        android:id="@+id/action_global_newBoardFragment"
+        app:destination="@id/newBoardFragment"
+        app:popUpTo="@id/outerBoardFragment" />
 </navigation>

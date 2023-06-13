@@ -6,9 +6,11 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class Board(
     val id: String = "",
-    val name: String = "",
+    var title: String = "",
+    val creatorId: String = "",
     val backgroundUrl: String = "",
     val members: List<String> = emptyList(),
     var listsOfNotesIds: List<String> = emptyList()
+
     ) :
     Parcelable

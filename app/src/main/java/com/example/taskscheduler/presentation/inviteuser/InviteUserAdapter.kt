@@ -8,10 +8,12 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
+import com.example.taskscheduler.domain.DiffCallback
 import com.example.taskscheduler.domain.User
 import com.squareup.picasso.Picasso
 
@@ -41,7 +43,7 @@ class InviteUserAdapter() : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
     var onItemClick: ((User) -> Unit)? = null
     var users = ArrayList<User>()
     set(newValue) {
-        val diffCallback = UserListDiffCallback(field, newValue)
+        val diffCallback = DiffCallback(field, newValue)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         diffResult.dispatchUpdatesTo(this)
         field = newValue
@@ -51,7 +53,8 @@ class InviteUserAdapter() : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
         (itemView: View,
          var textViewUserInfo: TextView = itemView.findViewById(R.id.textViewUserInfo),
          var checkBoxInvited: CheckBox = itemView.findViewById(R.id.checkBoxInvited),
-         var imageViewUserAvatar: ImageView = itemView.findViewById(R.id.imageViewUserAvatar)
+         var imageViewUserAvatar: ImageView = itemView.findViewById(R.id.imageViewUserAvatar),
+         var viewStatus: View = itemView.findViewById(R.id.circle_status)
     ): ViewHolder(itemView) {
         init {
             itemView.setOnClickListener {
@@ -71,6 +74,13 @@ class InviteUserAdapter() : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
         val userInfo = String.format("%s %s", user.name, user.lastName)
 //        holder.checkBoxInvited.onTouchEvent()
         holder.textViewUserInfo.text = userInfo
+
+        holder.viewStatus.background = if (user.onlineStatus) {
+            ResourcesCompat.getDrawable(holder.itemView.resources, R.drawable.oval, null)
+        } else ResourcesCompat.getDrawable(holder.itemView.resources, R.drawable.oval_red, null)
+        holder.checkBoxInvited.setOnClickListener {
+            onItemClick?.invoke(user)
+        }
         if (user.uri != "") {
             Glide.with(holder.itemView.context).load(user.uri).into(holder.imageViewUserAvatar)
         }

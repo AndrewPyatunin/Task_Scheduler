@@ -10,10 +10,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.adapter.FragmentViewHolder
 import androidx.viewpager2.widget.ViewPager2
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.DiffCallback
-import com.example.taskscheduler.domain.ListOfNotesItem
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.*
 import com.google.android.material.tabs.TabLayout
 
 class OuterBoardAdapter(
@@ -25,8 +22,8 @@ class OuterBoardAdapter(
     var position: Int,
     var tabLayout: TabLayout,
     var viewPager2: ViewPager2,
-    list: ArrayList<ListOfNotesItem>,
-    var isFirst: Boolean
+    var list: ArrayList<ListOfNotesItem> = ArrayList(),
+//    var isFirst: Boolean
     ) : FragmentStateAdapter(fragmentManager, lifecycle) {
         var fragmentList = list
             set(value) {
@@ -61,6 +58,6 @@ class OuterBoardAdapter(
 //                return InnerBoardFragment.newInstance(fragmentList[position], board, user)
 
             }
-            return InnerBoardFragment.newInstance(fragmentList[position], board, user)
+            return InnerBoardFragment.newInstance(fragmentList, position, board, user)
         }
 }

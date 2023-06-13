@@ -35,4 +35,23 @@
     <string name="full_name">%1$s %2$s</string>
     <string name="welcome">Добро пожаловать,\n %s</string>
     <string name="check_percent">%d %s</string>
+    <string name="move_to_another_list">Переместить в другой список</string>
+    <string name="delete_note">Удалить заметку</string>
+    <string name="change_list_name">Переименовать список</string>
+    <string name="delete_list">Удалить список</string>
+    <string name="delete_board">Удалить доску</string>
+    <string name="change_priority">Изменить приоритет заметки</string>
+    <string name="select_note_title">Введите название</string>
+    <string name="description_note">Описание</string>
+    <string name="select_note_description">Введите описание заметки</string>
+    <string name="check_list">Список задач</string>
+    <string name="deadline">Крайний срок</string>
+    <string name="note_title">Название</string>
+    <string name="add_item">Добавить элемент</string>
+    <string name="name_name">item</string>
+    <string name="add">Добавить</string>
+    <string name="tell_about_yourself">Расскажите о себе</string>
+    <string name="email_profile">Электронный адрес</string>
+    <string name="change_board_parameters">Изменить параметры доски</string>
+    <string name="date" translatable="false">%1$s.%2$s.%3$d</string>
 </resources>

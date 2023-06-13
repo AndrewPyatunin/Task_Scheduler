@@ -15,9 +15,15 @@ import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.R
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+import java.util.regex.Pattern
 
 class MainActivity : AppCompatActivity() {
-//    val auth = Firebase.auth
+    val auth = Firebase.auth
+    var user = auth.currentUser
+    private val databaseUsersRef = Firebase.database.getReference("Users")
 //    private val navController by lazy {
 //    val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
 //    navHostFragment.navController
@@ -36,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(R.style.Theme_AppCompat_Main)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
 
@@ -103,9 +110,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun isSignedIn(): Boolean {
-        val bundle = intent.extras ?: throw IllegalStateException("No required arguments")
-        val args = MainActivityArgs.fromBundle(bundle)
-        return args.isSignedIn
+//        val bundle = intent.extras ?: throw IllegalStateException("No required arguments")
+//        val args = MainActivityArgs.fromBundle(bundle)
+        return user != null
     }
 
     private fun isStartDestination(destination: NavDestination?): Boolean {
@@ -115,9 +122,50 @@ class MainActivity : AppCompatActivity() {
         return startDestinations.contains(destination.id)
     }
 
-    private val destinationListener = NavController.OnDestinationChangedListener {_, destination, arguments ->
+    private val destinationListener = NavController.OnDestinationChangedListener { _, destination, arguments ->
         supportActionBar?.setDisplayHomeAsUpEnabled(!isStartDestination(destination))
+        supportActionBar?.title = prepareTitle(destination.label, arguments)
+    }
 
+
+    private fun prepareTitle(label: CharSequence?, arguments: Bundle?): String {
+
+        // code for this method has been copied from Google sources :)
+
+        if (label == null) return ""
+        val title = StringBuffer()
+        val fillInPattern = Pattern.compile("\\{(.+?)\\}")
+        val matcher = fillInPattern.matcher(label)
+        while (matcher.find()) {
+            val argName = matcher.group(1)
+            if (arguments != null && arguments.containsKey(argName)) {
+                matcher.appendReplacement(title, "")
+                title.append(arguments[argName].toString())
+            } else {
+                throw IllegalArgumentException(
+                    "Could not find $argName in $arguments to fill label $label"
+                )
+            }
+        }
+        matcher.appendTail(title)
+        return title.toString()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        setUserOnline(false)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setUserOnline(true)
+    }
+
+    private fun setUserOnline(isOnline: Boolean) {
+        user = auth.currentUser
+        if (user != null) {
+            databaseUsersRef.child(user!!.uid).child("onlineStatus").setValue(isOnline)
+        }
     }
 
     private fun getMainNavigationGraphId() = R.navigation.main_navigation

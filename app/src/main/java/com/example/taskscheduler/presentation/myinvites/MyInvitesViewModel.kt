@@ -16,9 +16,9 @@ import com.google.firebase.ktx.Firebase
 class MyInvitesViewModel : ViewModel() {
     private val firebaseDatabase = Firebase.database
     val auth = Firebase.auth
-    val databaseInvitesReference = firebaseDatabase.getReference("Invites")
+    private val databaseInvitesReference = firebaseDatabase.getReference("Invites")
     val databaseBoardsReference = firebaseDatabase.getReference("Boards")
-    val databaseUsersReference = firebaseDatabase.getReference("Users")
+    private val databaseUsersReference = firebaseDatabase.getReference("Users")
 
     private val _invitesList = MutableLiveData<List<Invite>>()
     val inviteList: LiveData<List<Invite>>

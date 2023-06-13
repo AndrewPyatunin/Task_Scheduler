@@ -36,5 +36,23 @@
     <string name="full_name">%1$s %2$s</string>
     <string name="welcome">Welcome, %s</string>
     <string name="check_percent">%d %s</string>
+    <string name="move_to_another_list">Move to another list</string>
+    <string name="delete_note">Delete the note</string>
+    <string name="change_list_name">Rename the list</string>
+    <string name="delete_list">Delete the list</string>
+    <string name="delete_board">Delete the board</string>
+    <string name="select_note_title">Enter the note title</string>
+    <string name="check_list">Check list</string>
+    <string name="deadline">Deadline</string>
+    <string name="add_item">Add an item</string>
+    <string name="name_name">item</string>
+    <string name="add">Add</string>
+    <string name="change_priority">Change the note priority</string>
+    <string name="description_note">Description</string>
+    <string name="select_note_description">Enter the note description</string>
+    <string name="note_title">Title</string>
+    <string name="tell_about_yourself">Tell about yourself</string>
+    <string name="email_profile">Email</string>
+    <string name="change_board_parameters">Изменить параметры доски</string>
 
 </resources>

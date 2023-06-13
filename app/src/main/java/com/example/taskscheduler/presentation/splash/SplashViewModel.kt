@@ -1,4 +1,4 @@
-package com.example.taskscheduler.presentation
+package com.example.taskscheduler.presentation.splash
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

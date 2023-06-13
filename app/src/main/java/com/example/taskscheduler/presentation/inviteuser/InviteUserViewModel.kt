@@ -34,11 +34,11 @@ class InviteUserViewModel(board: Board) : ViewModel() {
     val success: LiveData<String>
         get() = _success
 
-    fun setUserStatus(isOnline: Boolean) {
-        databaseUsersReference.child(auth.currentUser?.uid ?: "")
-            .child("onlineStatus")
-            .setValue(isOnline)
-    }
+//    fun setUserStatus(isOnline: Boolean) {
+//        databaseUsersReference.child(auth.currentUser?.uid ?: "")
+//            .child("onlineStatus")
+//            .setValue(isOnline)
+//    }
 
     init {
         auth.addAuthStateListener {
@@ -83,7 +83,7 @@ class InviteUserViewModel(board: Board) : ViewModel() {
                                 currentUser.id,
                                 currentUser.name,
                                 currentUser.lastName,
-                                board.name
+                                board.title
                             )
                         )
                         val ref = databaseUsersReference.child(userForInvite.id).child("invites")

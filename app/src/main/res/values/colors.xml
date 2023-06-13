@@ -9,4 +9,9 @@
     <color name="white">#FFFFFFFF</color>
     <color name="text_shadow">#7F000000</color>
     <color name="light_font">#FBFBFB</color>
+    <color name="red">#FF0000</color>
+    <color name="orange">#FF5500</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="cyan">#00FFFF</color>
+    <color name="green">#008000</color>
 </resources>
