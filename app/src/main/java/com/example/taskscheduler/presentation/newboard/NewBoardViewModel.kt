@@ -97,56 +97,58 @@ class NewBoardViewModel : ViewModel() {
 
             _boardLiveData.value = board
         } else {
-            databaseUsersReference.child(user.id)
-                .addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        databaseUsersReference.removeEventListener(this)
-                        val listBoardsIds = ArrayList<String>()
-                        if (snapshot.child("boards").value == null) {
-                            listBoardsIds.add(idBoard)
-                        } else {
-                            for (dataSnapshot in snapshot.child("boards")
-                                .children) {
-                                val data = dataSnapshot.value as String
-                                listBoardsIds.add(data)
+            viewModelScope.launch(Dispatchers.IO) {
+                databaseUsersReference.child(user.id)
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            databaseUsersReference.removeEventListener(this)
+                            val listBoardsIds = ArrayList<String>()
+                            if (snapshot.child("boards").value == null) {
+                                listBoardsIds.add(idBoard)
+                            } else {
+                                for (dataSnapshot in snapshot.child("boards")
+                                    .children) {
+                                    val data = dataSnapshot.value as String
+                                    listBoardsIds.add(data)
+                                }
+                                listBoardsIds.add(idBoard)
                             }
-                            listBoardsIds.add(idBoard)
-                        }
-                        val listMembersIds = ArrayList<String>()
-                        listMembersIds.add(user.id)
-                        val board = Board(
-                            idBoard,
-                            name,
-                            user.id,
-                            urlBackground,
-                            listMembersIds,
-                            emptyList()
-                        )
-                        urlForBoard.setValue(board)
-                        val userToDb =
-                            User(
+                            val listMembersIds = ArrayList<String>()
+                            listMembersIds.add(user.id)
+                            val board = Board(
+                                idBoard,
+                                name,
                                 user.id,
-                                user.name,
-                                user.lastName,
-                                user.email,
-                                true,
-                                listBoardsIds,
-                                user.uri
+                                urlBackground,
+                                listMembersIds,
+                                emptyList()
                             )
-                        viewModelScope.launch(Dispatchers.IO) {
-                            databaseUsersReference.child(user.id).child("boards")
-                                .setValue(listBoardsIds)
+                            urlForBoard.setValue(board)
+                            val userToDb =
+                                User(
+                                    user.id,
+                                    user.name,
+                                    user.lastName,
+                                    user.email,
+                                    true,
+                                    listBoardsIds,
+                                    user.uri
+                                )
+                            viewModelScope.launch(Dispatchers.IO) {
+                                databaseUsersReference.child(user.id).child("boards")
+                                    .setValue(listBoardsIds)
+                            }
+
+                            _user.value = userToDb
+                            _boardLiveData.value = board
                         }
 
-                        _user.value = userToDb
-                        _boardLiveData.value = board
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        _error.value = error.message
-                        logout()
-                    }
-                })
+                        override fun onCancelled(error: DatabaseError) {
+                            _error.value = error.message
+                            logout()
+                        }
+                    })
+            }
         }
     }
 

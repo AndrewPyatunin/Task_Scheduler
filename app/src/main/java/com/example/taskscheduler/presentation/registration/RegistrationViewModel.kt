@@ -84,8 +84,8 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
                         getApplication(),
                         "Обновление данных пользователя прошло успешно",
                         Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    ).show()
+                    Log.i("USER_FIREBASE_SUCCESS", auth.currentUser.toString())
                     _success.value = auth.currentUser
                 }
             }

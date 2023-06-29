@@ -1,11 +1,9 @@
 package com.example.taskscheduler.presentation.boardlist
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseUser
@@ -46,48 +44,47 @@ class BoardListViewModel(user: User) : ViewModel() {
             if (it.currentUser != null) {
                 databaseBoardsReference.addValueEventListener(
                     object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        readData(object : MyCallback {
-                            override fun onCallback(user: User) {
-                                val boardsId = user.boards ?: emptyList()
-                                val boardsFromDb = ArrayList<Board>()
-                                for (dataSnapshot in snapshot.children) {
-                                    val board = dataSnapshot.getValue(Board::class.java)
-                                    if (board != null && dataSnapshot.key in boardsId) {
-                                        boardsFromDb.add(board)
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            readData(object : MyCallback {
+                                override fun onCallback(user: User) {
+                                    val boardsId = user.boards
+                                    val boardsFromDb = ArrayList<Board>()
+                                    for (dataSnapshot in snapshot.children) {
+                                        val board = dataSnapshot.getValue(Board::class.java)
+                                        if (board != null && dataSnapshot.key in boardsId) {
+                                            boardsFromDb.add(board)
+                                        }
                                     }
+                                    _boardList.value = boardsFromDb
                                 }
-                                _boardList.value = boardsFromDb
-                            }
-                        })
-                    }
-                    override fun onCancelled(error: DatabaseError) {
-                        logout()
-                    }
-                })
+                            })
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            logout()
+                        }
+                    })
+
             }
         }
     }
 
     fun readData(callback: MyCallback) {
-        databaseUsersReference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                var userFromDb: User? = User()
-                for (userSnapshot in snapshot.children) {
-                    if (userSnapshot.key == auth.currentUser?.uid) {
-                        userFromDb = userSnapshot.getValue(User::class.java)
-                    }
-                    if (userFromDb != null && userFromDb.id == auth.currentUser?.uid) {
-
-                    }
+        viewModelScope.launch(Dispatchers.IO) {
+            val queryForUser = databaseUsersReference.child(auth.currentUser?.uid ?: "")
+            queryForUser.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val userFromDb = snapshot.getValue(User::class.java)
+                    _user.postValue(userFromDb as User)
+                    callback.onCallback(userFromDb)
                 }
-                _user.value = userFromDb as User
-                callback.onCallback(userFromDb)
-            }
-            override fun onCancelled(error: DatabaseError) {
-                logout()
-            }
-        })
+
+                override fun onCancelled(error: DatabaseError) {
+                    logout()
+                }
+            })
+        }
+
     }
 
     interface MyCallback {

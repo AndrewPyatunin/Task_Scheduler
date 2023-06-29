@@ -1,12 +1,11 @@
 package com.example.taskscheduler.presentation.boardupdated
 
-import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
@@ -14,10 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
-import androidx.viewpager2.widget.ViewPager2.OFFSCREEN_PAGE_LIMIT_DEFAULT
-import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -40,35 +36,34 @@ class OuterBoardFragment : Fragment() {
 //        get() = _binding ?: throw RuntimeException("FragmentBoardBinding==null")
     lateinit var board: Board
     lateinit var user: User
-
-    //    private lateinit var recyclerViewParent: RecyclerView
+    val position = MyDatabaseConnection.currentPosition
     private var parentAdapter: OuterBoardAdapter? = null
     lateinit var viewModel: OuterBoardViewModel
     private var parentList = ArrayList<ListOfNotesItem>()
     private var viewPager: ViewPager2? = null
     private lateinit var tabLayout: TabLayout
     var currentPosition = 0
-    var sharedPreferences: SharedPreferences? = null
     var isFirst = true
 
     private val args by navArgs<OuterBoardFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        parseArgs()
-
-//        Log.i("USER_TAB_SELECTED", sharedPreferences?.getInt("tabPosition", 0).toString())
 //        if (savedInstanceState != null) {
-//            val position = savedInstanceState.getInt("tabPosition", 0)
-//            viewPager.currentItem = position
+//            currentPosition = requireArguments().getInt("position")
+//            Log.i("USER_SAVED", currentPosition.toString())
 //        }
+        parseArgs()
+        MyDatabaseConnection.currentPosition = 0
+        MyDatabaseConnection.updated = true
     }
 
     override fun onPause() {
         super.onPause()
-        requireArguments().putInt("position", viewPager?.currentItem ?: 0)
-        requireArguments().putBoolean("isFirst", isFirst)
-        Log.i("USER_POS", isFirst.toString())
+        val item = viewPager?.currentItem ?: 0
+        requireArguments().putInt("position", item)
+        Log.i("USER_SAVED", item.toString())
+        MyDatabaseConnection.currentPosition = item
     }
 
 
@@ -78,13 +73,7 @@ class OuterBoardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentOuterBoardBinding.inflate(inflater, container, false)
-//        requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav_view).menu
-//            .add(R.menu.bottom_menu_nav, R.id.inviteUserFragment, NONE, "Invite user")
         registerForContextMenu(binding.viewPager)
-//        TabLayoutMediator(tabLayout, viewPager) {tab, position ->
-//            tab.text =
-//        }
-
         return binding.root
     }
 
@@ -94,13 +83,16 @@ class OuterBoardFragment : Fragment() {
 //        sharedPreferences = context?.getSharedPreferences("tabPosition", Context.MODE_PRIVATE)
         viewModel = ViewModelProvider(this)[OuterBoardViewModel::class.java]
 
-        currentPosition = requireArguments().getInt("position")
-        isFirst = requireArguments().getBoolean("isFirst")
-        if (parentAdapter != null) {
-            parentAdapter?.notifyDataSetChanged()
+//        currentPosition = requireArguments().getInt("position")
+
+        currentPosition = MyDatabaseConnection.currentPosition
+//        if (parentAdapter != null) {
+//            parentAdapter?.notifyDataSetChanged()
+//        }
+        if (MyDatabaseConnection.updated) {
+            viewModel.readData(board.id)
         }
-        Log.i("USER_POSITION", currentPosition.toString() + isFirst.toString())
-        viewModel.readData(board.id)
+
 //        initViews()
         observeViewModel()
         binding.imageViewInvite.setOnClickListener {
@@ -118,11 +110,7 @@ class OuterBoardFragment : Fragment() {
             textView.visibility = View.GONE
             editText.visibility = View.VISIBLE
             buttonAddNewList.visibility = View.VISIBLE
-//            parentList.add(ListOfNotesItem(editText.text.toString(), ArrayList()))
-//            parentAdapter.parentListFrom = parentList
         }
-//        binding.viewPager.currentItem = currentPosition
-//        binding.tabLayout.getTabAt(currentPosition)?.select()
 
 
 
@@ -131,11 +119,7 @@ class OuterBoardFragment : Fragment() {
 
             val textTitle = editText.text.toString().trim()
             if (textTitle.isNotEmpty()) {
-//                val list = ArrayList(parentList)
-                //parentList.add(ListOfNotesItem("5", textTitle, ArrayList()))
                 val item = viewModel.createNewList(textTitle, board, user)
-//                parentAdapter.fragmentList.add(InnerBoardFragment.newInstance(item))
-//                parentAdapter.notifyDataSetChanged()
                 textView.visibility = View.VISIBLE
                 editText.visibility = View.INVISIBLE
                 buttonAddNewList.visibility = View.INVISIBLE
@@ -150,16 +134,6 @@ class OuterBoardFragment : Fragment() {
 
             })
         savedInstanceState?.putInt("position", viewPager?.currentItem ?: 0)
-        savedInstanceState?.putBoolean("isFirst", isFirst)
-//        viewPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-//            override fun onPageSelected(position: Int) {
-//                view.showContextMenu()
-//            }
-//        })
-//        viewPager?.apply {
-//            isLongClickable = true
-//            setOnCreateContextMenuListener(this@OuterBoardFragment)
-//        }
     }
 
 
@@ -176,11 +150,6 @@ class OuterBoardFragment : Fragment() {
             )
         )
     }
-
-//    fun launchNewNoteFragment(listOfNotesItem: ListOfNotesItem, note: Note) {
-//        findNavController().navigate(
-//            OuterBoardFragmentDirections.actionOuterBoardFragmentToNewNoteFragment(listOfNotesItem, board, user, note))
-//    }
 
     fun retryToListBoard() {
         findTopNavController().popBackStack(R.id.boardListFragment, false)
@@ -205,12 +174,8 @@ class OuterBoardFragment : Fragment() {
                 board,
                 user,
                 currentPosition,
-                binding.tabLayout,
-                binding.viewPager,
                 it
-//                isFirst
             )
-//            isFirst = false
             viewPager = binding.viewPager
             Glide.with(this).load(board.backgroundUrl).into(object : CustomTarget<Drawable>() {
                 override fun onResourceReady(
@@ -225,51 +190,16 @@ class OuterBoardFragment : Fragment() {
                 }
 
             })
-            tabLayout = binding.tabLayout
             viewPager?.offscreenPageLimit = it.size + 1
+            tabLayout = binding.tabLayout
             viewPager?.adapter = parentAdapter
             if (viewPager != null) {
                 TabLayoutMediator(tabLayout, viewPager!!) { tab, position ->
                     tab.text = it[position].title
                 }.attach()
             }
-//            parentAdapter = OuterBoardAdapter(lifecycle, childFragmentManager, listFragment)
-//            parentAdapter = OuterBoardAdapter(
-//                lifecycle,
-//                childFragmentManager,
-//                board,
-//                user,
-//                currentPosition,
-//                binding.tabLayout,
-//                binding.viewPager,
-//                it,
-//                isFirst
-//            )
-//            isFirst = false
-//            viewPager = binding.viewPager
-//            Glide.with(this).load(board.backgroundUrl).into(object : CustomTarget<Drawable>() {
-//                override fun onResourceReady(
-//                    resource: Drawable,
-//                    transition: Transition<in Drawable>?
-//                ) {
-//                    fillingLayout(resource)
-//                }
-//
-//                override fun onLoadCleared(placeholder: Drawable?) {
-//                    fillingLayout(placeholder)
-//                }
-//
-//            })
-//
-//            tabLayout = binding.tabLayout
-//            viewPager?.offscreenPageLimit = it.size + 1
-//            viewPager?.adapter = parentAdapter
-//            if (viewPager != null) {
-//                TabLayoutMediator(tabLayout, viewPager!!) { tab, position ->
-//                    tab.text = it[position].title
-//                }.attach()
-//            }
-//
+            tabLayout.getTabAt(currentPosition)?.select()
+            viewPager?.currentItem = currentPosition
         })
         viewModel.boardLiveData.observe(viewLifecycleOwner, Observer {
             board = it
@@ -286,6 +216,7 @@ class OuterBoardFragment : Fragment() {
 //                tabLayout.visibility = View.VISIBLE
         }
     }
+    
 
 }
 
@@ -293,19 +224,18 @@ class OuterBoardFragment : Fragment() {
 class MyPageTransformer : ViewPager2.PageTransformer {
     override fun transformPage(view: View, position: Float) {
         if (position <= -1.0F || position >= 1.0F) {
-            view.translationX = view.width * position;
-            view.alpha = 0.0F;
+            view.translationX = view.width * position
+            view.alpha = 0.0F
         } else if (position == 0.0F) {
-            view.translationX = view.width * position;
-            view.alpha = 1.0F;
+            view.translationX = view.width * position
+            view.alpha = 1.0F
         } else {
             // position is between -1.0F & 0.0F OR 0.0F & 1.0F
-            view.translationX = view.width * -position;
-            view.alpha = 1.0F - abs(position);
+            view.translationX = view.width * -position
+            view.alpha = 1.0F - abs(position)
         }
 
     }
-
 
 
 }

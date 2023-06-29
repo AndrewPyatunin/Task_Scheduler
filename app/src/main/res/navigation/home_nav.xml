@@ -126,9 +126,8 @@
         android:id="@+id/action_global_newNoteFragment"
         app:destination="@id/newNoteFragment"
         app:enterAnim="@anim/slide_in_left"
-        app:popExitAnim="@anim/slide_out_right"
-        app:popUpTo="@id/innerBoardFragment"
-        app:popUpToInclusive="true" />
+        app:popUpTo="@id/outerBoardFragment"
+        app:popUpToInclusive="false" />
     <action
         android:id="@+id/action_global_newBoardFragment"
         app:destination="@id/newBoardFragment"

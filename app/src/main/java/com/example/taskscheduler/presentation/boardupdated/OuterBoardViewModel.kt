@@ -1,11 +1,11 @@
 package com.example.taskscheduler.presentation.boardupdated
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.ListOfNotesItem
-import com.example.taskscheduler.domain.Note
 import com.example.taskscheduler.domain.User
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -15,8 +15,7 @@ import com.google.firebase.ktx.Firebase
 
 class OuterBoardViewModel : ViewModel() {
     val database = Firebase.database
-    val databaseListsOfNotesRef = database.getReference("ListsOfNotes")
-    val databaseNotesRef = database.getReference("Notes")
+    private val databaseListsOfNotesRef = database.getReference("ListsOfNotes")
     val databaseBoardsRef = database.getReference("Boards")
 
     private val _liveData = MutableLiveData<ListOfNotesItem>()
@@ -31,9 +30,6 @@ class OuterBoardViewModel : ViewModel() {
     val listLiveData: LiveData<List<ListOfNotesItem>>
         get() = _listLiveData
 
-//    private val _listNotesLiveData = MutableLiveData<List<Note>>()
-//    val listNotesLiveData: LiveData<List<Note>>
-//        get() = _listNotesLiveData
 
     fun createNewList(title: String, board: Board, user: User): ListOfNotesItem{
         val listOfNotesIds = ArrayList<String>()
@@ -76,7 +72,7 @@ class OuterBoardViewModel : ViewModel() {
                     val list = dataSnapshot.getValue(ListOfNotesItem::class.java)
                     if (list != null) listOfNotesItem.add(list)
                 }
-//                Log.i("USER_LIST_OF_NOTES", listOfNotesItem[0].title)
+                Log.i("USER_LIST_OF_NOTES", listOfNotesItem.size.toString())
                 _listLiveData.value = listOfNotesItem
             }
 
@@ -86,21 +82,4 @@ class OuterBoardViewModel : ViewModel() {
 
         })
     }
-//    fun getNotes(listNotesIds: List<String>) {
-//        databaseNotesRef.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                val listNotes = ArrayList<Note>()
-//                for (dataSnapshot in snapshot.children) {
-//                    if (dataSnapshot.key in listNotesIds) {
-//                        dataSnapshot.getValue(Note::class.java)?.let { listNotes.add(it) }
-//                    }
-//                }
-//                _listNotesLiveData.value = listNotes
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//            }
-//
-//        })
-//    }
 }

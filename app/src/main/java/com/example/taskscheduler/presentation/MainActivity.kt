@@ -24,13 +24,8 @@ class MainActivity : AppCompatActivity() {
     val auth = Firebase.auth
     var user = auth.currentUser
     private val databaseUsersRef = Firebase.database.getReference("Users")
-//    private val navController by lazy {
-//    val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
-//    navHostFragment.navController
 //}
     private var navController: NavController? = null
-//    val args by navArgs<MainActivityArgs>()
-//    val auth = Firebase.auth
     private val topLevelDestinations = setOf(getWelcomeDestination(), getLoginDestination())
 
     private val fragmentListener = object : FragmentManager.FragmentLifecycleCallbacks() {

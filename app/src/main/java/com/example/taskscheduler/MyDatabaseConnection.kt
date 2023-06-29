@@ -1,5 +1,6 @@
 package com.example.taskscheduler
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.NewCallback
@@ -18,8 +19,10 @@ object MyDatabaseConnection : DatabaseConnection {
     val databaseBoardsRef = database.getReference("Boards")
     private val databaseImagesReference = database.getReference("ImageUrls")
     var userFrom = User()
+    var uri: Uri? = null
     var currentPosition = 0
     var list = emptyList<BackgroundImage>()
+    var updated = true
 //    override fun <T>queryUser(ref: DatabaseReference, liveData: LiveData<T>) {
 //        ref.addValueEventListener(object : ValueEventListener {
 //            override fun onDataChange(snapshot: DataSnapshot) {

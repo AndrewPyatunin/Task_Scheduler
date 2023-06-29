@@ -15,6 +15,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.navOptions
 import com.bumptech.glide.Glide
+import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentUserProfileBinding
 import com.example.taskscheduler.findTopNavController
@@ -44,7 +45,8 @@ class UserProfileFragment : Fragment() {
 
         val user = auth.currentUser
         binding.textViewUserName.text = user?.displayName
-        if (user?.photoUrl != null) Glide.with(this).load(user.photoUrl).into(binding.profilePicture)
+        if (user?.photoUrl != null)
+            Glide.with(this).load(user.photoUrl).into(binding.profilePicture)
         onClick(binding.textViewLogout)
         onClick(binding.imageViewLogout)
         with(binding) {
@@ -101,7 +103,7 @@ class UserProfileFragment : Fragment() {
             binding.textViewEmail.text = it
         })
         viewModel.uriLiveData.observe(viewLifecycleOwner, Observer {
-            Glide.with(this).load(uri).into(binding.profilePicture)
+            Glide.with(this).load(it).into(binding.profilePicture)
         })
         viewModel.userLiveData.observe(viewLifecycleOwner) {
             userInfo = String.format(getString(R.string.full_name), it.name, it.lastName)

@@ -15,6 +15,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.MyDatabaseConnection.updated
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewNoteBinding
 import com.example.taskscheduler.domain.*
@@ -47,12 +49,12 @@ class NewNoteFragment : Fragment(), MenuProvider {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         parseArgs()
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[NewNoteViewModel::class.java]
+        MyDatabaseConnection.updated = false
         observeViewModel()
         binding.cardNewNoteDescription.background.alpha = 0
         binding.newNoteCard.background.alpha = 0
@@ -89,6 +91,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
                         )
                         note.date = textViewDate.text.toString()
                         switchVisibilityForCalendar()
+                        updated = true
                         viewModel.updateNote(note)
                     }
                 }
@@ -241,10 +244,6 @@ class NewNoteFragment : Fragment(), MenuProvider {
     }
 
     private fun parseArgs() {
-//        board = requireArguments().getParcelable<Board>(KEY_BOARD) ?: Board()
-//        listOfNotesItem = requireArguments().getParcelable<ListOfNotesItem>(KEY_LIST_NOTE) ?: ListOfNotesItem()
-//        user = requireArguments().getParcelable<User>(KEY_USER) ?: User()
-//        note = requireArguments().getParcelable(KEY_NOTE) ?: Note()
         listOfLists = args.listOfLists
         note = args.note
         board = args.board
@@ -271,18 +270,13 @@ class NewNoteFragment : Fragment(), MenuProvider {
     }
 
     private fun launchBoardFragment(board: Board, user: User) {
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .addToBackStack(null)
-//            .replace(R.id.fragment_container, InnerBoardFragment.newInstance(listOfNotesItem))
-//            .commit()
-
-//        findNavController().navigate(NewNoteFragmentDirections.actionNewNoteFragmentToInnerBoardFragment(listOfNotesItem))
-        findNavController().navigate(
-            NewNoteFragmentDirections.actionNewNoteFragmentToOuterBoardFragment(
-                user,
-                board
-            )
-        )
+        findNavController().popBackStack()
+//        findNavController().navigate(
+//            NewNoteFragmentDirections.actionNewNoteFragmentToOuterBoardFragment(
+//                user,
+//                board
+//            )
+//        )
 //        findNavController().navigate(NewNoteFragmentDirections.actionNewNoteFragmentToBoardFragment(board, user))
     }
 
@@ -347,6 +341,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
                             "Low" -> UrgencyOfNote.LOW
                             else -> UrgencyOfNote.LOW
                         }
+                        updated = true
                         viewModel.updateNote(note)
                     }
 

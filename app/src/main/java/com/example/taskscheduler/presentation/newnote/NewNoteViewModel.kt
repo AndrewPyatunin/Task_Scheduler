@@ -3,9 +3,14 @@ package com.example.taskscheduler.presentation.newnote
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.MyDatabaseConnection.updated
 import com.example.taskscheduler.domain.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class NewNoteViewModel: ViewModel() {
     val database = Firebase.database
@@ -30,19 +35,25 @@ class NewNoteViewModel: ViewModel() {
         get() = _boardLiveData
 
     fun deleteNote(note: Note, board: Board, listOfNotesItem: ListOfNotesItem) {
-        databaseNotesRef.child(note.id).removeValue()
-        databaseListsOfNotesRef.child(board.id).child(listOfNotesItem.id)
-            .child("listNotes").child(note.id).removeValue()
+        updated = true
+        viewModelScope.launch(Dispatchers.IO) {
+            databaseNotesRef.child(note.id).removeValue()
+            databaseListsOfNotesRef.child(board.id).child(listOfNotesItem.id)
+                .child("listNotes").child(note.id).removeValue()
+        }
+
     }
 
     fun updateNote(note: Note) {
-        databaseNotesRef.child(note.id).setValue(note)
-        val checkList = ArrayList<CheckNoteItem>()
+        viewModelScope.launch {
+            databaseNotesRef.child(note.id).setValue(note)
+            val checkList = ArrayList<CheckNoteItem>()
 //        listNotes as HashMap<String, Boolean>
 //        listNotes.put(note.id, true)
-        checkList.addAll(note.listOfTasks)
+            checkList.addAll(note.listOfTasks)
+            _noteData.postValue(checkList)
+        }
 
-        _noteData.value = checkList
     }
 
     fun createNewNote(
@@ -53,22 +64,27 @@ class NewNoteViewModel: ViewModel() {
         user: User,
         checkList: List<CheckNoteItem> = emptyList()
     ) {
-        val childListNotesRef = databaseListsOfNotesRef
-            .child(board.id).child(listOfNotesItem.id).child("listNotes")
-        val url = childListNotesRef.push()
-        val idNote = url.key ?: ""
-        val listNotes = listOfNotesItem.listNotes
+        viewModelScope.launch(Dispatchers.IO) {
+            val childListNotesRef = databaseListsOfNotesRef
+                .child(board.id).child(listOfNotesItem.id).child("listNotes")
+            val url = childListNotesRef.push()
+            val idNote = url.key ?: ""
+            val listNotes = listOfNotesItem.listNotes
 
-        val note = Note(idNote, title, user.id, emptyList(), description, "", checkList)
-        databaseNotesRef.child(idNote).setValue(note)
-        listNotes as HashMap<String, Boolean>
-        listNotes.put(idNote, true)
-        listOfNotesItem.listNotes = listNotes
-        url.setValue(true)
-        _success.value = board
+            val note = Note(idNote, title, user.id, emptyList(), description, "", checkList)
+            databaseNotesRef.child(idNote).setValue(note)
+            listNotes as HashMap<String, Boolean>
+            listNotes.put(idNote, true)
+            listOfNotesItem.listNotes = listNotes
+            url.setValue(true)
+            updated = true
+            _success.postValue(board)
+        }
+
     }
 
     fun moveNote(note: Note, listOfNotesItem: ListOfNotesItem, board: Board, user: User) {
+        updated = true
         deleteNote(note, board, listOfNotesItem)
         createNewNote(note.title, note.description, board, listOfNotesItem, user, note.listOfTasks)
     }

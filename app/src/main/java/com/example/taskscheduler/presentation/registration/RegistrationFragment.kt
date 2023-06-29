@@ -110,21 +110,24 @@ class RegistrationFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[RegistrationViewModel::class.java]
         createDirectory()
-        binding.imageViewAvatar.setOnClickListener {
+        with(binding) {
+            imageViewAvatar.setOnClickListener {
 //            ChooseAvatarOptionFragment().newInstance().show(childFragmentManager, "ChooseAvatarDialog")
-            pickImageFromGallery()
-        }
-        binding.buttonSignUp.setOnClickListener {
-            val email = binding.editTextEmailAddressRegistration.text.toString().trim()
-            val password = binding.editTextPasswordRegistration.text.toString().trim()
-            val name = binding.editTextPersonName.text.toString().trim()
-            val lastName = binding.editTextPersonLastName.text.toString().trim()
-            if (email == "" || password == "" || name == "" || lastName == "") {
-                Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()
-            } else {
-                viewModel.signUp(email, password, name, lastName, uri)
+                pickImageFromGallery()
             }
+            buttonSignUp.setOnClickListener {
+                val email = editTextEmailAddressRegistration.text.toString().trim()
+                val password = editTextPasswordRegistration.text.toString().trim()
+                val name = editTextPersonName.text.toString().trim()
+                val lastName = editTextPersonLastName.text.toString().trim()
+                if (email == "" || password == "" || name == "" || lastName == "") {
+                    Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.signUp(email, password, name, lastName, uri)
+                    buttonSignUp.isClickable = false
+                }
 
+            }
         }
         observeViewModel()
 
@@ -136,6 +139,7 @@ class RegistrationFragment: Fragment() {
         })
         viewModel.success.observe(viewLifecycleOwner, Observer {
             if (it != null) {
+                Log.i("USER_FIREBASE", it.displayName.toString())
                 launchWelcomeFragment()
 //                launchBoardListFragment(viewModel.user.value)
             }
