@@ -92,7 +92,7 @@
             app:popUpTo="@id/welcomeFragment"
             app:popUpToInclusive="true" />
         <argument
-            android:name="userName"
-            app:argType="string" />
+            android:name="user"
+            app:argType="com.example.taskscheduler.domain.User" />
     </fragment>
 </navigation>

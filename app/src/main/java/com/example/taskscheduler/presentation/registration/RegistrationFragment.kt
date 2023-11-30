@@ -144,6 +144,12 @@ class RegistrationFragment: Fragment() {
 //                launchBoardListFragment(viewModel.user.value)
             }
         })
+        viewModel._userLive.observe(viewLifecycleOwner) {
+            if (it != null) {
+                user = it
+
+            }
+        }
         viewModel.user.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 user = it

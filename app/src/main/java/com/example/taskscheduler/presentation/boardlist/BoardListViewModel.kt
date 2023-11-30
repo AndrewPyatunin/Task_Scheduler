@@ -1,9 +1,9 @@
 package com.example.taskscheduler.presentation.boardlist
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
+import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.data.TaskDatabase
+import com.example.taskscheduler.data.TaskRepositoryImpl
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseUser
@@ -18,9 +18,43 @@ import kotlinx.coroutines.launch
 
 class BoardListViewModel(user: User) : ViewModel() {
     private val auth = Firebase.auth
+    private var taskDatabase: TaskDatabase? = null
     private val firebaseDatabase = Firebase.database
     private val databaseBoardsReference = firebaseDatabase.getReference("Boards")
     private val databaseUsersReference = firebaseDatabase.getReference("Users")
+
+    val repository = TaskRepositoryImpl()
+
+    private val _userLiveData by lazy {
+        repository.getUser(user.id)
+    }
+
+    private val _boardsLiveData by lazy {
+        repository.getBoards(user)
+    }
+    val boardsLiveData: LiveData<List<Board>> = _boardsLiveData
+    val userLiveData: LiveData<User> = _userLiveData
+
+
+    private val observer = Observer<List<Board>> {
+        _boardsLiveData.value = it
+    }
+    private val userObserver = Observer<User> {
+        _userLiveData.value = it
+    }
+
+    override fun onCleared() {
+        _boardsLiveData.removeObserver(observer)
+        _userLiveData.removeObserver(userObserver)
+        super.onCleared()
+    }
+
+    val _userData by lazy {
+        repository.getUserFlow(auth.currentUser?.uid ?: "").asLiveData()
+    }
+    val _boardData by lazy {
+        repository.getBoardsFlow().asLiveData()
+    }
 
     private val _firebaseUser = MutableLiveData<FirebaseUser>()
     val firebaseUser: LiveData<FirebaseUser>
@@ -40,6 +74,8 @@ class BoardListViewModel(user: User) : ViewModel() {
                 _firebaseUser.value = auth.currentUser
             }
         }
+        _userLiveData.observeForever(userObserver)
+        _boardsLiveData.observeForever(observer)
         auth.addAuthStateListener {
             if (it.currentUser != null) {
                 databaseBoardsReference.addValueEventListener(
@@ -65,6 +101,16 @@ class BoardListViewModel(user: User) : ViewModel() {
                         }
                     })
 
+            } else {
+                val user = taskDatabase?.taskDatabaseDao()?.getUser(MyDatabaseConnection.userId ?: 0)
+                val boards = taskDatabase?.taskDatabaseDao()?.getBoardsFlow() ?: emptyList()
+                val list = ArrayList<Board>()
+                for (board in boards) {
+                    if (board.id in (user?.boards ?: emptyList())) {
+                        list.add(board)
+                    }
+                }
+                _boardList.value = list
             }
         }
     }

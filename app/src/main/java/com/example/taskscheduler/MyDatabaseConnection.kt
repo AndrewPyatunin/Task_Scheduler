@@ -23,6 +23,7 @@ object MyDatabaseConnection : DatabaseConnection {
     var currentPosition = 0
     var list = emptyList<BackgroundImage>()
     var updated = true
+    var userId: String? = null
 //    override fun <T>queryUser(ref: DatabaseReference, liveData: LiveData<T>) {
 //        ref.addValueEventListener(object : ValueEventListener {
 //            override fun onDataChange(snapshot: DataSnapshot) {

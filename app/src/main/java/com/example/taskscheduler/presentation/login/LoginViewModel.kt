@@ -1,23 +1,21 @@
 package com.example.taskscheduler.presentation.login
 
-import android.util.Log
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.example.taskscheduler.domain.Board
+import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.data.TaskDatabase
+import com.example.taskscheduler.data.TaskRepositoryImpl
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel : AndroidViewModel(Application()) {
     private val auth: FirebaseAuth = Firebase.auth
+    private var taskDatabase: TaskDatabase? = null
+    private var user: User? = null
 //    private val firebaseDatabase = Firebase.database
 //    val databaseBoardsReference = firebaseDatabase.getReference("Boards")
 //    val databaseUsersReference = firebaseDatabase.getReference("Users")
@@ -27,17 +25,24 @@ class LoginViewModel : ViewModel() {
 //    val boardList: LiveData<ArrayList<Board>>
 //        get() = _boardList
 
-    private val _user = MutableLiveData<User>()
-    val user: LiveData<User>
-        get() = _user
+    private val _userLiveData = MutableLiveData<User>()
+    val userLiveData: LiveData<User>
+        get() = _userLiveData
 
-    private val _success = MutableLiveData<FirebaseUser>()
-    val success: LiveData<FirebaseUser>
+    private val repository by lazy {
+        TaskRepositoryImpl()
+    }
+
+    private val _success = MutableLiveData<User>()
+    val success: LiveData<User>
         get() = _success
     init {
+
+        taskDatabase = TaskDatabase.getInstance(getApplication())
         auth.addAuthStateListener {
+            //val userDb = taskDatabase?.taskDatabaseDao()?.getUser(it.currentUser?.email ?: "")
             if (it.currentUser != null) {
-                _success.value = it.currentUser
+                _success.value = user ?: User()
             }
         }
 
@@ -83,10 +88,14 @@ class LoginViewModel : ViewModel() {
         get() = _error
 
     fun login(email: String, password: String) {
+        user = taskDatabase?.taskDatabaseDao()?.getUser(email)
         auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
-
         }.addOnFailureListener {
             _error.value = it.message
+        }
+        if (password == user?.password) {
+            MyDatabaseConnection.userId = user?.id
+            _success.value = user ?: User()
         }
     }
 

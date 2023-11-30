@@ -21,6 +21,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
 class BoardListFragment: Fragment(), MenuProvider {
+
     private var _binding: FragmentBoardListBinding? = null
     private val binding: FragmentBoardListBinding
         get() = _binding ?: throw RuntimeException("FragmentBoardListBinding==null")
@@ -85,21 +86,8 @@ class BoardListFragment: Fragment(), MenuProvider {
     }
 
     private fun observeViewModel() {
-        viewModel.firebaseUser.observe(viewLifecycleOwner, Observer {
-            if (it == null) {
-                launchLoginFragment()
-            }
-        })
-        viewModel.boardList.observe(viewLifecycleOwner, Observer {
-            boardsAdapter.boards = it
-            with(binding) {
-                loadingIndicator.visibility = View.GONE
-                pleaseWaitTextView.visibility = View.GONE
-                recyclerViewBoardList.visibility = View.VISIBLE
-            }
-        })
-        viewModel.user.observe(viewLifecycleOwner, Observer {
-            if (it != null) {
+        viewModel._userData.observe(viewLifecycleOwner) {
+            if (it!=null) {
                 user = it
                 Glide.with(this).load(it.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)
                 with(binding.textViewWelcomeUser) {
@@ -108,7 +96,60 @@ class BoardListFragment: Fragment(), MenuProvider {
                     visibility = View.VISIBLE
                 }
             }
+
+        }
+        viewModel._boardData.observe(viewLifecycleOwner) {
+            boardsAdapter.boards = it
+            with(binding) {
+                loadingIndicator.visibility = View.GONE
+                pleaseWaitTextView.visibility = View.GONE
+                recyclerViewBoardList.visibility = View.VISIBLE
+            }
+
+        }
+        viewModel.userLiveData.observe(viewLifecycleOwner) {
+            if (it!=null) {
+                user = it
+                Glide.with(this).load(it.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)
+                with(binding.textViewWelcomeUser) {
+                    text =
+                        String.format(getString(R.string.welcome_user, user.name, user.lastName))
+                    visibility = View.VISIBLE
+                }
+            }
+        }
+        viewModel.boardsLiveData.observe(viewLifecycleOwner) {
+            boardsAdapter.boards = it
+            with(binding) {
+                loadingIndicator.visibility = View.GONE
+                pleaseWaitTextView.visibility = View.GONE
+                recyclerViewBoardList.visibility = View.VISIBLE
+            }
+        }
+        viewModel.firebaseUser.observe(viewLifecycleOwner, Observer {
+            if (it == null) {
+                launchLoginFragment()
+            }
         })
+//        viewModel.boardList.observe(viewLifecycleOwner, Observer {
+//            boardsAdapter.boards = it
+//            with(binding) {
+//                loadingIndicator.visibility = View.GONE
+//                pleaseWaitTextView.visibility = View.GONE
+//                recyclerViewBoardList.visibility = View.VISIBLE
+//            }
+//        })
+//        viewModel.user.observe(viewLifecycleOwner, Observer {
+//            if (it != null) {
+//                user = it
+//                Glide.with(this).load(it.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)
+//                with(binding.textViewWelcomeUser) {
+//                    text =
+//                        String.format(getString(R.string.welcome_user, user.name, user.lastName))
+//                    visibility = View.VISIBLE
+//                }
+//            }
+//        })
     }
 
     private fun initViews() {

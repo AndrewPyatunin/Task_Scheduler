@@ -10,8 +10,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.databinding.FragmentLoginBinding
+import com.example.taskscheduler.domain.Delegate
 import com.example.taskscheduler.domain.User
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -21,6 +21,7 @@ class LoginFragment : Fragment() {
     lateinit var user: User
     private var email = ""
     lateinit var viewModel: LoginViewModel
+    var someProperty by Delegate<String>()
 
 
     override fun onCreateView(
@@ -62,16 +63,16 @@ class LoginFragment : Fragment() {
         viewModel.success.observe(viewLifecycleOwner, Observer {
             if (it != null) {
 //                launchTabsFragment()
-                launchWelcomeFragment()
+                launchWelcomeFragment(it)
             }
         })
-        viewModel.user.observe(viewLifecycleOwner, Observer {
+        viewModel.userLiveData.observe(viewLifecycleOwner, Observer {
             user = it
         })
     }
 
-    private fun launchWelcomeFragment() {
-        findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToWelcomeFragment(auth.currentUser?.displayName.toString()))
+    private fun launchWelcomeFragment(user: User) {
+        findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToWelcomeFragment(user))
     }
 
     private fun launchRegistrationFragment() {

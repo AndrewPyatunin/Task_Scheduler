@@ -7,7 +7,8 @@ import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.taskscheduler.R
+import androidx.lifecycle.asLiveData
+import com.example.taskscheduler.data.TaskRepositoryImpl
 import com.example.taskscheduler.domain.User
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -21,6 +22,7 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
     private var urlToFile = ""
     val databaseUsersReference = firebaseDatabase.getReference("Users")
     private val storageReference = Firebase.storage.reference
+    private val repository = TaskRepositoryImpl()
 
     private val _success = MutableLiveData<FirebaseUser>()
     val success: LiveData<FirebaseUser>
@@ -34,12 +36,18 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
     val user: LiveData<User>
         get() = _user
 
+    lateinit var _userLive: LiveData<User>
+
     val auth = Firebase.auth
 
     init {
 
+
         auth.addAuthStateListener {
             if (it.currentUser == null) {
+
+            } else {
+                _userLive = repository.getUserFlow(it.currentUser?.uid ?: "").asLiveData()
 
             }
         }
@@ -58,7 +66,7 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
         }.addOnCompleteListener {
             Log.i("USER_URL", it.result.toString())
             if (it.isSuccessful) {
-                updateUserProfile(it.result, name)
+                updateUserAvatar(it.result, name)
                 urlToFile = it.result.toString()
                 callback.onUrlCallback(urlToFile)
             } else {
@@ -69,7 +77,7 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
 
     }
 
-    private fun updateUserProfile(uri: Uri, name: String) {
+    private fun updateUserAvatar(uri: Uri, name: String) {
         val user = auth.currentUser
         val profileUpdates = userProfileChangeRequest {
             photoUri = uri
@@ -99,6 +107,7 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
                 upLoadUserAvatar(uri, "$name $lastName", object : UrlCallback {
                     override fun onUrlCallback(url: String) {
                         val user = User(userId, name, lastName, email, true, emptyList(), url)
+                        repository.addUser(user)
                         databaseUsersReference.child(userId).setValue(user)
                         _user.value = user
 
