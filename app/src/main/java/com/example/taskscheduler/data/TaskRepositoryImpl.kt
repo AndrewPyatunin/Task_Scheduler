@@ -29,7 +29,7 @@ class TaskRepositoryImpl(
     private val mapperForListsOfNotesAndListsOfNotesDb: MapperForListsOfNotesAndListsOfNotesDb,
     private val mapperForInviteAndInviteDb: MapperForInviteAndInviteDb,
     private val mapperForUserAndUserForInvitesDb: MapperForUserAndUserForInvitesDb
-): TaskRepositoryRemote {
+): TaskRepository {
 
     private val auth = Firebase.auth
     private var taskDatabase: TaskDatabase? = null
@@ -46,7 +46,7 @@ class TaskRepositoryImpl(
     private val user = auth.currentUser
 
 
-    fun getUserFlow(user: User): Flow<User> {
+    override fun getUserFlow(user: User): Flow<User> {
         return localDataSource.getUser(user.id).map {
             mapperForUserAndUserDb.map(it)
         }
@@ -64,25 +64,25 @@ class TaskRepositoryImpl(
         }
     }
 
-    fun getNotesFlow(listOfNotesItemId: String): Flow<List<Note>> {
+    override fun getNotesFlow(listOfNotesItemId: String): Flow<List<Note>> {
         return localDataSource.getNotesFlow(listOfNotesItemId).map {
             mapperForNoteAndNoteDb.mapList(it)
         }
     }
 
-    fun getListsOfNotesFlow(board: Board): Flow<List<ListOfNotesItem>> {
+    override fun getListsOfNotesFlow(board: Board): Flow<List<ListOfNotesItem>> {
         return localDataSource.getListsOfNotesFlow(board.id).map {
             mapperForListsOfNotesAndListsOfNotesDb.mapList(it)
         }
     }
 
-    fun getInvitesFlow(): Flow<List<Invite>> {
+    override fun getInvitesFlow(): Flow<List<Invite>> {
         return localDataSource.getInvites().map {
             mapperForInviteAndInviteDb.mapList(it)
         }
     }
 
-    fun getUsersForInvitesFlow(): Flow<List<User>> {
+    override fun getUsersForInvitesFlow(): Flow<List<User>> {
         return localDataSource.getUsersForInvites().map {
             mapperForUserAndUserForInvitesDb.mapList(it)
         }
@@ -213,7 +213,7 @@ class TaskRepositoryImpl(
         TODO("Not yet implemented")
     }
 
-    override fun createNewBoard(name: String, user: User, urlBackground: String, board: Board) {
+    override fun createNewBoard(name: String, user: User, urlBackground: String, board: Board, scope: CoroutineScope) {
 //        val _boardLiveData = MutableLiveData<Board>()
 //        val _user = MutableLiveData<User>()
 //        val mediatorLiveData = MediatorLiveData<Pair<Board, User>>()
@@ -224,10 +224,10 @@ class TaskRepositoryImpl(
             val ref = databaseBoardsReference.child(board.id)
             ref.child("backgroundUrl").setValue(urlBackground)
             ref.child("title").setValue(name)
-            board.title = name
+            val boardDb = board.copy(title = name, backgroundUrl = urlBackground)
 //            addUser(user)
-            CoroutineScope(Dispatchers.IO).launch {
-                addBoard(board)
+            scope.launch {
+                addBoard(boardDb)
             }
 
 //            _user.value = user
@@ -286,12 +286,27 @@ class TaskRepositoryImpl(
 //        }
 //        return mediatorLiveData
     }
+    private val flowBoardUpdate = MutableSharedFlow<String>()
+    fun flowBoardUpdate() = flowBoardUpdate.asSharedFlow()
 
-    override fun updateBoard(board: Board, listOfNotesItemId: String) {
+    override fun updateBoard(board: Board, listOfNotesItemId: String, scope: CoroutineScope): Flow<String> {
         val listOfNotesIdsNew = board.listsOfNotesIds
         (listOfNotesIdsNew as ArrayList).remove(listOfNotesItemId)
-        databaseBoardsReference.child(board.id).child("listsOfNotesIds").setValue(listOfNotesIdsNew)
-        addBoard(board.copy(listsOfNotesIds = listOfNotesIdsNew))
+        databaseBoardsReference.child(board.id).child("listsOfNotesIds").setValue(listOfNotesIdsNew).addOnSuccessListener {
+            scope.launch {
+                flowBoardUpdate.emit("Update of data was successful")
+            }
+
+        }.addOnFailureListener {
+            it.message?.let { it1 ->
+                scope.launch {
+                    flowBoardUpdate.emit(it1)
+                }
+            }
+        }
+        scope.launch {
+            addBoard(board.copy(listsOfNotesIds = listOfNotesIdsNew))//Добавление в Room
+        }
     }
 
     override fun deleteBoard(board: Board, user: User) {
@@ -380,7 +395,9 @@ class TaskRepositoryImpl(
         return item
     }
 
-    override fun getNotes(listNotesIds: List<String>): LiveData<List<Note>> {
+    override fun getNotes(listNotesIds: List<String>): Flow<List<Note>> {
+        val flowNotes = MutableSharedFlow<List<Note>>()
+
         databaseNotesRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val listNotes = ArrayList<Note>()
@@ -389,16 +406,20 @@ class TaskRepositoryImpl(
                         val note = dataSnapshot.getValue(Note::class.java)
                         note?.let { listNotes.add(it) }
                         note?.let { addNote(it) }
+
                     }
                 }
-
-                _listNotesLiveData.value = listNotes
+                listNotes.let { CoroutineScope(Dispatchers.IO).launch {
+                    flowNotes.emit(it)
+                } }
+//                _listNotesLiveData.value = listNotes
             }
 
             override fun onCancelled(error: DatabaseError) {
             }
 
         })
+        return flowNotes.asSharedFlow()
     }
 
     override fun createNewNote(
@@ -436,7 +457,10 @@ class TaskRepositoryImpl(
 //        listNotes as HashMap<String, Boolean>
 //        listNotes.put(note.id, true)
         checkList.addAll(note.listOfTasks)
-        addNote(note)
+        CoroutineScope(Dispatchers.IO).launch {
+            addNote(note)
+        }
+
 //        _noteData.postValue(checkList)
     }
 
@@ -471,7 +495,7 @@ class TaskRepositoryImpl(
         auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
             val userId = it.user?.uid ?: return@addOnSuccessListener
             if (uri != null) {
-                uploadUserAvatar(uri, "$name $lastName", object : TaskRepositoryRemote.UrlCallback {
+                uploadUserAvatar(uri, "$name $lastName", object : TaskRepository.UrlCallback {
                     override fun onUrlCallback(url: String) {
                         val user = User(userId, name, lastName, email, true, emptyList(), url)
                         addUser(user)
@@ -519,7 +543,7 @@ class TaskRepositoryImpl(
     override fun uploadUserAvatar(
         uri: Uri,
         name: String,
-        callback: TaskRepositoryRemote.UrlCallback
+        callback: TaskRepository.UrlCallback
     ) {
         val imageRef = storageReference.child("images/${uri.lastPathSegment}")
         imageRef.putFile(uri).continueWithTask {
@@ -554,7 +578,7 @@ class TaskRepositoryImpl(
 
     override fun update(uri: Uri?, name: String) {
         if (uri != null) {
-            uploadUserAvatar(uri, name, object : TaskRepositoryRemote.UrlCallback {
+            uploadUserAvatar(uri, name, object : TaskRepository.UrlCallback {
                 override fun onUrlCallback(url: String) {
                     databaseUsersReference.child(user!!.uid).child("uri").setValue(url)
                     _uriLiveData.value = uri!!

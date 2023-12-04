@@ -6,8 +6,8 @@ class GetBoardsFlowUseCase(
     private val repository: TaskRepository
 ) {
 
-    fun execute(): Flow<List<Board>> {
-        repository.getBoards()
+    fun execute(user: User): Flow<List<Board>> {
+        repository.getBoards(user)
         return repository.getBoardsFlow()
     }
 }

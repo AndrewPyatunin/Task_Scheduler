@@ -4,8 +4,7 @@ import androidx.lifecycle.*
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.TaskDatabase
 import com.example.taskscheduler.data.TaskRepositoryImpl
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.*
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
@@ -14,16 +13,26 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
-class BoardListViewModel(user: User) : ViewModel() {
+class BoardListViewModel(
+    user: User,
+    private val getBoardsFlowUseCase: GetBoardsFlowUseCase
+) : ViewModel() {
     private val auth = Firebase.auth
     private var taskDatabase: TaskDatabase? = null
     private val firebaseDatabase = Firebase.database
     private val databaseBoardsReference = firebaseDatabase.getReference("Boards")
     private val databaseUsersReference = firebaseDatabase.getReference("Users")
+    lateinit var repository: TaskRepository
+    val getBoardsFlow = getBoardsFlowUseCase.execute(user).onEach {
 
-    val repository = TaskRepositoryImpl()
+    }.onStart {  }
+
+//    val repository = TaskRepositoryImpl()
+
 
     private val _userLiveData by lazy {
         repository.getUser(user.id)
@@ -50,7 +59,7 @@ class BoardListViewModel(user: User) : ViewModel() {
     }
 
     val _userData by lazy {
-        repository.getUserFlow(auth.currentUser?.uid ?: "").asLiveData()
+        repository.getUserFlow(user).asLiveData()
     }
     val _boardData by lazy {
         repository.getBoardsFlow().asLiveData()
