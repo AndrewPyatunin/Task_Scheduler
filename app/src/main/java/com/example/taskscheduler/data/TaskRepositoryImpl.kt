@@ -18,8 +18,8 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlin.coroutines.CoroutineContext
 
 class TaskRepositoryImpl(
     private val localDataSource: LocalDataSource,
@@ -46,8 +46,8 @@ class TaskRepositoryImpl(
     private val user = auth.currentUser
 
 
-    override fun getUserFlow(user: User): Flow<User> {
-        return localDataSource.getUser(user.id).map {
+    override fun getUserFlow(userId: String): Flow<User> {
+        return localDataSource.getUser(userId).map {
             mapperForUserAndUserDb.map(it)
         }
     }
@@ -159,25 +159,27 @@ class TaskRepositoryImpl(
         }
     }
 
-    override suspend fun getUser(userId: String, scope: CoroutineScope) {//должна быть suspend?
-
-        val userData = MutableLiveData<User>()
+    override fun getUser(userId: String) = callbackFlow<User> {//должна быть suspend?
         val queryForUser = databaseUsersReference.child(auth.currentUser?.uid ?: "")
-        queryForUser.addValueEventListener(object : ValueEventListener {
+        val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val userFromDb = snapshot.getValue(User::class.java)
-                userData.value = userFromDb as User
-
-                scope.async {
-                    addUser(userFromDb)
-                }
-               // _user.postValue(userFromDb as User)
+                val userFromDb = snapshot.getValue(User::class.java) as User
+                trySend(userFromDb)
+//                scope.async {
+//                    addUser(userFromDb)
+//                }
+                // _user.postValue(userFromDb as User)
             }
 
             override fun onCancelled(error: DatabaseError) {
-               // logout()
+                throw RuntimeException(error.message)
+                // logout()
             }
-        })
+        }
+        queryForUser.addValueEventListener(listener)
+        awaitClose {
+            queryForUser.removeEventListener(listener)
+        }
     }
 
     override suspend fun getUsersForInvites(currentUser: User, board: Board, scope: CoroutineScope) {

@@ -6,14 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.databinding.FragmentLoginBinding
 import com.example.taskscheduler.domain.Delegate
 import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.presentation.UserAuthState
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
     private val auth = Firebase.auth
@@ -57,17 +58,29 @@ class LoginFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+
+
         viewModel.error.observe(viewLifecycleOwner, Observer {
             if (it != null) Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
         })
         viewModel.success.observe(viewLifecycleOwner, Observer {
             if (it != null) {
 //                launchTabsFragment()
-                launchWelcomeFragment(it)
+                lifecycleScope.launch {
+                    repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                        viewModel.getUser(it.uid).collect { state ->
+                            when(state) {
+                                is UserAuthState.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                                UserAuthState.Loading -> {
+
+                                }
+                                is UserAuthState.Success -> launchWelcomeFragment(state.user)
+                            }
+
+                        }
+                    }
+                }
             }
-        })
-        viewModel.userLiveData.observe(viewLifecycleOwner, Observer {
-            user = it
         })
     }
 

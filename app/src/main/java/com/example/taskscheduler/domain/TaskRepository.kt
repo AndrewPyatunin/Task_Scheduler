@@ -4,10 +4,8 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlin.coroutines.CoroutineContext
 
 
 interface TaskRepository {
@@ -16,7 +14,7 @@ interface TaskRepository {
 
     fun getBoardsFlow(): Flow<List<Board>>
 
-    suspend fun getUser(userId: String, scope: CoroutineScope)
+    fun getUser(userId: String): Flow<User>
 
     suspend fun getUsersForInvites(currentUser: User, board: Board, scope: CoroutineScope)
 
@@ -24,7 +22,13 @@ interface TaskRepository {
 
     fun addUser(user: User)
 
-    fun createNewBoard(name: String, user: User, urlBackground: String, board: Board, scope: CoroutineScope)
+    fun createNewBoard(
+        name: String,
+        user: User,
+        urlBackground: String,
+        board: Board,
+        scope: CoroutineScope
+    )
 
     fun updateBoard(board: Board, listOfNotesItemId: String, scope: CoroutineScope): Flow<String>
 
@@ -59,11 +63,20 @@ interface TaskRepository {
     fun addBoard(board: Board)
 
     fun getListsOfNotesFlow(board: Board): Flow<List<ListOfNotesItem>>
+
     fun getInvitesFlow(): Flow<List<Invite>>
-    fun getUserFlow(user: User): Flow<User>
+
+    fun getUserFlow(userId: String): Flow<User>
+
     fun getUsersForInvitesFlow(): Flow<List<User>>
 
-    fun signUp(email: String, password: String, name: String, lastName: String, uri: Uri?): LiveData<User>
+    fun signUp(
+        email: String,
+        password: String,
+        name: String,
+        lastName: String,
+        uri: Uri?
+    ): LiveData<User>
 
     fun updateUserAvatar(uri: Uri, name: String): LiveData<FirebaseUser>
 
@@ -95,7 +108,10 @@ interface TaskRepository {
     }
 
     fun addUserForInvites(user: User)
+
     fun addListOfNote(listOfNotesItem: ListOfNotesItem)
+
     fun addNote(note: Note)
+
     fun addInvite(invite: Invite)
 }

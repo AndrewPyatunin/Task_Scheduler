@@ -31,7 +31,7 @@ class WelcomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentWelcomeBinding.inflate(inflater, container, false)
-        firebaseUser = Firebase.auth.currentUser!!
+//        firebaseUser = Firebase.auth.currentUser!!
         val user = args.user
         name = "${user.name} ${user.lastName}"
         viewModel = ViewModelProvider(this)[WelcomeViewModel::class.java]

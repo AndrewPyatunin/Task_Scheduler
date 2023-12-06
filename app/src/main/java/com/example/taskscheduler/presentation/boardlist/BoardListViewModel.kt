@@ -3,7 +3,6 @@ package com.example.taskscheduler.presentation.boardlist
 import androidx.lifecycle.*
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.TaskDatabase
-import com.example.taskscheduler.data.TaskRepositoryImpl
 import com.example.taskscheduler.domain.*
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
