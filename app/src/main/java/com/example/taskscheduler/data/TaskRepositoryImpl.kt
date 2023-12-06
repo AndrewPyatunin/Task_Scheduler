@@ -88,11 +88,11 @@ class TaskRepositoryImpl(
         }
     }
 
-    private fun addUser(user: User) {
+    override fun addUser(user: User) {
         localDataSource.addUser(mapperForUserAndUserDb.mapToDb(user))
     }
 
-    private fun addUserForInvites(user: User) {
+    override fun addUserForInvites(user: User) {
         localDataSource.addUserForInvites(mapperForUserAndUserForInvitesDb.mapToUserInvitesDb(user))
     }
 
@@ -100,15 +100,15 @@ class TaskRepositoryImpl(
         localDataSource.addBoard(mapperForBoardAndBoardDb.mapToDb(board))
     }
 
-    private fun addListOfNote(listOfNotesItem: ListOfNotesItem) {
+    override fun addListOfNote(listOfNotesItem: ListOfNotesItem) {
         localDataSource.addListOfNotes(mapperForListsOfNotesAndListsOfNotesDb.mapToDb(listOfNotesItem))
     }
 
-    private fun addNote(note: Note) {
+    override fun addNote(note: Note) {
         localDataSource.addNote(mapperForNoteAndNoteDb.mapToDb(note))
     }
 
-    private fun addInvite(invite: Invite) {
+    override fun addInvite(invite: Invite) {
         localDataSource.addInvite(mapperForInviteAndInviteDb.mapToDb(invite))
     }
 

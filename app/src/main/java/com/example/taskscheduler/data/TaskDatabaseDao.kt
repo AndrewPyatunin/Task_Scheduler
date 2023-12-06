@@ -28,6 +28,9 @@ interface TaskDatabaseDao {
     @Query("SELECT * FROM users WHERE id = :id")
     fun getUser(id: String): Flow<UserDb>
 
+    @Query("SELECT * FROM users")
+    fun getUsersFlow(): Flow<UserDb>
+
     @Query("SELECT * FROM usersForInvites")
     fun getUsersForInvites(): Flow<List<UserForInvitesDb>>
 

@@ -1,8 +1,10 @@
 package com.example.taskscheduler.domain
 
-class AddUserUseCase {
+class AddUserUseCase(
+    private val repository: TaskRepository
+) {
 
-    fun execute() {
-
+    fun execute(user: User) {
+        repository.addUser(user)
     }
 }

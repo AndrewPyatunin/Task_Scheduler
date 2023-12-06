@@ -13,6 +13,9 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -121,6 +124,26 @@ class BoardListViewModel(
                 }
                 _boardList.value = list
             }
+        }
+    }
+
+    fun method(): Flow<String> = callbackFlow {
+        val queryForUser = databaseUsersReference.child(auth.currentUser?.uid ?: "")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val userFromDb = snapshot.getValue(User::class.java)
+                _user.postValue(userFromDb as User)
+                trySend(userFromDb.name)
+//                callback.onCallback(userFromDb)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                logout()
+            }
+        }
+        queryForUser.addValueEventListener(listener)
+        awaitClose {
+            queryForUser.removeEventListener(listener)
         }
     }
 

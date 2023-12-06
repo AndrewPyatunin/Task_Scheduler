@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.TaskDatabase
 import com.example.taskscheduler.data.TaskRepositoryImpl
@@ -12,7 +13,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
-class LoginViewModel : AndroidViewModel(Application()) {
+class LoginViewModel(
+
+) : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
     private var taskDatabase: TaskDatabase? = null
     private var user: User? = null
@@ -42,6 +45,7 @@ class LoginViewModel : AndroidViewModel(Application()) {
         auth.addAuthStateListener {
             //val userDb = taskDatabase?.taskDatabaseDao()?.getUser(it.currentUser?.email ?: "")
             if (it.currentUser != null) {
+
                 _success.value = user ?: User()
             }
         }

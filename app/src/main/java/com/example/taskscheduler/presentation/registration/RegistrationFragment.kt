@@ -15,24 +15,37 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
+import com.example.taskscheduler.ChooseAvatarOptionFragment
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentRegistrationBinding
 import com.example.taskscheduler.domain.User
 import com.example.taskscheduler.presentation.TakePhotoActivity
+import com.example.taskscheduler.presentation.UserAuthState
+import com.example.taskscheduler.presentation.ViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 import java.io.File
 
 
-class RegistrationFragment: Fragment() {
+class RegistrationFragment : Fragment() {
     lateinit var directory: File
     private lateinit var auth: FirebaseAuth
     private lateinit var binding: FragmentRegistrationBinding
-    private lateinit var viewModel: RegistrationViewModel
+
+    //    private lateinit var viewModel: RegistrationViewModel
     private lateinit var user: User
     private var uri: Uri? = null
+
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val viewModel by lazy {
+        ViewModelProvider(
+            this,
+            viewModelFactory
+        )[RegistrationViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,9 +89,9 @@ class RegistrationFragment: Fragment() {
     }
 
     private fun generateFileUri(): Uri? {
-        var file: File? = null
+//        var file: File? = null
 
-        file = File(
+        val file = File(
             directory.path + "/" + "photo_"
                     + System.currentTimeMillis() + ".jpg"
         )
@@ -108,23 +121,48 @@ class RegistrationFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[RegistrationViewModel::class.java]
+//        viewModel = ViewModelProvider(this)[RegistrationViewModel::class.java]
         createDirectory()
         with(binding) {
             imageViewAvatar.setOnClickListener {
-//            ChooseAvatarOptionFragment().newInstance().show(childFragmentManager, "ChooseAvatarDialog")
-                pickImageFromGallery()
-            }
-            buttonSignUp.setOnClickListener {
+            ChooseAvatarOptionFragment().newInstance().show(childFragmentManager, "ChooseAvatarDialog")
+//                pickImageFromGallery()
                 val email = editTextEmailAddressRegistration.text.toString().trim()
                 val password = editTextPasswordRegistration.text.toString().trim()
                 val name = editTextPersonName.text.toString().trim()
                 val lastName = editTextPersonLastName.text.toString().trim()
                 if (email == "" || password == "" || name == "" || lastName == "") {
-                    Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
-                    viewModel.signUp(email, password, name, lastName, uri)
-                    buttonSignUp.isClickable = false
+                    buttonSignUp.isEnabled = false
+                    lifecycleScope.launch {
+                        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                            viewModel.signUp(email, password, name, lastName, uri).collect {
+                                when (it) {
+                                    is UserAuthState.Error -> Toast.makeText(
+                                        this@RegistrationFragment.requireContext(),
+                                        it.message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    UserAuthState.Loading -> {
+                                    }
+                                    is UserAuthState.Success -> {
+                                        user = it.user
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Регистрация пользователя ${user.name} ${user.lastName} прошла успешно!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        launchWelcomeFragment(user)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+
                 }
 
             }
@@ -134,35 +172,25 @@ class RegistrationFragment: Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.error.observe(viewLifecycleOwner, Observer {
-            if (it != null) Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-        })
-        viewModel.success.observe(viewLifecycleOwner, Observer {
-            if (it != null) {
-                Log.i("USER_FIREBASE", it.displayName.toString())
-                launchWelcomeFragment()
-//                launchBoardListFragment(viewModel.user.value)
-            }
-        })
-        viewModel._userLive.observe(viewLifecycleOwner) {
-            if (it != null) {
-                user = it
 
-            }
-        }
-        viewModel.user.observe(viewLifecycleOwner, Observer {
-            if (it != null) {
-                user = it
-//                launchBoardListFragment(it)
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+//                viewModel.flowToast.collect {
+//                    Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//
+//        }
 
-            }
-
-        })
     }
 
-    private fun launchWelcomeFragment() {
+    private fun launchWelcomeFragment(user: User) {
         val userName = String.format(getString(R.string.full_name), user.name, user.lastName)
-        findNavController().navigate(RegistrationFragmentDirections.actionRegistrationFragmentToWelcomeFragment(userName))
+        findNavController().navigate(
+            RegistrationFragmentDirections.actionRegistrationFragmentToWelcomeFragment(
+                user
+            )
+        )
     }
 
     private fun launchBoardListFragment(user: User) {

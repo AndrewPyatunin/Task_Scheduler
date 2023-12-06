@@ -1,128 +1,43 @@
 package com.example.taskscheduler.presentation.registration
 
-import android.app.Application
 import android.net.Uri
-import android.util.Log
-import android.widget.Toast
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asLiveData
-import com.example.taskscheduler.data.TaskRepositoryImpl
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.taskscheduler.domain.AddUserUseCase
+import com.example.taskscheduler.domain.RegistrationUseCase
 import com.example.taskscheduler.domain.User
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.auth.ktx.userProfileChangeRequest
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
+import com.example.taskscheduler.presentation.UserAuthState
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import javax.inject.Inject
 
-class RegistrationViewModel(application: Application) : AndroidViewModel(application) {
-    private val firebaseDatabase = Firebase.database
-    private var urlToFile = ""
-    val databaseUsersReference = firebaseDatabase.getReference("Users")
-    private val storageReference = Firebase.storage.reference
-    private val repository = TaskRepositoryImpl()
+class RegistrationViewModel @Inject constructor(
+    private val registrationUseCase: RegistrationUseCase,
+    private val addUserUseCase: AddUserUseCase,
+    private val auth: FirebaseAuth
+) : ViewModel() {
 
-    private val _success = MutableLiveData<FirebaseUser>()
-    val success: LiveData<FirebaseUser>
-        get() = _success
-
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String>
-        get() = _error
-
-    private val _user = MutableLiveData<User>()
-    val user: LiveData<User>
-        get() = _user
-
-    lateinit var _userLive: LiveData<User>
-
-    val auth = Firebase.auth
-
-    init {
+    private fun addUserToRoom(user: User) = addUserUseCase.execute(user)
 
 
+    fun signUp(email: String, password: String, name: String, lastName: String, uri: Uri?): Flow<UserAuthState> {
         auth.addAuthStateListener {
-            if (it.currentUser == null) {
-
-            } else {
-                _userLive = repository.getUserFlow(it.currentUser?.uid ?: "").asLiveData()
-
-            }
+            if (it.currentUser == null) return@addAuthStateListener
         }
-    }
-
-    private fun upLoadUserAvatar(uri: Uri, name: String, callback: UrlCallback) {
-//        val imageStorage = storageReference.child("images")
-        val imageRef = storageReference.child("images/${uri.lastPathSegment}")
-        imageRef.putFile(uri).continueWithTask {
-            if (!it.isSuccessful) {
-                it.exception?.let { exception ->
-                    throw exception
-                }
-            }
-            imageRef.downloadUrl
-        }.addOnCompleteListener {
-            Log.i("USER_URL", it.result.toString())
-            if (it.isSuccessful) {
-                updateUserAvatar(it.result, name)
-                urlToFile = it.result.toString()
-                callback.onUrlCallback(urlToFile)
-            } else {
-                Toast.makeText(getApplication(), "${it.result}", Toast.LENGTH_SHORT).show()
+        return registrationUseCase.execute(email, password, name, lastName, uri, viewModelScope).map {
+            addUserToRoom(it)
+            UserAuthState.Success(it) as UserAuthState
+        }.onStart {
+            emit(UserAuthState.Loading)
+        }.catch {
+            it.message?.let { message ->
+                emit(UserAuthState.Error(message))
             }
         }
 
-
     }
 
-    private fun updateUserAvatar(uri: Uri, name: String) {
-        val user = auth.currentUser
-        val profileUpdates = userProfileChangeRequest {
-            photoUri = uri
-            displayName = name
-        }
-
-
-        user?.updateProfile(profileUpdates)
-            ?.addOnCompleteListener {
-                if (it.isSuccessful) {
-                    Toast.makeText(
-                        getApplication(),
-                        "Обновление данных пользователя прошло успешно",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    Log.i("USER_FIREBASE_SUCCESS", auth.currentUser.toString())
-                    _success.value = auth.currentUser
-                }
-            }
-    }
-
-
-    fun signUp(email: String, password: String, name: String, lastName: String, uri: Uri?) {
-        auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-            val userId = it.user?.uid ?: return@addOnSuccessListener
-            if (uri != null) {
-                upLoadUserAvatar(uri, "$name $lastName", object : UrlCallback {
-                    override fun onUrlCallback(url: String) {
-                        val user = User(userId, name, lastName, email, true, emptyList(), url)
-                        repository.addUser(user)
-                        databaseUsersReference.child(userId).setValue(user)
-                        _user.value = user
-
-                    }
-
-                })
-
-            }
-
-        }.addOnFailureListener {
-            _error.value = it.message
-        }
-    }
-
-    interface UrlCallback {
-        fun onUrlCallback(url: String)
-    }
 }

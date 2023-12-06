@@ -37,6 +37,8 @@ class LocalDataSourceImpl(
         return taskDatabaseDao.getInvitesFlow()
     }
 
+    override fun getUsersFlow(): Flow<List<>>
+
     override fun getUsersForInvites(): Flow<List<UserForInvitesDb>> {
         return taskDatabaseDao.getUsersForInvites()
     }

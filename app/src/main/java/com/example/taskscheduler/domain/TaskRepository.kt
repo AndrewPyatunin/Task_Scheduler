@@ -22,6 +22,8 @@ interface TaskRepository {
 
     fun getBoard()
 
+    fun addUser(user: User)
+
     fun createNewBoard(name: String, user: User, urlBackground: String, board: Board, scope: CoroutineScope)
 
     fun updateBoard(board: Board, listOfNotesItemId: String, scope: CoroutineScope): Flow<String>
@@ -91,4 +93,9 @@ interface TaskRepository {
     interface UrlCallback {
         fun onUrlCallback(url: String)
     }
+
+    fun addUserForInvites(user: User)
+    fun addListOfNote(listOfNotesItem: ListOfNotesItem)
+    fun addNote(note: Note)
+    fun addInvite(invite: Invite)
 }
