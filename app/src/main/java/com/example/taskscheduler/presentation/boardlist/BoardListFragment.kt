@@ -5,20 +5,23 @@ import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.taskscheduler.*
+import com.example.taskscheduler.BoardListAdapter
+import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentBoardListBinding
 import com.example.taskscheduler.domain.Board
 import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.findTopNavController
+import com.example.taskscheduler.presentation.ViewModelFactory
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class BoardListFragment: Fragment(), MenuProvider {
 
@@ -28,13 +31,13 @@ class BoardListFragment: Fragment(), MenuProvider {
     private lateinit var userId: String
     lateinit var user: User
     var boardList = ArrayList<Board>()
-    private lateinit var viewModel: BoardListViewModel
-    private lateinit var viewModelFactory: BoardListViewModelFactory
+    @Inject
+    private lateinit var viewModelFactory: ViewModelFactory
     lateinit var recyclerViewBoardList: RecyclerView
     lateinit var boardsAdapter: BoardListAdapter
     private val databaseImageUrlsReference = Firebase.database.getReference("ImageUrls")
 //    private val args by navArgs<BoardListFragmentArgs>()
-
+    private val viewModel by lazy { ViewModelProvider(this, viewModelFactory)[BoardListViewModel::class.java] }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        parseArgs()
@@ -52,26 +55,13 @@ class BoardListFragment: Fragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        viewModelFactory = BoardListViewModelFactory(User())
-        viewModel = ViewModelProvider(this, viewModelFactory)[BoardListViewModel::class.java]
         observeViewModel()
         initViews()
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-//        user = viewModel.user.value ?: User()
-//        Log.i("USER_URL_LIST", user.uri)
-
-//        Glide.with(this).load(user.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)
-//        binding.buttonInvites.setOnClickListener {
-////            Log.i("USER_TO_INVITE", user.name)
-//            launchMyInvitesFragment(user)
-//        }
 
         binding.imageViewAddNewBoard.setOnClickListener {
             launchNewBoardFragment(user)
-//            Log.i("USER_BOARD_LIST", viewModel.user.value.toString())
-//            viewModel.user.value?.let { it1 -> launchNewBoardFragment(it1) }
         }
         boardsAdapter.onItemClick = {
             launchBoardFragment(it)
@@ -86,70 +76,33 @@ class BoardListFragment: Fragment(), MenuProvider {
     }
 
     private fun observeViewModel() {
-        viewModel._userData.observe(viewLifecycleOwner) {
-            if (it!=null) {
-                user = it
-                Glide.with(this).load(it.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)
-                with(binding.textViewWelcomeUser) {
-                    text =
-                        String.format(getString(R.string.welcome_user, user.name, user.lastName))
-                    visibility = View.VISIBLE
-                }
-            }
-
-        }
-        viewModel._boardData.observe(viewLifecycleOwner) {
-            boardsAdapter.boards = it
-            with(binding) {
-                loadingIndicator.visibility = View.GONE
-                pleaseWaitTextView.visibility = View.GONE
-                recyclerViewBoardList.visibility = View.VISIBLE
-            }
-
-        }
-        viewModel.userLiveData.observe(viewLifecycleOwner) {
-            if (it!=null) {
-                user = it
-                Glide.with(this).load(it.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)
-                with(binding.textViewWelcomeUser) {
-                    text =
-                        String.format(getString(R.string.welcome_user, user.name, user.lastName))
-                    visibility = View.VISIBLE
-                }
-            }
-        }
-        viewModel.boardsLiveData.observe(viewLifecycleOwner) {
-            boardsAdapter.boards = it
-            with(binding) {
-                loadingIndicator.visibility = View.GONE
-                pleaseWaitTextView.visibility = View.GONE
-                recyclerViewBoardList.visibility = View.VISIBLE
-            }
-        }
         viewModel.firebaseUser.observe(viewLifecycleOwner, Observer {
             if (it == null) {
                 launchLoginFragment()
             }
         })
-//        viewModel.boardList.observe(viewLifecycleOwner, Observer {
-//            boardsAdapter.boards = it
-//            with(binding) {
-//                loadingIndicator.visibility = View.GONE
-//                pleaseWaitTextView.visibility = View.GONE
-//                recyclerViewBoardList.visibility = View.VISIBLE
-//            }
-//        })
-//        viewModel.user.observe(viewLifecycleOwner, Observer {
-//            if (it != null) {
-//                user = it
-//                Glide.with(this).load(it.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)
-//                with(binding.textViewWelcomeUser) {
-//                    text =
-//                        String.format(getString(R.string.welcome_user, user.name, user.lastName))
-//                    visibility = View.VISIBLE
-//                }
-//            }
-//        })
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.userFlow?.collect {
+                    user = it
+                    Glide.with(this@BoardListFragment).load(it.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)
+                    with(binding.textViewWelcomeUser) {
+                        text =
+                            String.format(getString(R.string.welcome_user, user.name, user.lastName))
+                        visibility = View.VISIBLE
+                    }
+                    viewModel.getBoardsFlow(it).collect { list ->
+                        boardsAdapter.boards = list
+                        with(binding) {
+                            loadingIndicator.visibility = View.GONE
+                            pleaseWaitTextView.visibility = View.GONE
+                            recyclerViewBoardList.visibility = View.VISIBLE
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
     private fun initViews() {

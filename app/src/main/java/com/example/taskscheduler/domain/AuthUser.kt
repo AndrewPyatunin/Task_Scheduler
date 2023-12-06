@@ -15,6 +15,4 @@ interface AuthUser {
         uri: Uri?,
         scope: CoroutineScope
     ): Flow<User>
-
-    fun flowRegistrToast(): SharedFlow<String>
 }

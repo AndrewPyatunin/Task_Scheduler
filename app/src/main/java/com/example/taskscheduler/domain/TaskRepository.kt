@@ -12,7 +12,9 @@ interface TaskRepository {
 
     fun getBoards(user: User)
 
-    fun getBoardsFlow(): Flow<List<Board>>
+    fun getBoardsFlow(user: User): Flow<List<Board>>
+
+    fun getBoardsFlowFromRoom(): Flow<List<Board>>
 
     fun getUser(userId: String): Flow<User>
 

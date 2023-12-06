@@ -28,7 +28,7 @@ class TaskRepositoryImpl(
     private val mapperForNoteAndNoteDb: MapperForNoteAndNoteDb,
     private val mapperForListsOfNotesAndListsOfNotesDb: MapperForListsOfNotesAndListsOfNotesDb,
     private val mapperForInviteAndInviteDb: MapperForInviteAndInviteDb,
-    private val mapperForUserAndUserForInvitesDb: MapperForUserAndUserForInvitesDb
+    private val mapperForUserAndUserForInvitesDb: MapperForUserAndUserForInvitesDb,
 ): TaskRepository {
 
     private val auth = Firebase.auth
@@ -58,7 +58,7 @@ class TaskRepositoryImpl(
         }
     }
 
-    override fun getBoardsFlow(): Flow<List<Board>> {
+    override fun getBoardsFlowFromRoom(): Flow<List<Board>> {
         return localDataSource.getBoardsFlow().map {
             mapperForBoardAndBoardDb.listMap(it)
         }
@@ -116,28 +116,26 @@ class TaskRepositoryImpl(
     val flowBoards: SharedFlow<Board> = _flowBoards.asSharedFlow()
 
     override fun getBoards(user: User) {
-        val boardsData = MutableLiveData<List<Board>>()
 
         //сущность из персистант вебсокет клин архитекче веб сокет
         auth.addAuthStateListener {
-            if (it.currentUser != null) {
-                databaseBoardsReference.addValueEventListener(
-                    object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val boardsFromRoomDb = getBoards()
-                            val boardsId = user.boards
-                            val boardsFromDb = ArrayList<Board>()
-                            for (dataSnapshot in snapshot.children) {
-                                val board = dataSnapshot.getValue(Board::class.java)
-                                if (board != null && dataSnapshot.key in boardsId && board !in boardsFromRoomDb) {
+            val listener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val boardsFromRoomDb = getBoards()
+                    val boardsId = user.boards
+                    val boardsFromDb = ArrayList<Board>()
+                    for (dataSnapshot in snapshot.children) {
+                        val board = dataSnapshot.getValue(Board::class.java)
+                        if (board != null && dataSnapshot.key in boardsId && board !in boardsFromRoomDb) {
 //                                    boardsFromDb.add(board)
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        _flowBoards.emit(board)
-                                        addBoard(board)//Добавление в room
-                                    }
 
-                                }
+                            CoroutineScope(Dispatchers.IO).launch {
+                                _flowBoards.emit(board)
+                                addBoard(board)//Добавление в room
                             }
+
+                        }
+                    }
 
 //                            for (boardDb in boardsFromDb) {
 //                                if (boardDb !in boardsFromRoomDb)
@@ -145,13 +143,15 @@ class TaskRepositoryImpl(
 //                            }
 //                            boardsData.value = boardsFromDb
 
-                        }
+                }
 
-                        override fun onCancelled(error: DatabaseError) {
+                override fun onCancelled(error: DatabaseError) {
 
-                           // logout()
-                        }
-                    })
+                    // logout()
+                }
+            }
+            if (it.currentUser != null) {
+                databaseBoardsReference.addValueEventListener(listener)
 
             } else {
                 getBoards()
@@ -159,7 +159,47 @@ class TaskRepositoryImpl(
         }
     }
 
-    override fun getUser(userId: String) = callbackFlow<User> {//должна быть suspend?
+    override fun getBoardsFlow(user: User): Flow<List<Board>> = callbackFlow {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val boardsFromRoomDb = getBoards()
+                val boardsId = user.boards
+                val boardsFromDb = ArrayList<Board>()
+                for (dataSnapshot in snapshot.children) {
+                    val board = dataSnapshot.getValue(Board::class.java)
+                    if (board != null && dataSnapshot.key in boardsId && board !in boardsFromRoomDb) {
+                        boardsFromDb.add(board)
+
+                    }
+                }
+                trySend(boardsFromDb as List<Board>)
+
+//                            for (boardDb in boardsFromDb) {
+//                                if (boardDb !in boardsFromRoomDb)
+//                                    addBoard(boardDb)
+//                            }
+//                            boardsData.value = boardsFromDb
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                throw RuntimeException(error.message)
+                // logout()
+            }
+        }
+        auth.addAuthStateListener {
+            if (it.currentUser != null) {
+                databaseBoardsReference.addValueEventListener(listener)
+            } else {
+                getBoards()
+            }
+        }
+        awaitClose {
+            databaseUsersReference.removeEventListener(listener)
+        }
+    }
+
+    override fun getUser(userId: String) = callbackFlow<User> {
         val queryForUser = databaseUsersReference.child(auth.currentUser?.uid ?: "")
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

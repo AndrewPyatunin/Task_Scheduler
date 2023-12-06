@@ -4,6 +4,9 @@ import android.net.Uri
 import android.util.Log
 import com.example.taskscheduler.domain.AuthUser
 import com.example.taskscheduler.domain.User
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.database.DatabaseReference
@@ -13,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.lang.Exception
 import javax.inject.Inject
 
 class AuthenticationOfUser @Inject constructor(
@@ -27,15 +31,6 @@ class AuthenticationOfUser @Inject constructor(
         fun onUrlCallback(url: String)
     }
 
-    private var _userFlow = MutableSharedFlow<User>()
-    val userFlow = _userFlow.asSharedFlow()
-
-    fun flowOf(): Flow<User> = userFlow
-
-    private val flowToast = MutableSharedFlow<String>()
-
-    override fun flowRegistrToast() = flowToast.asSharedFlow()
-
     override fun signUp(
         email: String,
         password: String,
@@ -47,34 +42,36 @@ class AuthenticationOfUser @Inject constructor(
 //        scope.launch {
 //            flowUserAuth.emit(UserAuthState.Loading)
 //        }
-
-        val value = auth.createUserWithEmailAndPassword(email, password)
-        auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-            val userId = it.user?.uid ?: return@addOnSuccessListener
-            if (uri != null) {
-                uploadUserAvatar(uri, "$name $lastName", scope, object : UrlCallback {
-                    override fun onUrlCallback(url: String) {
-                        val user = User(userId, name, lastName, email, true, emptyList(), url)
-                        databaseUsersReference.child(userId).setValue(user)
-                        trySend(user)
+        val successListener = object : OnSuccessListener<AuthResult> {
+            override fun onSuccess(p0: AuthResult?) {
+                val userId = p0?.user?.uid ?: return
+                if (uri != null) {
+                    uploadUserAvatar(uri, "$name $lastName", scope, object : UrlCallback {
+                        override fun onUrlCallback(url: String) {
+                            val user = User(userId, name, lastName, email, true, emptyList(), url)
+                            databaseUsersReference.child(userId).setValue(user)
+                            trySend(user)
 //                        _user.value = user
-                        scope.launch {
-                            localDataSource.addUser(mapperForUserAndUserDb.mapToDb(user))
+                            scope.launch {
+                                localDataSource.addUser(mapperForUserAndUserDb.mapToDb(user))
 //                            _userFlow.emit(user)
 //                            flowUserAuth.emit()
+                            }
                         }
-                    }
-                })
+                    })
+                }
+
+            }
+        }
+        val failureListener = object : OnFailureListener {
+            override fun onFailure(p0: Exception) {
+                throw RuntimeException(p0.message?: "Неизвестная ошибка!")
             }
 
-        }.addOnFailureListener {
-//            scope.launch {
-////                _toastFlow.emit(it.message!!)
-//                flowToast.emit(it.message ?: "Неизвестная ошибка!")
-//            }
-            throw RuntimeException(it.message ?: "Неизвестная ошибка!")
-//            _error.value = it.message
         }
+        val creationTask = auth.createUserWithEmailAndPassword(email, password)
+        creationTask.addOnSuccessListener(successListener)
+            .addOnFailureListener(failureListener)
         awaitClose {
         }
     }
@@ -111,13 +108,6 @@ class AuthenticationOfUser @Inject constructor(
     }
 
 
-    private var _toastFlow = MutableSharedFlow<String>()
-    val toastFlow = _toastFlow.asSharedFlow()
-
-    fun updateData(scope: CoroutineScope) = scope.launch(Dispatchers.Main) {
-        _toastFlow.emit("Обновление данных произошло успешно")
-    }
-
     private fun uploadUserAvatar(
         uri: Uri,
         name: String,
@@ -153,9 +143,6 @@ class AuthenticationOfUser @Inject constructor(
         auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
 
         }.addOnFailureListener {
-            scope.launch {
-                _toastFlow.emit(it.message!!)
-            }
 
 //            _error.value = it.message
         }

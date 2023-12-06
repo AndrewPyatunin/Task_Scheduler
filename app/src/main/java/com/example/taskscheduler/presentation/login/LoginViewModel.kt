@@ -22,17 +22,18 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val dao: TaskDatabaseDao,
     private val getUserFlowUseCase: GetUserFlowUseCase,
-    private val addUserUseCase: AddUserUseCase
+    private val addUserUseCase: AddUserUseCase,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
-    private val auth: FirebaseAuth = Firebase.auth
-    private var taskDatabase: TaskDatabase? = null
-    private var user: User? = null
 
-
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String>
+        get() = _error
 
     private val _success = MutableLiveData<FirebaseUser>()
     val success: LiveData<FirebaseUser>
         get() = _success
+
     init {
 
         auth.addAuthStateListener {
@@ -55,11 +56,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-
-
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String>
-        get() = _error
 
     fun login(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
