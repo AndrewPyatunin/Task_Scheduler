@@ -2,6 +2,7 @@ package com.example.taskscheduler.domain
 
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DiffUtil
+import com.example.taskscheduler.domain.models.*
 
 class DiffCallback<T>(
     private val oldList: List<T>,

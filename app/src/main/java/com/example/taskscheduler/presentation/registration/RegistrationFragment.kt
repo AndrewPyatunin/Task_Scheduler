@@ -20,7 +20,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.ChooseAvatarOptionFragment
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentRegistrationBinding
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.TakePhotoActivity
 import com.example.taskscheduler.presentation.UserAuthState
 import com.example.taskscheduler.presentation.ViewModelFactory

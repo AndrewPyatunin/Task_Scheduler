@@ -14,8 +14,8 @@ import com.bumptech.glide.Glide
 import com.example.taskscheduler.BoardListAdapter
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentBoardListBinding
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
 import com.example.taskscheduler.presentation.ViewModelFactory
 import com.google.firebase.database.ktx.database

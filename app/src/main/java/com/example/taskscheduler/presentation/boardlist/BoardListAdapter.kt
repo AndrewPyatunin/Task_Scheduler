@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.example.taskscheduler.domain.Board
+import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.DiffCallback
 
 class BoardListDiffCallback(

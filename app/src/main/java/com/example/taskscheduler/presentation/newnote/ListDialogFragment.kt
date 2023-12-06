@@ -5,7 +5,7 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.example.taskscheduler.domain.ListOfNotesItem
+import com.example.taskscheduler.domain.models.ListOfNotesItem
 
 class ListDialogFragment(val list: List<ListOfNotesItem>) : DialogFragment() {
 

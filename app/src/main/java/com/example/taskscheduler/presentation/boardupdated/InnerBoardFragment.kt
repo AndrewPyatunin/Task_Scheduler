@@ -14,11 +14,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentInnerBoardBinding
 import com.example.taskscheduler.domain.*
-import com.example.taskscheduler.findTopNavController
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.Note
+import com.example.taskscheduler.domain.models.User
 import com.google.android.material.tabs.TabLayout
 
 

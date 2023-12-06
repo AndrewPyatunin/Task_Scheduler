@@ -1,5 +1,6 @@
 package com.example.taskscheduler.data
 
+import com.example.taskscheduler.data.modelsDb.*
 import kotlinx.coroutines.flow.Flow
 
 interface LocalDataSource {

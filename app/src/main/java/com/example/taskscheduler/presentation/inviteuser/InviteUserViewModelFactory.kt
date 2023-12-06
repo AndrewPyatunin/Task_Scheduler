@@ -2,7 +2,7 @@ package com.example.taskscheduler.presentation.inviteuser
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.taskscheduler.domain.Board
+import com.example.taskscheduler.domain.models.Board
 
 class InviteUserViewModelFactory(val board: Board) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

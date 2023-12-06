@@ -4,11 +4,10 @@ import android.app.Application
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.taskscheduler.data.TaskDatabaseDao
-import com.example.taskscheduler.domain.Board
+import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.ListOfBoards
-import com.example.taskscheduler.domain.Note
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Note
+import com.example.taskscheduler.domain.models.User
 
 @Database(entities = [Board::class, Note::class, ListOfBoards::class, User::class], version = 1)
 abstract class TaskDatabase : RoomDatabase() {

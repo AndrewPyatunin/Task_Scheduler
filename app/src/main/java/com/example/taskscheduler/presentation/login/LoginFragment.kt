@@ -10,7 +10,7 @@ import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.databinding.FragmentLoginBinding
 import com.example.taskscheduler.domain.Delegate
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.UserAuthState
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase

@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.taskscheduler.domain.Invite
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Invite
+import com.example.taskscheduler.domain.models.User
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError

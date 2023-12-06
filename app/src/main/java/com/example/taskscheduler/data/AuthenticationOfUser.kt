@@ -2,8 +2,9 @@ package com.example.taskscheduler.data
 
 import android.net.Uri
 import android.util.Log
+import com.example.taskscheduler.data.mappers.MapperForUserAndUserDb
 import com.example.taskscheduler.domain.AuthUser
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.User
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.AuthResult
@@ -12,7 +13,6 @@ import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.CheckBox
 import android.widget.Toast
-import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -17,8 +16,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taskscheduler.*
 import com.example.taskscheduler.databinding.FragmentInviteUserBinding
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.User
 
 class InviteUserFragment : Fragment(){
     lateinit var binding: FragmentInviteUserBinding

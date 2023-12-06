@@ -3,9 +3,9 @@ package com.example.taskscheduler.presentation.registration
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.domain.AddUserUseCase
-import com.example.taskscheduler.domain.RegistrationUseCase
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.usecases.AddUserUseCase
+import com.example.taskscheduler.domain.usecases.RegistrationUseCase
+import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.UserAuthState
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow

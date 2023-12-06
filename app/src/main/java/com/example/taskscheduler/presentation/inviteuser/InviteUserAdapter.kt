@@ -5,17 +5,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.example.taskscheduler.domain.DiffCallback
-import com.example.taskscheduler.domain.User
-import com.squareup.picasso.Picasso
+import com.example.taskscheduler.domain.models.User
 
 class UserListDiffCallback(
     private val oldList: List<User>,

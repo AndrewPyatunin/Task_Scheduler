@@ -7,8 +7,8 @@ package com.example.taskscheduler
 //import androidx.recyclerview.widget.DiffUtil
 //import androidx.recyclerview.widget.RecyclerView.Adapter
 //import androidx.recyclerview.widget.RecyclerView.ViewHolder
-//import com.example.taskscheduler.domain.ListOfNotesItem
-//import com.example.taskscheduler.domain.Note
+//import com.example.taskscheduler.domain.models.ListOfNotesItem
+//import com.example.taskscheduler.domain.models.Note
 //import com.example.taskscheduler.presentation.board.BoardFragment
 //
 //class ChildNoteDiffCallback(

@@ -1,13 +1,12 @@
 package com.example.taskscheduler.presentation.boardupdated
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.ListOfNotesItem
-import com.example.taskscheduler.domain.Note
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.Note
+import com.example.taskscheduler.domain.models.User
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener

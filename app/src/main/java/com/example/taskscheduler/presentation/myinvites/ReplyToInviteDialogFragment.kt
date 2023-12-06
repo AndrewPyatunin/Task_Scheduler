@@ -6,7 +6,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.DialogFragment
-import com.example.taskscheduler.domain.Invite
+import com.example.taskscheduler.domain.models.Invite
 
 class ReplyToInviteDialogFragment : DialogFragment() {
 

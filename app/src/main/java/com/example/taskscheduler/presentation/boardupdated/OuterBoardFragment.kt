@@ -20,9 +20,9 @@ import com.bumptech.glide.request.transition.Transition
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentOuterBoardBinding
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.ListOfNotesItem
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator

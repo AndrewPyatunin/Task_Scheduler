@@ -7,11 +7,10 @@ import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Priority
 import com.example.taskscheduler.R
 import com.example.taskscheduler.domain.Colors
 import com.example.taskscheduler.domain.DiffCallback
-import com.example.taskscheduler.domain.Note
+import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.UrgencyOfNote
 
 class InnerBoardAdapter(listOfNotesFrom: List<Note>): RecyclerView.Adapter<InnerBoardAdapter.NoteViewHolder>()

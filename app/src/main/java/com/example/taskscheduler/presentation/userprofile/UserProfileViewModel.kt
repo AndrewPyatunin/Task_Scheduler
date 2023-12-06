@@ -7,8 +7,7 @@ import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.taskscheduler.domain.User
-import com.example.taskscheduler.presentation.registration.RegistrationViewModel
+import com.example.taskscheduler.domain.models.User
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.database.DataSnapshot

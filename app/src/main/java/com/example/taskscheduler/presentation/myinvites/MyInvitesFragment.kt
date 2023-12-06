@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taskscheduler.MyInvitesAdapter
 import com.example.taskscheduler.databinding.FragmentMyInvitesBinding
-import com.example.taskscheduler.domain.Invite
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Invite
+import com.example.taskscheduler.domain.models.User
 
 class MyInvitesFragment : Fragment() {
     lateinit var binding: FragmentMyInvitesBinding

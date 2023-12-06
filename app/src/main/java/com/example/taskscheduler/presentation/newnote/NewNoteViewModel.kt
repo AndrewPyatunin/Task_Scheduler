@@ -4,9 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.MyDatabaseConnection.updated
 import com.example.taskscheduler.domain.*
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.Note
+import com.example.taskscheduler.domain.models.User
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers

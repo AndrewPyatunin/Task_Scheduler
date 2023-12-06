@@ -20,6 +20,10 @@ import com.example.taskscheduler.MyDatabaseConnection.updated
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewNoteBinding
 import com.example.taskscheduler.domain.*
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.Note
+import com.example.taskscheduler.domain.models.User
 import kotlin.math.roundToInt
 
 class NewNoteFragment : Fragment(), MenuProvider {

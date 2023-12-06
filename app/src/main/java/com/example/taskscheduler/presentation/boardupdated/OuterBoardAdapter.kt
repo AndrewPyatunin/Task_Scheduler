@@ -5,10 +5,10 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.DiffUtil
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.taskscheduler.domain.Board
+import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.DiffCallback
-import com.example.taskscheduler.domain.ListOfNotesItem
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.User
 
 class OuterBoardAdapter(
     lifecycle: Lifecycle,

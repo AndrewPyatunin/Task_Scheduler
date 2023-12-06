@@ -10,7 +10,7 @@ package com.example.taskscheduler.presentation.board
 //import com.example.taskscheduler.ChildNoteRVAdapter
 //import com.example.taskscheduler.R
 //import com.example.taskscheduler.domain.DiffCallback
-//import com.example.taskscheduler.domain.ListOfNotesItem
+//import com.example.taskscheduler.domain.models.ListOfNotesItem
 //
 //class ParentListDiffCallback(
 //    private val oldList: List<ListOfNotesItem>,

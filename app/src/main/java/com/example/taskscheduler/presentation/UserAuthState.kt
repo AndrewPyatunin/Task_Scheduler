@@ -1,6 +1,6 @@
 package com.example.taskscheduler.presentation
 
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.User
 
 sealed class UserAuthState {
     object Loading : UserAuthState()

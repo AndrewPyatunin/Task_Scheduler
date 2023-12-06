@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -18,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.taskscheduler.NewBoardAdapter
 import com.example.taskscheduler.databinding.FragmentNewBoardBinding
 import com.example.taskscheduler.domain.BackgroundImage
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.boardupdated.RecyclerViewReadyCallback
 
 class NewBoardFragment : Fragment() {

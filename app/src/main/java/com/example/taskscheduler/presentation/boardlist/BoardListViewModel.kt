@@ -2,8 +2,9 @@ package com.example.taskscheduler.presentation.boardlist
 
 import androidx.lifecycle.*
 import com.example.taskscheduler.MyDatabaseConnection
-import com.example.taskscheduler.data.TaskDatabase
-import com.example.taskscheduler.domain.*
+import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.domain.usecases.GetBoardsFlowUseCase
+import com.example.taskscheduler.domain.usecases.GetUserFlowFromRoomUseCase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -11,10 +12,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class BoardListViewModel @Inject constructor(

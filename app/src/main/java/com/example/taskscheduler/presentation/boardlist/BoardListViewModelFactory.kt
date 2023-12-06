@@ -2,7 +2,7 @@ package com.example.taskscheduler.presentation.boardlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.User
 
 class BoardListViewModelFactory(val user: User): ViewModelProvider.Factory {
 

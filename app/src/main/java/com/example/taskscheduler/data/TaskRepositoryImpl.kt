@@ -6,7 +6,9 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.data.mappers.*
 import com.example.taskscheduler.domain.*
+import com.example.taskscheduler.domain.models.*
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.userProfileChangeRequest

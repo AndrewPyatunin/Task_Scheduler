@@ -9,8 +9,8 @@ import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.TaskDatabase
 import com.example.taskscheduler.data.TaskRepositoryImpl
 import com.example.taskscheduler.domain.BackgroundImage
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.User
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase

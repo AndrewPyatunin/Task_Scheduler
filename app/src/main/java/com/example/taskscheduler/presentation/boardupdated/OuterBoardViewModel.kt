@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.ListOfNotesItem
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.User
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -31,7 +31,7 @@ class OuterBoardViewModel : ViewModel() {
         get() = _listLiveData
 
 
-    fun createNewList(title: String, board: Board, user: User): ListOfNotesItem{
+    fun createNewList(title: String, board: Board, user: User): ListOfNotesItem {
         val listOfNotesIds = ArrayList<String>()
         val ref = databaseListsOfNotesRef.child(board.id).push()
         val listId = ref.key.toString()

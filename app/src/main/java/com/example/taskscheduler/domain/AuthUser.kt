@@ -1,9 +1,9 @@
 package com.example.taskscheduler.domain
 
 import android.net.Uri
+import com.example.taskscheduler.domain.models.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 
 interface AuthUser {
 
