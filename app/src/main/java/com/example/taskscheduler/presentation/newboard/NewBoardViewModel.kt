@@ -1,10 +1,13 @@
 package com.example.taskscheduler.presentation.newboard
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.TaskDatabase
 import com.example.taskscheduler.data.TaskRepositoryImpl
@@ -14,6 +17,8 @@ import com.example.taskscheduler.domain.models.User
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class NewBoardViewModel : AndroidViewModel(Application()) {
     private val firebaseDatabase = Firebase.database
@@ -71,8 +76,16 @@ class NewBoardViewModel : AndroidViewModel(Application()) {
 
     }
 
-    fun createNewBoard(name: String, user: User, urlBackground: String, board: Board) {
-        repository.createNewBoard(name, user, urlBackground, board)
+    fun createNewBoard(name: String, user: User, urlBackground: String, board: Board, context: Context) {
+        viewModelScope.launch {
+            repository.createNewBoard(name, user, urlBackground, board).catch {
+                Toast.makeText(context, "Произошла ошибка ${it.message}", Toast.LENGTH_SHORT).show()
+            }.collect {
+
+            }
+        }
+
+
     }
 
     private fun buildImageList(list: List<String>): List<BackgroundImage> {

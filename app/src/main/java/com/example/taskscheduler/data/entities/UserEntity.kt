@@ -1,10 +1,10 @@
-package com.example.taskscheduler.data.modelsDb
+package com.example.taskscheduler.data.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "users")
-data class UserDb(
+data class UserEntity(
     @PrimaryKey
     val id: String,
     val name: String,

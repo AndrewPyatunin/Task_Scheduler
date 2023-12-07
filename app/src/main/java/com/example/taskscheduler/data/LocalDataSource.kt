@@ -1,45 +1,45 @@
 package com.example.taskscheduler.data
 
-import com.example.taskscheduler.data.modelsDb.*
+import com.example.taskscheduler.data.entities.*
 import kotlinx.coroutines.flow.Flow
 
 interface LocalDataSource {
 
-    fun getUser(userId: String): Flow<UserDb>
+    fun getUser(userId: String): Flow<UserEntity>
 
-    fun getBoardsFlow(): Flow<List<BoardDb>>
+    fun getBoardsFlow(): Flow<List<BoardEntity>>
 
-    suspend fun getBoards(): List<BoardDb>
+    suspend fun getBoards(): List<BoardEntity>
 
-    fun getListsOfNotesFlow(boardId: String): Flow<List<ListOfNotesDb>>
+    fun getListsOfNotesFlow(boardId: String): Flow<List<ListOfNotesEntity>>
 
-    suspend fun getListsOfNotes(): List<ListOfNotesDb>
+    suspend fun getListsOfNotes(): List<ListOfNotesEntity>
 
-    fun getNotesFlow(listOfNotesId: String): Flow<List<NoteDb>>
+    fun getNotesFlow(listOfNotesId: String): Flow<List<NoteEntity>>
 
-    suspend fun getNotes(): List<NoteDb>
+    suspend fun getNotes(): List<NoteEntity>
 
-    fun getInvites(): Flow<List<InviteDb>>
+    fun getInvites(): Flow<List<InviteEntity>>
 
-    fun getUsersForInvites(): Flow<List<UserForInvitesDb>>
+    fun getUsersForInvites(): Flow<List<UserForInvitesEntity>>
 
-    suspend fun addBoard(boardDb: BoardDb)
+    suspend fun addBoard(boardEntity: BoardEntity)
 
-    suspend fun addUser(userDb: UserDb)
+    suspend fun addUser(userEntity: UserEntity)
 
-    suspend fun addNote(noteDb: NoteDb)
+    suspend fun addNote(noteEntity: NoteEntity)
 
-    suspend fun addListOfNotes(listOfNotesDb: ListOfNotesDb)
+    suspend fun addListOfNotes(listOfNotesEntity: ListOfNotesEntity)
 
-    suspend fun addInvite(inviteDb: InviteDb)
+    suspend fun addInvite(inviteEntity: InviteEntity)
 
-    suspend fun removeBoard(boardDb: BoardDb)
+    suspend fun removeBoard(boardEntity: BoardEntity)
 
-    suspend fun removeNote(noteDb: NoteDb)
+    suspend fun removeNote(noteEntity: NoteEntity)
 
     suspend fun removeListOfNotes(listId: String)
 
-    suspend fun removeInvite(inviteDb: InviteDb)
+    suspend fun removeInvite(inviteEntity: InviteEntity)
 
-    suspend fun addUserForInvites(userForInvitesDb: UserForInvitesDb)
+    suspend fun addUserForInvites(userForInvitesEntity: UserForInvitesEntity)
 }

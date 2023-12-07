@@ -1,30 +1,30 @@
 package com.example.taskscheduler.data.mappers
 
-import com.example.taskscheduler.data.modelsDb.UserForInvitesDb
+import com.example.taskscheduler.data.entities.UserForInvitesEntity
 import com.example.taskscheduler.domain.models.User
 
 class MapperForUserAndUserForInvitesDb {
 
-    fun map(userForInvitesDb: UserForInvitesDb): User {
+    fun map(userForInvitesEntity: UserForInvitesEntity): User {
         return User(
-            id = userForInvitesDb.id,
-            name = userForInvitesDb.name,
-            lastName = userForInvitesDb.lastName,
-            email = userForInvitesDb.email,
-            onlineStatus = userForInvitesDb.onlineStatus,
-            boards = userForInvitesDb.boards,
-            uri = userForInvitesDb.uri,
-            description = userForInvitesDb.description,
-            invites =  userForInvitesDb.invites
+            id = userForInvitesEntity.id,
+            name = userForInvitesEntity.name,
+            lastName = userForInvitesEntity.lastName,
+            email = userForInvitesEntity.email,
+            onlineStatus = userForInvitesEntity.onlineStatus,
+            boards = userForInvitesEntity.boards,
+            uri = userForInvitesEntity.uri,
+            description = userForInvitesEntity.description,
+            invites =  userForInvitesEntity.invites
         )
     }
 
-    fun mapList(list: List<UserForInvitesDb>): List<User> {
+    fun mapList(list: List<UserForInvitesEntity>): List<User> {
         return list.map { map(it) }
     }
 
-    fun mapToUserInvitesDb(user: User): UserForInvitesDb {
-        return UserForInvitesDb(
+    fun mapToUserInvitesDb(user: User): UserForInvitesEntity {
+        return UserForInvitesEntity(
             id = user.id,
             name = user.name,
             lastName = user.lastName,

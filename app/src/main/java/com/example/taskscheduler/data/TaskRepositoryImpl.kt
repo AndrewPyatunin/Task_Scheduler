@@ -257,10 +257,7 @@ class TaskRepositoryImpl(
         TODO("Not yet implemented")
     }
 
-    override fun createNewBoard(name: String, user: User, urlBackground: String, board: Board, scope: CoroutineScope) {
-//        val _boardLiveData = MutableLiveData<Board>()
-//        val _user = MutableLiveData<User>()
-//        val mediatorLiveData = MediatorLiveData<Pair<Board, User>>()
+    override fun createNewBoard(name: String, user: User, urlBackground: String, board: Board) = callbackFlow<Board> {
         val urlForBoard = databaseBoardsReference.push()
         val idBoard = urlForBoard.key ?: ""
         if (board.id != "") {
@@ -270,15 +267,14 @@ class TaskRepositoryImpl(
             ref.child("title").setValue(name)
             val boardDb = board.copy(title = name, backgroundUrl = urlBackground)
 //            addUser(user)
-            scope.launch {
-                addBoard(boardDb)
-            }
-
-//            _user.value = user
-//            _boardLiveData.value = board
+            trySend(boardDb)
+//            scope.launch {
+//                addBoard(boardDb)
+//            }
         } else {
-            databaseUsersReference.child(user.id)
-                .addListenerForSingleValueEvent(object : ValueEventListener {
+            val usersRef = databaseUsersReference.child(user.id)
+
+                usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         databaseUsersReference.removeEventListener(this)
                         val listBoardsIds = ArrayList<String>()
@@ -309,26 +305,19 @@ class TaskRepositoryImpl(
                         )
                         databaseUsersReference.child(user.id).child("boards")
                             .setValue(listBoardsIds)
-                        addUser(userToDb)
-                        addBoard(boardToDb)
-//                        _user.value = userToDb
-//                        _boardLiveData.value = board
+                        trySend(boardToDb)
+//                        addUser(userToDb)
+//                        addBoard(boardToDb)
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-//                        _error.value = error.message
-                        logout()
+                        throw RuntimeException(error.message)
                     }
                 })
-        }
-//        mediatorLiveData.addSource(_boardLiveData) {
-//            val userData = _user.value
-//            val boardData = _boardLiveData.value
-//            if (userData != null && boardData != null) {
-//                mediatorLiveData.value = Pair(boardData, userData)
+//            awaitClose {
+//                usersRef.removeEventListener()
 //            }
-//        }
-//        return mediatorLiveData
+        }
     }
     private val flowBoardUpdate = MutableSharedFlow<String>()
     fun flowBoardUpdate() = flowBoardUpdate.asSharedFlow()

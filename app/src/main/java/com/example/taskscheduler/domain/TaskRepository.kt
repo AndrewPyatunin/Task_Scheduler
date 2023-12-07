@@ -29,9 +29,8 @@ interface TaskRepository {
         name: String,
         user: User,
         urlBackground: String,
-        board: Board,
-        scope: CoroutineScope
-    )
+        board: Board
+    ): Flow<Board>
 
     fun updateBoard(board: Board, listOfNotesItemId: String, scope: CoroutineScope): Flow<String>
 

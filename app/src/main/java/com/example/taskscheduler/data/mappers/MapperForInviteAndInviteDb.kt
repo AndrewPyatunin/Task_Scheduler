@@ -1,27 +1,27 @@
 package com.example.taskscheduler.data.mappers
 
-import com.example.taskscheduler.data.modelsDb.InviteDb
+import com.example.taskscheduler.data.entities.InviteEntity
 import com.example.taskscheduler.domain.models.Invite
 
 class MapperForInviteAndInviteDb {
 
-    fun map(inviteDb: InviteDb): Invite {
+    fun map(inviteEntity: InviteEntity): Invite {
         return Invite(
-            id = inviteDb.id,
-            boardId = inviteDb.boardId,
-            userSenderId = inviteDb.userSenderId,
-            userName = inviteDb.userName,
-            userLastName = inviteDb.userLastName,
-            boardName = inviteDb.boardName
+            id = inviteEntity.id,
+            boardId = inviteEntity.boardId,
+            userSenderId = inviteEntity.userSenderId,
+            userName = inviteEntity.userName,
+            userLastName = inviteEntity.userLastName,
+            boardName = inviteEntity.boardName
         )
     }
 
-    fun mapList(list: List<InviteDb>): List<Invite> {
+    fun mapList(list: List<InviteEntity>): List<Invite> {
         return list.map { map(it) }
     }
 
-    fun mapToDb(invite: Invite): InviteDb {
-        return InviteDb(
+    fun mapToDb(invite: Invite): InviteEntity {
+        return InviteEntity(
             id = invite.id,
             boardId = invite.boardId,
             userSenderId = invite.userSenderId,
@@ -31,7 +31,7 @@ class MapperForInviteAndInviteDb {
         )
     }
 
-    fun mapToDbList(list: List<Invite>): List<InviteDb> {
+    fun mapToDbList(list: List<Invite>): List<InviteEntity> {
         return list.map { mapToDb(it) }
     }
 }

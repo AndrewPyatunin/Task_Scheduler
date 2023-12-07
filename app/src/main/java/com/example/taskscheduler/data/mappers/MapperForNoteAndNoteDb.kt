@@ -1,29 +1,29 @@
 package com.example.taskscheduler.data.mappers
 
-import com.example.taskscheduler.data.modelsDb.NoteDb
+import com.example.taskscheduler.data.entities.NoteEntity
 import com.example.taskscheduler.domain.models.Note
 
 class MapperForNoteAndNoteDb {
 
-    fun map(noteDb: NoteDb): Note {
+    fun map(noteEntity: NoteEntity): Note {
         return Note(
-            id = noteDb.id,
-            title = noteDb.title,
-            creatorId = noteDb.creatorId,
-            members = noteDb.members,
-            description = noteDb.description,
-            date = noteDb.date,
-            listOfTasks = noteDb.listOfTasks,
-            priority = noteDb.priority
+            id = noteEntity.id,
+            title = noteEntity.title,
+            creatorId = noteEntity.creatorId,
+            members = noteEntity.members,
+            description = noteEntity.description,
+            date = noteEntity.date,
+            listOfTasks = noteEntity.listOfTasks,
+            priority = noteEntity.priority
         )
     }
 
-    fun mapList(list: List<NoteDb>): List<Note> {
+    fun mapList(list: List<NoteEntity>): List<Note> {
         return list.map { map(it) }
     }
 
-    fun mapToDb(note: Note): NoteDb {
-        return NoteDb(
+    fun mapToDb(note: Note): NoteEntity {
+        return NoteEntity(
             id = note.id,
             title = note.title,
             creatorId = note.creatorId,
@@ -35,7 +35,7 @@ class MapperForNoteAndNoteDb {
         )
     }
 
-    fun mapListToDb(list: List<Note>): List<NoteDb> {
+    fun mapListToDb(list: List<Note>): List<NoteEntity> {
         return list.map { mapToDb(it) }
     }
 }

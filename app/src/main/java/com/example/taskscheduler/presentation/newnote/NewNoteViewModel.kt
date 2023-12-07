@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskscheduler.MyDatabaseConnection.updated
-import com.example.taskscheduler.domain.*
+import com.example.taskscheduler.domain.CheckNoteItem
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.ListOfNotesItem
 import com.example.taskscheduler.domain.models.Note
@@ -15,7 +15,8 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class NewNoteViewModel: ViewModel() {
+class NewNoteViewModel : ViewModel() {
+
     val database = Firebase.database
     private val databaseListsOfNotesRef = database.getReference("ListsOfNotes")
     private val databaseNotesRef = database.getReference("Notes")

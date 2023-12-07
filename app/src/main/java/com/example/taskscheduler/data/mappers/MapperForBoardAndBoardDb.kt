@@ -1,27 +1,27 @@
 package com.example.taskscheduler.data.mappers
 
-import com.example.taskscheduler.data.modelsDb.BoardDb
+import com.example.taskscheduler.data.entities.BoardEntity
 import com.example.taskscheduler.domain.models.Board
 
 class MapperForBoardAndBoardDb {
 
-    fun map(boardDb: BoardDb): Board {
+    fun map(boardEntity: BoardEntity): Board {
         return Board(
-            id = boardDb.id,
-            title = boardDb.title,
-            creatorId = boardDb.creatorId,
-            backgroundUrl = boardDb.backgroundUrl,
-            members = boardDb.members,
-            listsOfNotesIds = boardDb.listOfNotesIds
+            id = boardEntity.id,
+            title = boardEntity.title,
+            creatorId = boardEntity.creatorId,
+            backgroundUrl = boardEntity.backgroundUrl,
+            members = boardEntity.members,
+            listsOfNotesIds = boardEntity.listOfNotesIds
         )
     }
 
-    fun listMap(list: List<BoardDb>): List<Board> {
+    fun listMap(list: List<BoardEntity>): List<Board> {
         return list.map { map(it) }
     }
 
-    fun mapToDb(board: Board): BoardDb {
-        return BoardDb(
+    fun mapToDb(board: Board): BoardEntity {
+        return BoardEntity(
             id = board.id,
             title = board.title,
             creatorId = board.creatorId,
@@ -31,7 +31,7 @@ class MapperForBoardAndBoardDb {
         )
     }
 
-    fun mapListToDb(list: List<Board>): List<BoardDb> {
+    fun mapListToDb(list: List<Board>): List<BoardEntity> {
         return list.map { mapToDb(it) }
     }
 }

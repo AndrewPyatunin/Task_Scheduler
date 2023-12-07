@@ -82,7 +82,7 @@ class BoardListFragment: Fragment(), MenuProvider {
             }
         })
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {//flow будет вызван, когда фрагмент перейдет в состояние Resumed и завершится в onPause
                 viewModel.userFlow?.collect {
                     user = it
                     Glide.with(this@BoardListFragment).load(it.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)

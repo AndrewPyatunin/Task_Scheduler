@@ -4,12 +4,9 @@ import android.app.Application
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.taskscheduler.domain.models.Board
-import com.example.taskscheduler.domain.ListOfBoards
-import com.example.taskscheduler.domain.models.Note
-import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.data.entities.*
 
-@Database(entities = [Board::class, Note::class, ListOfBoards::class, User::class], version = 1)
+@Database(entities = [BoardEntity::class, NoteEntity::class, ListOfNotesEntity::class, UserEntity::class, InviteEntity::class], version = 1)
 abstract class TaskDatabase : RoomDatabase() {
     companion object {
         private var instance: TaskDatabase? = null
