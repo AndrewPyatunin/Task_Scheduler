@@ -22,7 +22,6 @@ class LoginFragment : Fragment() {
     lateinit var user: User
     private var email = ""
     lateinit var viewModel: LoginViewModel
-    var someProperty by Delegate<String>()
 
 
     override fun onCreateView(

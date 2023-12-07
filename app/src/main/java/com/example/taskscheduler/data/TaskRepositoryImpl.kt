@@ -25,13 +25,19 @@ import kotlinx.coroutines.flow.*
 
 class TaskRepositoryImpl(
     private val localDataSource: LocalDataSource,
-    private val mapperForUserAndUserDb: MapperForUserAndUserDb,
-    private val mapperForBoardAndBoardDb: MapperForBoardAndBoardDb,
-    private val mapperForNoteAndNoteDb: MapperForNoteAndNoteDb,
-    private val mapperForListsOfNotesAndListsOfNotesDb: MapperForListsOfNotesAndListsOfNotesDb,
-    private val mapperForInviteAndInviteDb: MapperForInviteAndInviteDb,
-    private val mapperForUserAndUserForInvitesDb: MapperForUserAndUserForInvitesDb,
-): TaskRepository {
+    private val userToUserEntityMapper: UserToUserEntityMapper,
+    private val userEntityToUserMapper: UserEntityToUserMapper,
+    private val boardToBoardEntityMapper: BoardToBoardEntityMapper,
+    private val boardEntityToBoardMapper: BoardEntityToBoardMapper,
+    private val noteToNoteEntityMapper: NoteToNoteEntityMapper,
+    private val noteEntityToNoteMapper: NoteEntityToNoteMapper,
+    private val listOfNotesEntityToListOfNotesItemMapper: ListOfNotesEntityToListOfNotesItemMapper,
+    private val listOfNotesItemToListOfNotesEntityMapper: ListOfNotesItemToListOfNotesEntityMapper,
+    private val inviteEntityToInviteMapper: InviteEntityToInviteMapper,
+    private val inviteToInviteEntityMapper: InviteToInviteEntityMapper,
+    private val userToUserForInvitesMapper: UserToUserForInvitesMapper,
+    private val userForInvitesToUserMapper: UserForInvitesToUserMapper
+) : TaskRepository {
 
     private val auth = Firebase.auth
     private var taskDatabase: TaskDatabase? = null
@@ -49,69 +55,81 @@ class TaskRepositoryImpl(
 
 
     override fun getUserFlow(userId: String): Flow<User> {
-        return localDataSource.getUser(userId).map {
-            mapperForUserAndUserDb.map(it)
+        return localDataSource.getUser(userId).map { userEntity ->
+            userEntityToUserMapper.map(userEntity)
         }
     }
 
     private suspend fun getBoards(): List<Board> {
         return localDataSource.getBoards().let {
-            mapperForBoardAndBoardDb.listMap(it)
+            it.map { boardEntity ->
+                boardEntityToBoardMapper.map(boardEntity)
+            }
         }
     }
 
     override fun getBoardsFlowFromRoom(): Flow<List<Board>> {
         return localDataSource.getBoardsFlow().map {
-            mapperForBoardAndBoardDb.listMap(it)
+            it.map { boardEntity ->
+                boardEntityToBoardMapper.map(boardEntity)
+            }
         }
     }
 
     override fun getNotesFlow(listOfNotesItemId: String): Flow<List<Note>> {
-        return localDataSource.getNotesFlow(listOfNotesItemId).map {
-            mapperForNoteAndNoteDb.mapList(it)
+        return localDataSource.getNotesFlow(listOfNotesItemId).map { list ->
+            list.map { noteEntity ->
+                noteEntityToNoteMapper.map(noteEntity)
+            }
         }
     }
 
     override fun getListsOfNotesFlow(board: Board): Flow<List<ListOfNotesItem>> {
-        return localDataSource.getListsOfNotesFlow(board.id).map {
-            mapperForListsOfNotesAndListsOfNotesDb.mapList(it)
+        return localDataSource.getListsOfNotesFlow(board.id).map { list ->
+            list.map { listOfNotesEntity ->
+                listOfNotesEntityToListOfNotesItemMapper.map(listOfNotesEntity)
+            }
         }
     }
 
     override fun getInvitesFlow(): Flow<List<Invite>> {
         return localDataSource.getInvites().map {
-            mapperForInviteAndInviteDb.mapList(it)
+            it.map { inviteEntity ->
+                inviteEntityToInviteMapper.map(inviteEntity)
+            }
         }
     }
 
     override fun getUsersForInvitesFlow(): Flow<List<User>> {
-        return localDataSource.getUsersForInvites().map {
-            mapperForUserAndUserForInvitesDb.mapList(it)
+        return localDataSource.getUsersForInvites().map { list ->
+            list.map {
+                userForInvitesToUserMapper.map(it)
+            }
         }
     }
 
     override suspend fun addUser(user: User) {
-        localDataSource.addUser(mapperForUserAndUserDb.mapToDb(user))
+        localDataSource.addUser(userToUserEntityMapper.map(user))
     }
 
     override suspend fun addUserForInvites(user: User) {
-        localDataSource.addUserForInvites(mapperForUserAndUserForInvitesDb.mapToUserInvitesDb(user))
+        localDataSource.addUserForInvites(userToUserForInvitesMapper.map(user))
     }
 
     override suspend fun addBoard(board: Board) {
-        localDataSource.addBoard(mapperForBoardAndBoardDb.mapToDb(board))
+        localDataSource.addBoard(boardToBoardEntityMapper.map(board))
     }
 
     override suspend fun addListOfNote(listOfNotesItem: ListOfNotesItem) {
-        localDataSource.addListOfNotes(mapperForListsOfNotesAndListsOfNotesDb.mapToDb(listOfNotesItem))
+        localDataSource.addListOfNotes(listOfNotesItemToListOfNotesEntityMapper.map(listOfNotesItem))
     }
 
     override suspend fun addNote(note: Note) {
-        localDataSource.addNote(mapperForNoteAndNoteDb.mapToDb(note))
+        localDataSource.addNote(noteToNoteEntityMapper.map(note))
     }
 
     override suspend fun addInvite(invite: Invite) {
-        localDataSource.addInvite(mapperForInviteAndInviteDb.mapToDb(invite))
+        localDataSource.addInvite(inviteToInviteEntityMapper.map(invite))
     }
 
     private val _flowBoards = MutableSharedFlow<Board>()
@@ -224,7 +242,11 @@ class TaskRepositoryImpl(
         }
     }
 
-    override suspend fun getUsersForInvites(currentUser: User, board: Board, scope: CoroutineScope) {
+    override suspend fun getUsersForInvites(
+        currentUser: User,
+        board: Board,
+        scope: CoroutineScope
+    ) {
         val listUsers = MutableSharedFlow<List<User>>()
         databaseUsersReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -232,7 +254,8 @@ class TaskRepositoryImpl(
                 for (dataSnapshot in snapshot.children) {
                     val user = dataSnapshot.getValue(User::class.java)
                     if (user != null && user.id != auth.currentUser?.uid &&
-                        user.id !in board.members && board.id !in user.invites.keys) {
+                        user.id !in board.members && board.id !in user.invites.keys
+                    ) {
                         usersFromDb.add(user)
                         scope.launch {
                             addUserForInvites(user)// кладем данные в room
@@ -257,22 +280,23 @@ class TaskRepositoryImpl(
         TODO("Not yet implemented")
     }
 
-    override fun createNewBoard(name: String, user: User, urlBackground: String, board: Board) = callbackFlow<Board> {
-        val urlForBoard = databaseBoardsReference.push()
-        val idBoard = urlForBoard.key ?: ""
-        if (board.id != "") {
-            Log.i("USER_CREATE", board.id)
-            val ref = databaseBoardsReference.child(board.id)
-            ref.child("backgroundUrl").setValue(urlBackground)
-            ref.child("title").setValue(name)
-            val boardDb = board.copy(title = name, backgroundUrl = urlBackground)
+    override fun createNewBoard(name: String, user: User, urlBackground: String, board: Board) =
+        callbackFlow<Board> {
+            val urlForBoard = databaseBoardsReference.push()
+            val idBoard = urlForBoard.key ?: ""
+            if (board.id != "") {
+                Log.i("USER_CREATE", board.id)
+                val ref = databaseBoardsReference.child(board.id)
+                ref.child("backgroundUrl").setValue(urlBackground)
+                ref.child("title").setValue(name)
+                val boardDb = board.copy(title = name, backgroundUrl = urlBackground)
 //            addUser(user)
-            trySend(boardDb)
+                trySend(boardDb)
 //            scope.launch {
 //                addBoard(boardDb)
 //            }
-        } else {
-            val usersRef = databaseUsersReference.child(user.id)
+            } else {
+                val usersRef = databaseUsersReference.child(user.id)
 
                 usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -317,20 +341,26 @@ class TaskRepositoryImpl(
 //            awaitClose {
 //                usersRef.removeEventListener()
 //            }
+            }
         }
-    }
+
     private val flowBoardUpdate = MutableSharedFlow<String>()
     fun flowBoardUpdate() = flowBoardUpdate.asSharedFlow()
 
-    override fun updateBoard(board: Board, listOfNotesItemId: String, scope: CoroutineScope): Flow<String> {
+    override fun updateBoard(
+        board: Board,
+        listOfNotesItemId: String,
+        scope: CoroutineScope
+    ): Flow<String> {
         val listOfNotesIdsNew = board.listsOfNotesIds
         (listOfNotesIdsNew as ArrayList).remove(listOfNotesItemId)
-        databaseBoardsReference.child(board.id).child("listsOfNotesIds").setValue(listOfNotesIdsNew).addOnSuccessListener {
-            scope.launch {
-                flowBoardUpdate.emit("Update of data was successful")
-            }
+        databaseBoardsReference.child(board.id).child("listsOfNotesIds").setValue(listOfNotesIdsNew)
+            .addOnSuccessListener {
+                scope.launch {
+                    flowBoardUpdate.emit("Update of data was successful")
+                }
 
-        }.addOnFailureListener {
+            }.addOnFailureListener {
             it.message?.let { it1 ->
                 scope.launch {
                     flowBoardUpdate.emit(it1)
@@ -354,7 +384,8 @@ class TaskRepositoryImpl(
     }
 
     private fun getListsOfNotes(): List<ListOfNotesItem> {
-        return localDataSource.getListsOfNotes().map { mapperForListsOfNotesAndListsOfNotesDb.map(it) }
+        return localDataSource.getListsOfNotes()
+            .map { listOfNotesEntityToListOfNotesItemMapper.map(it) }
     }
 
     override fun renameList(listOfNotesItem: ListOfNotesItem, board: Board, title: String) {
@@ -366,7 +397,8 @@ class TaskRepositoryImpl(
     override fun deleteList(listOfNotesItem: ListOfNotesItem, board: Board, isList: Boolean) {
         databaseListsOfNotesRef.child(board.id).child(listOfNotesItem.id).removeValue()
         localDataSource.removeListOfNotes(listOfNotesItem.id)
-        val listNotes = localDataSource.getNotes().filter { it.id in listOfNotesItem.listNotes.keys }
+        val listNotes =
+            localDataSource.getNotes().filter { it.id in listOfNotesItem.listNotes.keys }
         if (listNotes != null) {
             for (note in listNotes) {
                 databaseNotesRef.child(note.id).removeValue()
@@ -442,9 +474,11 @@ class TaskRepositoryImpl(
 
                     }
                 }
-                listNotes.let { CoroutineScope(Dispatchers.IO).launch {
-                    flowNotes.emit(it)
-                } }
+                listNotes.let {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        flowNotes.emit(it)
+                    }
+                }
 //                _listNotesLiveData.value = listNotes
             }
 
@@ -501,7 +535,7 @@ class TaskRepositoryImpl(
         databaseNotesRef.child(note.id).removeValue()
         databaseListsOfNotesRef.child(board.id).child(listOfNotesItem.id)
             .child("listNotes").child(note.id).removeValue()
-        localDataSource.removeNote(mapperForNoteAndNoteDb.mapToDb(note))
+        localDataSource.removeNote(noteToNoteEntityMapper.map(note))
         val listNotes: HashMap<String, Boolean> = listOfNotesItem.listNotes as HashMap
         listNotes.remove(note.id)
         addListOfNote(listOfNotesItem.copy(listNotes = listNotes))
@@ -617,7 +651,8 @@ class TaskRepositoryImpl(
                     Toast.makeText(
                         getApplication(),
                         "Обновление данных пользователя прошло успешно",
-                        Toast.LENGTH_SHORT)
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 }
 
@@ -629,8 +664,10 @@ class TaskRepositoryImpl(
         user!!.updateEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(getApplication(), "Электронный адрес пользователя обновлен",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        getApplication(), "Электронный адрес пользователя обновлен",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     ref.child("email").setValue(email)
                     _emailLiveData.value = email
                 }
@@ -645,23 +682,24 @@ class TaskRepositoryImpl(
 
     override fun getInvites(): LiveData<List<Invite>> {
         val _invitesList = MutableLiveData<List<Invite>>()
-        databaseInvitesReference.child(auth.currentUser?.uid.toString()).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val listInvites = ArrayList<Invite>()
-                for (dataSnapshot in snapshot.children) {
-                    for (data in dataSnapshot.children) {
-                        data.getValue(Invite::class.java)?.let { listInvites.add(it) }
+        databaseInvitesReference.child(auth.currentUser?.uid.toString())
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val listInvites = ArrayList<Invite>()
+                    for (dataSnapshot in snapshot.children) {
+                        for (data in dataSnapshot.children) {
+                            data.getValue(Invite::class.java)?.let { listInvites.add(it) }
+                        }
                     }
+                    Log.i("USER_INVITE_LIST_SIZE", listInvites.size.toString())
+                    _invitesList.value = listInvites
                 }
-                Log.i("USER_INVITE_LIST_SIZE", listInvites.size.toString())
-                _invitesList.value = listInvites
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                logout()
-            }
+                override fun onCancelled(error: DatabaseError) {
+                    logout()
+                }
 
-        })
+            })
         return _invitesList
     }
 
@@ -671,21 +709,23 @@ class TaskRepositoryImpl(
         boardsList.add(inviteBoardId)
         databaseUsersReference.child(user.id).child("boards").setValue(boardsList)
         val listMembers = ArrayList<String>()
-        databaseBoardsReference.child(inviteBoardId).child("members").addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                databaseBoardsReference.removeEventListener(this)
-                for (dataSnapshot in snapshot.children) {
-                    listMembers.add(dataSnapshot.value.toString())
-                    Log.i("USER_MEMBERS_FROM", dataSnapshot.value.toString())
+        databaseBoardsReference.child(inviteBoardId).child("members")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    databaseBoardsReference.removeEventListener(this)
+                    for (dataSnapshot in snapshot.children) {
+                        listMembers.add(dataSnapshot.value.toString())
+                        Log.i("USER_MEMBERS_FROM", dataSnapshot.value.toString())
+                    }
+                    listMembers.add(user.id)
+                    databaseBoardsReference.child(inviteBoardId).child("members")
+                        .setValue(listMembers)
                 }
-                listMembers.add(user.id)
-                databaseBoardsReference.child(inviteBoardId).child("members").setValue(listMembers)
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                logout()
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    logout()
+                }
+            })
         clearInviteInDatabase(user.id, inviteBoardId)
     }
 

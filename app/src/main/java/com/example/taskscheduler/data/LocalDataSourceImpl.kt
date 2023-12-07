@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 class LocalDataSourceImpl(
     private val taskDatabaseDao: TaskDatabaseDao
 ): LocalDataSource {
+
     override fun getUser(userId: String): Flow<UserEntity> {
         return taskDatabaseDao.getUser(userId)
     }

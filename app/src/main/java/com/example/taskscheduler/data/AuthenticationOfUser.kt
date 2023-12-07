@@ -2,7 +2,8 @@ package com.example.taskscheduler.data
 
 import android.net.Uri
 import android.util.Log
-import com.example.taskscheduler.data.mappers.MapperForUserAndUserDb
+import com.example.taskscheduler.data.mappers.UserEntityToUserMapper
+import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
 import com.example.taskscheduler.domain.AuthUser
 import com.example.taskscheduler.domain.models.User
 import com.google.android.gms.tasks.OnFailureListener
@@ -14,19 +15,21 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import javax.inject.Inject
 
 class AuthenticationOfUser @Inject constructor(
     private val localDataSource: LocalDataSource,
-    private val mapperForUserAndUserDb: MapperForUserAndUserDb,
+    private val userEntityToUserMapper: UserEntityToUserMapper,
+    private val userToUserEntityMapper: UserToUserEntityMapper,
     private val databaseUsersReference: DatabaseReference,
     private val storageReference: StorageReference,
     private val dao: TaskDatabaseDao,
     private val auth: FirebaseAuth
 ) : AuthUser {
+
     interface UrlCallback {
         fun onUrlCallback(url: String)
     }
@@ -39,9 +42,7 @@ class AuthenticationOfUser @Inject constructor(
         uri: Uri?,
         scope: CoroutineScope
     ): Flow<User> = callbackFlow {
-//        scope.launch {
-//            flowUserAuth.emit(UserAuthState.Loading)
-//        }
+
         val successListener = object : OnSuccessListener<AuthResult> {
             override fun onSuccess(p0: AuthResult?) {
                 val userId = p0?.user?.uid ?: return
@@ -53,7 +54,7 @@ class AuthenticationOfUser @Inject constructor(
                             trySend(user)
 //                        _user.value = user
                             scope.launch {
-                                localDataSource.addUser(mapperForUserAndUserDb.mapToDb(user))
+                                localDataSource.addUser(userToUserEntityMapper.map(user))
 //                            _userFlow.emit(user)
 //                            flowUserAuth.emit()
                             }
@@ -65,7 +66,7 @@ class AuthenticationOfUser @Inject constructor(
         }
         val failureListener = object : OnFailureListener {
             override fun onFailure(p0: Exception) {
-                throw RuntimeException(p0.message?: "Неизвестная ошибка!")
+                throw RuntimeException(p0.message ?: "Неизвестная ошибка!")
             }
 
         }
@@ -78,6 +79,7 @@ class AuthenticationOfUser @Inject constructor(
 
 
     private fun updateUserAvatar(uri: Uri, name: String, scope: CoroutineScope) {
+
         val user = auth.currentUser
         val profileUpdates = userProfileChangeRequest {
             photoUri = uri
@@ -88,19 +90,7 @@ class AuthenticationOfUser @Inject constructor(
         user?.updateProfile(profileUpdates)
             ?.addOnCompleteListener {
                 if (it.isSuccessful) {
-
-//                    updateData(scope = scope)
-//                    Toast.makeText(
-//                        getApplication(),
-//                        "Обновление данных пользователя прошло успешно",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
                     Log.i("USER_FIREBASE_SUCCESS", auth.currentUser.toString())
-//                    scope.launch {
-//                        flowToast.emit("Обновление данных пользователя прошло успешно")
-//                    }
-
-//                    _success.value = auth.currentUser
                 }
             }?.addOnFailureListener {
                 throw RuntimeException(it.message)
@@ -130,10 +120,6 @@ class AuthenticationOfUser @Inject constructor(
                 callback.onUrlCallback(urlToFile)
             } else {
                 throw RuntimeException(it.result.toString())
-//                scope.launch {
-//                    flowToast.emit(it.result.toString())
-//                }
-//                Toast.makeText(getApplication(), "${it.result}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -144,11 +130,6 @@ class AuthenticationOfUser @Inject constructor(
 
         }.addOnFailureListener {
 
-//            _error.value = it.message
         }
-//        if (password == user.password) {
-//            MyDatabaseConnection.userId = user.id
-//            _success.value = user ?: User()
-//        }
     }
 }
