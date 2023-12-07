@@ -6,6 +6,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class CheckNoteItem(
     val itemTitle: String = "",
-    var isChecked: Boolean = false,
-    var id: String = ""
+    val isChecked: Boolean = false,
+    val id: String = ""
 ): Parcelable

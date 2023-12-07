@@ -6,15 +6,14 @@ import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@Entity(tableName = "boards")
 data class Board(
     @PrimaryKey
     val id: String = "",
-    var title: String = "",
+    val title: String = "",
     val creatorId: String = "",
     val backgroundUrl: String = "",
     val members: List<String> = emptyList(),
-    var listsOfNotesIds: List<String> = emptyList()
+    val listsOfNotesIds: List<String> = emptyList()
 
     ) :
     Parcelable

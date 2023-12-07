@@ -23,7 +23,7 @@ interface TaskRepository {
 
     fun getBoard()
 
-    fun addUser(user: User)
+    suspend fun addUser(user: User)
 
     fun createNewBoard(
         name: String,
@@ -63,7 +63,7 @@ interface TaskRepository {
 
     fun getListOfListNotes(boardId: String): LiveData<List<ListOfNotesItem>>
 
-    fun addBoard(board: Board)
+    suspend fun addBoard(board: Board)
 
     fun getListsOfNotesFlow(board: Board): Flow<List<ListOfNotesItem>>
 
@@ -110,11 +110,11 @@ interface TaskRepository {
         fun onUrlCallback(url: String)
     }
 
-    fun addUserForInvites(user: User)
+    suspend fun addUserForInvites(user: User)
 
-    fun addListOfNote(listOfNotesItem: ListOfNotesItem)
+    suspend fun addListOfNote(listOfNotesItem: ListOfNotesItem)
 
-    fun addNote(note: Note)
+    suspend fun addNote(note: Note)
 
-    fun addInvite(invite: Invite)
+    suspend fun addInvite(invite: Invite)
 }

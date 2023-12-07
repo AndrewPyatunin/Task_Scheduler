@@ -7,7 +7,7 @@ class AddUserUseCase(
     private val repository: TaskRepository
 ) {
 
-    fun execute(user: User) {
+    suspend fun execute(user: User) {
         repository.addUser(user)
     }
 }

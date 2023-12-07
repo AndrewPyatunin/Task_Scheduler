@@ -8,16 +8,15 @@ import com.example.taskscheduler.domain.UrgencyOfNote
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@Entity(tableName = "notes")
 data class Note(
     @PrimaryKey
     val id: String = "",
-    var title: String = "",
+    val title: String = "",
     val creatorId: String = "",
     val members: List<User> = emptyList(),
-    var description: String = "",
-    var date: String = "",
+    val description: String = "",
+    val date: String = "",
     val listOfTasks: List<CheckNoteItem> = ArrayList(),
-    var priority: UrgencyOfNote = UrgencyOfNote.LOW
+    val priority: UrgencyOfNote = UrgencyOfNote.LOW
     ) :
     Parcelable

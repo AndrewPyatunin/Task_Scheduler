@@ -12,7 +12,7 @@ interface TaskDatabaseDao {
     fun getBoardsFlow(): Flow<List<BoardDb>>
 
     @Query("SELECT * FROM boards")
-    fun getBoards(): List<BoardDb>
+    suspend fun getBoards(): List<BoardDb>
 
     @Query("SELECT * FROM notes")
     fun getNotesFlow(): Flow<List<NoteDb>>
@@ -36,39 +36,39 @@ interface TaskDatabaseDao {
     fun getUsersForInvites(): Flow<List<UserForInvitesDb>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addNote(note: NoteDb)
+    suspend fun addNote(note: NoteDb)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addBoard(board: BoardDb)
+    suspend fun addBoard(board: BoardDb)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addInvite(invite: InviteDb)
+    suspend fun addInvite(invite: InviteDb)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addListOfNotes(listOfNotesItem: ListOfNotesDb)
+    suspend fun addListOfNotes(listOfNotesItem: ListOfNotesDb)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addUser(user: UserDb)
+    suspend fun addUser(user: UserDb)
 
     @Query("DELETE FROM notes WHERE id = :id")
-    fun removeNote(id: String)
+    suspend fun removeNote(id: String)
 
     @Query("DELETE FROM boards WHERE id = :id")
-    fun removeBoard(id: String)
+    suspend fun removeBoard(id: String)
 
     @Query("DELETE FROM listsOfNotes WHERE id = :id")
-    fun removeListOfNotes(id: String)
+    suspend fun removeListOfNotes(id: String)
 
     @Query("DELETE FROM invites WHERE id = :id")
-    fun removeInvite(id: String)
+    suspend fun removeInvite(id: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addUserForInvites(userForInvitesDb: UserForInvitesDb)
+    suspend fun addUserForInvites(userForInvitesDb: UserForInvitesDb)
 
     @Query("SELECT * FROM notes")
-    fun getNotes(): List<NoteDb>
+    suspend fun getNotes(): List<NoteDb>
 
     @Query("SELECT * FROM listsOfNotes")
-    fun getListsOfNotes(): List<ListOfNotesDb>
+    suspend fun getListsOfNotes(): List<ListOfNotesDb>
 
 }

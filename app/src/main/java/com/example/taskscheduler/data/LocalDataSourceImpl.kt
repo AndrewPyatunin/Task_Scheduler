@@ -14,7 +14,7 @@ class LocalDataSourceImpl(
         return taskDatabaseDao.getBoardsFlow()
     }
 
-    override fun getBoards(): List<BoardDb> {
+    override suspend fun getBoards(): List<BoardDb> {
         return taskDatabaseDao.getBoards()
     }
 
@@ -22,7 +22,7 @@ class LocalDataSourceImpl(
         return taskDatabaseDao.getListsOfNotesFlow()
     }
 
-    override fun getListsOfNotes(): List<ListOfNotesDb> {
+    override suspend fun getListsOfNotes(): List<ListOfNotesDb> {
         return taskDatabaseDao.getListsOfNotes()
     }
 
@@ -30,7 +30,7 @@ class LocalDataSourceImpl(
         return taskDatabaseDao.getNotesFlow()
     }
 
-    override fun getNotes(): List<NoteDb> {
+    override suspend fun getNotes(): List<NoteDb> {
         return taskDatabaseDao.getNotes()
     }
 
@@ -42,43 +42,43 @@ class LocalDataSourceImpl(
         return taskDatabaseDao.getUsersForInvites()
     }
 
-    override fun addBoard(boardDb: BoardDb) {
+    override suspend fun addBoard(boardDb: BoardDb) {
         taskDatabaseDao.addBoard(boardDb)
     }
 
-    override fun addUser(userDb: UserDb) {
+    override suspend fun addUser(userDb: UserDb) {
         taskDatabaseDao.addUser(userDb)
     }
 
-    override fun addNote(noteDb: NoteDb) {
+    override suspend fun addNote(noteDb: NoteDb) {
         taskDatabaseDao.addNote(noteDb)
     }
 
-    override fun addListOfNotes(listOfNotesDb: ListOfNotesDb) {
+    override suspend fun addListOfNotes(listOfNotesDb: ListOfNotesDb) {
         taskDatabaseDao.addListOfNotes(listOfNotesDb)
     }
 
-    override fun addInvite(inviteDb: InviteDb) {
+    override suspend fun addInvite(inviteDb: InviteDb) {
         taskDatabaseDao.addInvite(inviteDb)
     }
 
-    override fun removeBoard(boardDb: BoardDb) {
+    override suspend fun removeBoard(boardDb: BoardDb) {
         taskDatabaseDao.removeBoard(boardDb.id)
     }
 
-    override fun removeNote(noteDb: NoteDb) {
+    override suspend fun removeNote(noteDb: NoteDb) {
         taskDatabaseDao.removeNote(noteDb.id)
     }
 
-    override fun removeListOfNotes(listId: String) {
+    override suspend fun removeListOfNotes(listId: String) {
         taskDatabaseDao.removeListOfNotes(listId)
     }
 
-    override fun removeInvite(inviteDb: InviteDb) {
+    override suspend fun removeInvite(inviteDb: InviteDb) {
         taskDatabaseDao.removeInvite(inviteDb.id)
     }
 
-    override fun addUserForInvites(userForInvitesDb: UserForInvitesDb) {
+    override suspend fun addUserForInvites(userForInvitesDb: UserForInvitesDb) {
         taskDatabaseDao.addUserForInvites(userForInvitesDb)
     }
 }

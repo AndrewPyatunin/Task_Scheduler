@@ -5,12 +5,11 @@ import androidx.room.Entity
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@Entity("invites")
 data class Invite(
-    var id: String = "",
-    var boardId: String = "",
-    var userSenderId: String = "",
-    var userName: String = "",
-    var userLastName: String = "",
-    var boardName: String = ""
+    val id: String = "",
+    val boardId: String = "",
+    val userSenderId: String = "",
+    val userName: String = "",
+    val userLastName: String = "",
+    val boardName: String = ""
 ): Parcelable

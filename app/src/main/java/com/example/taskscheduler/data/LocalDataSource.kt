@@ -9,37 +9,37 @@ interface LocalDataSource {
 
     fun getBoardsFlow(): Flow<List<BoardDb>>
 
-    fun getBoards(): List<BoardDb>
+    suspend fun getBoards(): List<BoardDb>
 
     fun getListsOfNotesFlow(boardId: String): Flow<List<ListOfNotesDb>>
 
-    fun getListsOfNotes(): List<ListOfNotesDb>
+    suspend fun getListsOfNotes(): List<ListOfNotesDb>
 
     fun getNotesFlow(listOfNotesId: String): Flow<List<NoteDb>>
 
-    fun getNotes(): List<NoteDb>
+    suspend fun getNotes(): List<NoteDb>
 
     fun getInvites(): Flow<List<InviteDb>>
 
     fun getUsersForInvites(): Flow<List<UserForInvitesDb>>
 
-    fun addBoard(boardDb: BoardDb)
+    suspend fun addBoard(boardDb: BoardDb)
 
-    fun addUser(userDb: UserDb)
+    suspend fun addUser(userDb: UserDb)
 
-    fun addNote(noteDb: NoteDb)
+    suspend fun addNote(noteDb: NoteDb)
 
-    fun addListOfNotes(listOfNotesDb: ListOfNotesDb)
+    suspend fun addListOfNotes(listOfNotesDb: ListOfNotesDb)
 
-    fun addInvite(inviteDb: InviteDb)
+    suspend fun addInvite(inviteDb: InviteDb)
 
-    fun removeBoard(boardDb: BoardDb)
+    suspend fun removeBoard(boardDb: BoardDb)
 
-    fun removeNote(noteDb: NoteDb)
+    suspend fun removeNote(noteDb: NoteDb)
 
-    fun removeListOfNotes(listId: String)
+    suspend fun removeListOfNotes(listId: String)
 
-    fun removeInvite(inviteDb: InviteDb)
+    suspend fun removeInvite(inviteDb: InviteDb)
 
-    fun addUserForInvites(userForInvitesDb: UserForInvitesDb)
+    suspend fun addUserForInvites(userForInvitesDb: UserForInvitesDb)
 }

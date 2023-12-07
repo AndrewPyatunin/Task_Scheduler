@@ -6,11 +6,10 @@ import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@Entity(tableName = "listsOfNotes")
 data class ListOfNotesItem(
     @PrimaryKey
-    var id: String = "",
+    val id: String = "",
     val title: String = "",
     val creatorId: String = "",
-    var listNotes: Map<String, Boolean> = HashMap()
+    val listNotes: Map<String, Boolean> = HashMap()
     ) : Parcelable

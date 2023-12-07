@@ -5,16 +5,15 @@ import androidx.room.Entity
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@Entity(tableName = "users")
 data class User(
-    var id: String = "",
+    val id: String = "",
     val name: String = "",
     val lastName: String = "",
     val email: String = "",
-    var onlineStatus: Boolean = false,
-    var boards: List<String> = emptyList(),
-    var uri: String = "",
-    var description: String = "",
-    var invites: Map<String, Boolean> = emptyMap()
+    val onlineStatus: Boolean = false,
+    val boards: List<String> = emptyList(),
+    val uri: String = "",
+    val description: String = "",
+    val invites: Map<String, Boolean> = emptyMap()
 
 ) : Parcelable

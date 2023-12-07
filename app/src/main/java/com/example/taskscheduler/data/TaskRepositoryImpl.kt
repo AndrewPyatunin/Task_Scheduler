@@ -54,7 +54,7 @@ class TaskRepositoryImpl(
         }
     }
 
-    private fun getBoards(): List<Board> {
+    private suspend fun getBoards(): List<Board> {
         return localDataSource.getBoards().let {
             mapperForBoardAndBoardDb.listMap(it)
         }
@@ -90,27 +90,27 @@ class TaskRepositoryImpl(
         }
     }
 
-    override fun addUser(user: User) {
+    override suspend fun addUser(user: User) {
         localDataSource.addUser(mapperForUserAndUserDb.mapToDb(user))
     }
 
-    override fun addUserForInvites(user: User) {
+    override suspend fun addUserForInvites(user: User) {
         localDataSource.addUserForInvites(mapperForUserAndUserForInvitesDb.mapToUserInvitesDb(user))
     }
 
-    override fun addBoard(board: Board) {
+    override suspend fun addBoard(board: Board) {
         localDataSource.addBoard(mapperForBoardAndBoardDb.mapToDb(board))
     }
 
-    override fun addListOfNote(listOfNotesItem: ListOfNotesItem) {
+    override suspend fun addListOfNote(listOfNotesItem: ListOfNotesItem) {
         localDataSource.addListOfNotes(mapperForListsOfNotesAndListsOfNotesDb.mapToDb(listOfNotesItem))
     }
 
-    override fun addNote(note: Note) {
+    override suspend fun addNote(note: Note) {
         localDataSource.addNote(mapperForNoteAndNoteDb.mapToDb(note))
     }
 
-    override fun addInvite(invite: Invite) {
+    override suspend fun addInvite(invite: Invite) {
         localDataSource.addInvite(mapperForInviteAndInviteDb.mapToDb(invite))
     }
 
@@ -162,9 +162,9 @@ class TaskRepositoryImpl(
     }
 
     override fun getBoardsFlow(user: User): Flow<List<Board>> = callbackFlow {
+        val boardsFromRoomDb = getBoards()
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val boardsFromRoomDb = getBoards()
                 val boardsId = user.boards
                 val boardsFromDb = ArrayList<Board>()
                 for (dataSnapshot in snapshot.children) {
@@ -485,7 +485,6 @@ class TaskRepositoryImpl(
         databaseNotesRef.child(idNote).setValue(note)
         listNotes as HashMap<String, Boolean>
         listNotes.put(idNote, true)
-        listOfNotesItem.listNotes = listNotes
         scope.launch {
             addNote(note)
             addListOfNote(listOfNotesItem.copy(listNotes = listNotes))
