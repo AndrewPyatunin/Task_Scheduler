@@ -1,4 +1,4 @@
-package com.example.taskscheduler
+package com.example.taskscheduler.presentation.boardlist
 
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
@@ -12,41 +12,21 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.R
 import com.example.taskscheduler.domain.DiffCallback
+import com.example.taskscheduler.domain.models.Board
 
-class BoardListDiffCallback(
-    private val oldList: List<Board>,
-    private val newList: List<Board>
-    ) : DiffUtil.Callback() {
-    override fun getOldListSize(): Int = oldList.size
+class BoardListAdapter : Adapter<BoardListAdapter.BoardListViewHolder>() {
 
-    override fun getNewListSize(): Int = newList.size
-
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        val oldBoard = oldList[oldItemPosition]
-        val newBoard = newList[newItemPosition]
-        return oldBoard.id == newBoard.id
-    }
-
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        val oldBoard = oldList[oldItemPosition]
-        val newBoard = newList[newItemPosition]
-        return oldBoard == newBoard
-    }
-
-}
-
-class BoardListAdapter: Adapter<BoardListAdapter.BoardListViewHolder>() {
-    var onItemClick:((Board) -> Unit)? = null
+    var onItemClick: ((Board) -> Unit)? = null
 
     var boards = emptyList<Board>()
-    set(newValue) {
-        val diffCallback = DiffCallback(field, newValue)
-        val diffResult = DiffUtil.calculateDiff(diffCallback)
-        diffResult.dispatchUpdatesTo(this)
-        field = newValue
-    }
+        set(newValue) {
+            val diffCallback = DiffCallback(field, newValue)
+            val diffResult = DiffUtil.calculateDiff(diffCallback)
+            diffResult.dispatchUpdatesTo(this)
+            field = newValue
+        }
 
     inner class BoardListViewHolder(
         itemView: View,
@@ -54,6 +34,7 @@ class BoardListAdapter: Adapter<BoardListAdapter.BoardListViewHolder>() {
         val linearLayout: LinearLayout = itemView.findViewById(R.id.linear_board_item)
 
     ) : ViewHolder(itemView) {
+
         init {
             itemView.setOnClickListener {
                 onItemClick?.invoke(boards[adapterPosition])
@@ -63,7 +44,8 @@ class BoardListAdapter: Adapter<BoardListAdapter.BoardListViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BoardListViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.board_list_item, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.board_list_item, parent, false)
         return BoardListViewHolder(view)
     }
 

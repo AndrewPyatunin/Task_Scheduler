@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.data.entities.*
 import com.example.taskscheduler.data.mappers.*
 import com.example.taskscheduler.domain.*
 import com.example.taskscheduler.domain.models.*
@@ -25,18 +26,18 @@ import kotlinx.coroutines.flow.*
 
 class TaskRepositoryImpl(
     private val localDataSource: LocalDataSource,
-    private val userToUserEntityMapper: UserToUserEntityMapper,
-    private val userEntityToUserMapper: UserEntityToUserMapper,
-    private val boardToBoardEntityMapper: BoardToBoardEntityMapper,
-    private val boardEntityToBoardMapper: BoardEntityToBoardMapper,
-    private val noteToNoteEntityMapper: NoteToNoteEntityMapper,
-    private val noteEntityToNoteMapper: NoteEntityToNoteMapper,
-    private val listOfNotesEntityToListOfNotesItemMapper: ListOfNotesEntityToListOfNotesItemMapper,
-    private val listOfNotesItemToListOfNotesEntityMapper: ListOfNotesItemToListOfNotesEntityMapper,
-    private val inviteEntityToInviteMapper: InviteEntityToInviteMapper,
-    private val inviteToInviteEntityMapper: InviteToInviteEntityMapper,
-    private val userToUserForInvitesMapper: UserToUserForInvitesMapper,
-    private val userForInvitesToUserMapper: UserForInvitesToUserMapper
+    private val userToUserEntityMapper: Mapper<User, UserEntity>,
+    private val userEntityToUserMapper: Mapper<UserEntity, User>,
+    private val boardToBoardEntityMapper: Mapper<Board, BoardEntity>,
+    private val boardEntityToBoardMapper: Mapper<BoardEntity, Board>,
+    private val noteToNoteEntityMapper: Mapper<Note, NoteEntity>,
+    private val noteEntityToNoteMapper: Mapper<NoteEntity, Note>,
+    private val listOfNotesEntityToListOfNotesItemMapper: Mapper<ListOfNotesEntity, ListOfNotesItem>,
+    private val listOfNotesItemToListOfNotesEntityMapper: Mapper<ListOfNotesItem, ListOfNotesEntity>,
+    private val inviteEntityToInviteMapper: Mapper<InviteEntity, Invite>,
+    private val inviteToInviteEntityMapper: Mapper<Invite, InviteEntity>,
+    private val userToUserForInvitesMapper: Mapper<User, UserForInvitesEntity>,
+    private val userForInvitesToUserMapper: Mapper<UserForInvitesEntity, User>
 ) : TaskRepository {
 
     private val auth = Firebase.auth
@@ -132,56 +133,10 @@ class TaskRepositoryImpl(
         localDataSource.addInvite(inviteToInviteEntityMapper.map(invite))
     }
 
-    private val _flowBoards = MutableSharedFlow<Board>()
-    val flowBoards: SharedFlow<Board> = _flowBoards.asSharedFlow()
-
-    override fun getBoards(user: User) {
-
-        //сущность из персистант вебсокет клин архитекче веб сокет
-        auth.addAuthStateListener {
-            val listener = object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val boardsFromRoomDb = getBoards()
-                    val boardsId = user.boards
-                    val boardsFromDb = ArrayList<Board>()
-                    for (dataSnapshot in snapshot.children) {
-                        val board = dataSnapshot.getValue(Board::class.java)
-                        if (board != null && dataSnapshot.key in boardsId && board !in boardsFromRoomDb) {
-//                                    boardsFromDb.add(board)
-
-                            CoroutineScope(Dispatchers.IO).launch {
-                                _flowBoards.emit(board)
-                                addBoard(board)//Добавление в room
-                            }
-
-                        }
-                    }
-
-//                            for (boardDb in boardsFromDb) {
-//                                if (boardDb !in boardsFromRoomDb)
-//                                    addBoard(boardDb)
-//                            }
-//                            boardsData.value = boardsFromDb
-
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-
-                    // logout()
-                }
-            }
-            if (it.currentUser != null) {
-                databaseBoardsReference.addValueEventListener(listener)
-
-            } else {
-                getBoards()
-            }
-        }
-    }
-
     override fun getBoardsFlow(user: User): Flow<List<Board>> = callbackFlow {
         val boardsFromRoomDb = getBoards()
         val listener = object : ValueEventListener {
+
             override fun onDataChange(snapshot: DataSnapshot) {
                 val boardsId = user.boards
                 val boardsFromDb = ArrayList<Board>()
@@ -193,25 +148,15 @@ class TaskRepositoryImpl(
                     }
                 }
                 trySend(boardsFromDb as List<Board>)
-
-//                            for (boardDb in boardsFromDb) {
-//                                if (boardDb !in boardsFromRoomDb)
-//                                    addBoard(boardDb)
-//                            }
-//                            boardsData.value = boardsFromDb
-
             }
 
             override fun onCancelled(error: DatabaseError) {
                 throw RuntimeException(error.message)
-                // logout()
             }
         }
         auth.addAuthStateListener {
             if (it.currentUser != null) {
                 databaseBoardsReference.addValueEventListener(listener)
-            } else {
-                getBoards()
             }
         }
         awaitClose {
@@ -247,7 +192,6 @@ class TaskRepositoryImpl(
         board: Board,
         scope: CoroutineScope
     ) {
-        val listUsers = MutableSharedFlow<List<User>>()
         databaseUsersReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val usersFromDb = ArrayList<User>()
@@ -264,9 +208,6 @@ class TaskRepositoryImpl(
 
                     }
                 }
-//                CoroutineScope(Dispatchers.IO).launch {
-//                    listUsers.emit(usersFromDb)
-//                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -361,12 +302,12 @@ class TaskRepositoryImpl(
                 }
 
             }.addOnFailureListener {
-            it.message?.let { it1 ->
-                scope.launch {
-                    flowBoardUpdate.emit(it1)
+                it.message?.let { it1 ->
+                    scope.launch {
+                        flowBoardUpdate.emit(it1)
+                    }
                 }
             }
-        }
         scope.launch {
             addBoard(board.copy(listsOfNotesIds = listOfNotesIdsNew))//Добавление в Room
         }
@@ -399,11 +340,9 @@ class TaskRepositoryImpl(
         localDataSource.removeListOfNotes(listOfNotesItem.id)
         val listNotes =
             localDataSource.getNotes().filter { it.id in listOfNotesItem.listNotes.keys }
-        if (listNotes != null) {
-            for (note in listNotes) {
-                databaseNotesRef.child(note.id).removeValue()
-                localDataSource.removeNote(note)
-            }
+        listNotes.map {
+            databaseNotesRef.child(it.id).removeValue()
+            localDataSource.removeNote(it)
         }
         if (isList) updateBoard(board, listOfNotesItem.id)
     }
@@ -581,6 +520,7 @@ class TaskRepositoryImpl(
     }
 
     interface UrlCallback {
+
         fun onUrlCallback(url: String)
     }
 
@@ -749,9 +689,7 @@ class TaskRepositoryImpl(
         databaseInvitesReference.child(userForInvite.id).child(board.id)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.hasChildren()) {
-
-                    } else {
+                    if (!snapshot.hasChildren()) {
                         val pushInvite =
                             databaseInvitesReference.child(userForInvite.id).child(board.id).push()
                         val inviteId = pushInvite.key.toString()
@@ -770,7 +708,6 @@ class TaskRepositoryImpl(
                         map[board.id] = true
                         ref.updateChildren(map)
                         _success.value = "Приглашение успешно отправлено"
-
                     }
 
                 }

@@ -5,7 +5,10 @@ import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
@@ -18,29 +21,26 @@ import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
 import com.example.taskscheduler.presentation.ViewModelFactory
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class BoardListFragment: Fragment(), MenuProvider {
+class BoardListFragment : Fragment(), MenuProvider {
 
     private var _binding: FragmentBoardListBinding? = null
     private val binding: FragmentBoardListBinding
         get() = _binding ?: throw RuntimeException("FragmentBoardListBinding==null")
-    private lateinit var userId: String
     lateinit var user: User
     var boardList = ArrayList<Board>()
+
     @Inject
     private lateinit var viewModelFactory: ViewModelFactory
     lateinit var recyclerViewBoardList: RecyclerView
     lateinit var boardsAdapter: BoardListAdapter
-    private val databaseImageUrlsReference = Firebase.database.getReference("ImageUrls")
-//    private val args by navArgs<BoardListFragmentArgs>()
-    private val viewModel by lazy { ViewModelProvider(this, viewModelFactory)[BoardListViewModel::class.java] }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        parseArgs()
+    private val viewModel by lazy {
+        ViewModelProvider(
+            this,
+            viewModelFactory
+        )[BoardListViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -69,35 +69,36 @@ class BoardListFragment: Fragment(), MenuProvider {
     }
 
 
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
     private fun observeViewModel() {
-        viewModel.firebaseUser.observe(viewLifecycleOwner, Observer {
-            if (it == null) {
-                launchLoginFragment()
-            }
-        })
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {//flow будет вызван, когда фрагмент перейдет в состояние Resumed и завершится в onPause
                 viewModel.userFlow?.collect {
                     user = it
-                    Glide.with(this@BoardListFragment).load(it.uri).centerCrop().into(binding.imageViewUserAvatarBoardList)
+                    Glide.with(this@BoardListFragment).load(it.uri).centerCrop()
+                        .into(binding.imageViewUserAvatarBoardList)
                     with(binding.textViewWelcomeUser) {
                         text =
-                            String.format(getString(R.string.welcome_user, user.name, user.lastName))
+                            String.format(
+                                getString(
+                                    R.string.welcome_user,
+                                    user.name,
+                                    user.lastName
+                                )
+                            )
                         visibility = View.VISIBLE
                     }
-                    viewModel.getBoardsFlow(it).collect { list ->
-                        boardsAdapter.boards = list
-                        with(binding) {
-                            loadingIndicator.visibility = View.GONE
-                            pleaseWaitTextView.visibility = View.GONE
-                            recyclerViewBoardList.visibility = View.VISIBLE
-                        }
+                }
+                viewModel.getBoardsFlow(user).collect { list ->
+                    boardsAdapter.boards = list
+                    with(binding) {
+                        loadingIndicator.visibility = View.GONE
+                        pleaseWaitTextView.visibility = View.GONE
+                        recyclerViewBoardList.visibility = View.VISIBLE
                     }
                 }
             }
@@ -108,27 +109,28 @@ class BoardListFragment: Fragment(), MenuProvider {
     private fun initViews() {
         recyclerViewBoardList = binding.recyclerViewBoardList
         recyclerViewBoardList.layoutManager = GridLayoutManager(requireContext(), 2)
-//        recyclerViewBoardList.isNestedScrollingEnabled = false
         boardsAdapter = BoardListAdapter()
         if (boardList.isNotEmpty()) boardsAdapter.boards = boardList
         recyclerViewBoardList.adapter = boardsAdapter
     }
 
-    private fun launchMyInvitesFragment(user: User) {
-    }
-
-    private fun launchLoginFragment() {
-//        findNavController().navigate(.actionBoardListFragmentToLoginFragment())
-    }
-
     private fun launchNewBoardFragment(user: User) {
-        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToNewBoardFragment(user, Board()))
+        findNavController().navigate(
+            BoardListFragmentDirections.actionBoardListFragmentToNewBoardFragment(
+                user,
+                Board()
+            )
+        )
     }
 
     private fun launchBoardFragment(board: Board) {
-        findNavController().navigate(BoardListFragmentDirections.actionBoardListFragmentToOuterBoardFragment(user, board))
+        findNavController().navigate(
+            BoardListFragmentDirections.actionBoardListFragmentToOuterBoardFragment(
+                user,
+                board
+            )
+        )
     }
-
 
 
     companion object {

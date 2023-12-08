@@ -15,7 +15,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.navOptions
 import com.bumptech.glide.Glide
-import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentUserProfileBinding
 import com.example.taskscheduler.findTopNavController
@@ -24,6 +23,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 class UserProfileFragment : Fragment() {
+
     lateinit var binding: FragmentUserProfileBinding
     val auth = Firebase.auth
     lateinit var viewModel: UserProfileViewModel
@@ -63,7 +63,6 @@ class UserProfileFragment : Fragment() {
                 editTextPersonEmail.setText(textViewEmail.text)
                 changeVisibilityForAllEmailElements()
                 imageViewSaveEmail.setOnClickListener {
-//                    val regex = "/w{3,20}@/w{3,20}./w{2,7}".toRegex()
                     viewModel.updateUserProfile("", editTextPersonEmail.text.toString())
                 }
             }
@@ -73,8 +72,9 @@ class UserProfileFragment : Fragment() {
         }
         observeViewModel()
     }
+
     private fun changeVisibilityForAllEmailElements() {
-        with (binding) {
+        with(binding) {
             changeVisibility(textViewEmail)
             changeVisibility(imageViewEditUserEmail)
             changeVisibility(editTextPersonEmail)

@@ -10,5 +10,4 @@ data class ListOfNotesEntity(
     val title: String,
     val creatorId: String,
     val listNotes: Map<String, Boolean>
-) {
-}
+)

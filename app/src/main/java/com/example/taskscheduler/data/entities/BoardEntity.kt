@@ -12,5 +12,4 @@ data class BoardEntity(
     val backgroundUrl: String,
     val members: List<String>,
     val listOfNotesIds: List<String>
-) {
-}
+)

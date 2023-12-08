@@ -15,7 +15,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.ChooseAvatarOptionFragment
 import com.example.taskscheduler.R
@@ -30,14 +33,12 @@ import java.io.File
 
 
 class RegistrationFragment : Fragment() {
+
     lateinit var directory: File
     private lateinit var auth: FirebaseAuth
     private lateinit var binding: FragmentRegistrationBinding
-
-    //    private lateinit var viewModel: RegistrationViewModel
     private lateinit var user: User
     private var uri: Uri? = null
-
     lateinit var viewModelFactory: ViewModelFactory
 
     private val viewModel by lazy {
@@ -121,11 +122,11 @@ class RegistrationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        viewModel = ViewModelProvider(this)[RegistrationViewModel::class.java]
         createDirectory()
         with(binding) {
             imageViewAvatar.setOnClickListener {
-            ChooseAvatarOptionFragment().newInstance().show(childFragmentManager, "ChooseAvatarDialog")
+                ChooseAvatarOptionFragment().newInstance()
+                    .show(childFragmentManager, "ChooseAvatarDialog")
 //                pickImageFromGallery()
                 val email = editTextEmailAddressRegistration.text.toString().trim()
                 val password = editTextPasswordRegistration.text.toString().trim()
@@ -162,7 +163,6 @@ class RegistrationFragment : Fragment() {
                     }
 
 
-
                 }
 
             }
@@ -173,32 +173,14 @@ class RegistrationFragment : Fragment() {
 
     private fun observeViewModel() {
 
-//        lifecycleScope.launch {
-//            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-//                viewModel.flowToast.collect {
-//                    Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//
-//        }
-
     }
 
     private fun launchWelcomeFragment(user: User) {
-        val userName = String.format(getString(R.string.full_name), user.name, user.lastName)
         findNavController().navigate(
             RegistrationFragmentDirections.actionRegistrationFragmentToWelcomeFragment(
                 user
             )
         )
-    }
-
-    private fun launchBoardListFragment(user: User) {
-        findNavController().navigate(RegistrationFragmentDirections.actionRegistrationFragmentToTabsFragment())
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, BoardListFragment.newInstance(user, ArrayList()))
-//            .addToBackStack(BoardListFragment.NAME_BOARD_LIST)
-//            .commit()
     }
 
     fun galleryClicked() {
@@ -210,6 +192,7 @@ class RegistrationFragment : Fragment() {
     }
 
     companion object {
+
         const val NAME_LAUNCH = "launchBoardListFragment"
         fun newInstance(): RegistrationFragment {
             return RegistrationFragment()

@@ -3,14 +3,14 @@ package com.example.taskscheduler.data.mappers
 import com.example.taskscheduler.data.entities.ListOfNotesEntity
 import com.example.taskscheduler.domain.models.ListOfNotesItem
 
-class ListOfNotesItemToListOfNotesEntityMapper {
+class ListOfNotesItemToListOfNotesEntityMapper : Mapper<ListOfNotesItem, ListOfNotesEntity> {
 
-    fun map(listOfNotesItem: ListOfNotesItem): ListOfNotesEntity {
+    override fun map(from: ListOfNotesItem): ListOfNotesEntity {
         return ListOfNotesEntity(
-            id = listOfNotesItem.id,
-            title = listOfNotesItem.title,
-            creatorId = listOfNotesItem.creatorId,
-            listNotes = listOfNotesItem.listNotes
+            id = from.id,
+            title = from.title,
+            creatorId = from.creatorId,
+            listNotes = from.listNotes
         )
     }
 

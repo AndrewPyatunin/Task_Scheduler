@@ -15,5 +15,4 @@ data class UserForInvitesEntity(
     val uri: String,
     val description: String,
     val invites: Map<String, Boolean>
-) {
-}
+)

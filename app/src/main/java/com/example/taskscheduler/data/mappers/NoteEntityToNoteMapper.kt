@@ -3,18 +3,18 @@ package com.example.taskscheduler.data.mappers
 import com.example.taskscheduler.data.entities.NoteEntity
 import com.example.taskscheduler.domain.models.Note
 
-class NoteEntityToNoteMapper {
+class NoteEntityToNoteMapper : Mapper<NoteEntity, Note> {
 
-    fun map(noteEntity: NoteEntity): Note {
+    override fun map(from: NoteEntity): Note {
         return Note(
-            id = noteEntity.id,
-            title = noteEntity.title,
-            creatorId = noteEntity.creatorId,
-            members = noteEntity.members,
-            description = noteEntity.description,
-            date = noteEntity.date,
-            listOfTasks = noteEntity.listOfTasks,
-            priority = noteEntity.priority
+            id = from.id,
+            title = from.title,
+            creatorId = from.creatorId,
+            members = from.members,
+            description = from.description,
+            date = from.date,
+            listOfTasks = from.listOfTasks,
+            priority = from.priority
         )
     }
 }

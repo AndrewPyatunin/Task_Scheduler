@@ -5,7 +5,7 @@ import com.example.taskscheduler.domain.models.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
-interface AuthUser {
+interface UserAuth {
 
     fun signUp(
         email: String,

@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {
 
-    fun getBoards(user: User)
-
     fun getBoardsFlow(user: User): Flow<List<Board>>
 
     fun getBoardsFlowFromRoom(): Flow<List<Board>>

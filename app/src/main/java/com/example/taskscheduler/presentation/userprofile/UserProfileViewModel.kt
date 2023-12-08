@@ -18,7 +18,8 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 
-class UserProfileViewModel(application: Application): AndroidViewModel(application) {
+class UserProfileViewModel(application: Application) : AndroidViewModel(application) {
+
     val auth = Firebase.auth
     private val databaseUsersRef = Firebase.database.getReference("Users")
     private val storageReference = Firebase.storage.reference
@@ -109,12 +110,14 @@ class UserProfileViewModel(application: Application): AndroidViewModel(applicati
                     Toast.makeText(
                         getApplication(),
                         "Обновление данных пользователя прошло успешно",
-                        Toast.LENGTH_SHORT)
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
 
                 }
             }
     }
+
     fun update(uri: Uri?, name: String) {
         if (uri != null) {
             upLoadUserAvatar(uri, name, object : UrlCallback {
@@ -124,7 +127,8 @@ class UserProfileViewModel(application: Application): AndroidViewModel(applicati
                     Toast.makeText(
                         getApplication(),
                         "Обновление данных пользователя прошло успешно",
-                        Toast.LENGTH_SHORT)
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 }
 
@@ -138,8 +142,10 @@ class UserProfileViewModel(application: Application): AndroidViewModel(applicati
         user!!.updateEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(getApplication(), "Электронный адрес пользователя обновлен",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        getApplication(), "Электронный адрес пользователя обновлен",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     ref.child("email").setValue(email)
                     _emailLiveData.value = email
                 }
@@ -153,6 +159,7 @@ class UserProfileViewModel(application: Application): AndroidViewModel(applicati
     }
 
     interface UrlCallback {
+
         fun onUrlCallback(url: String)
     }
 }

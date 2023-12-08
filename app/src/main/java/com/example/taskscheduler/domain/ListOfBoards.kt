@@ -8,4 +8,4 @@ import kotlinx.parcelize.Parcelize
 data class ListOfBoards(
     val listBoards: ArrayList<Board>,
     var id: String
-    ): Parcelable
+) : Parcelable

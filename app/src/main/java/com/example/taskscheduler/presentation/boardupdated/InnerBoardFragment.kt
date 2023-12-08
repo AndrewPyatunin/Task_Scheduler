@@ -28,7 +28,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
 
     lateinit var binding: FragmentInnerBoardBinding
     lateinit var list: ListOfNotesItem
-    lateinit var notesItem: NotesItem
     lateinit var user: User
     lateinit var board: Board
     lateinit var listNotes: List<Note>

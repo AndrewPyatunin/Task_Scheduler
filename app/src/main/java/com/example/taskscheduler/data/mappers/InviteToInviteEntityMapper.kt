@@ -3,16 +3,16 @@ package com.example.taskscheduler.data.mappers
 import com.example.taskscheduler.data.entities.InviteEntity
 import com.example.taskscheduler.domain.models.Invite
 
-class InviteToInviteEntityMapper {
+class InviteToInviteEntityMapper : Mapper<Invite, InviteEntity> {
 
-    fun map(invite: Invite): InviteEntity {
+    override fun map(from: Invite): InviteEntity {
         return InviteEntity(
-            id = invite.id,
-            boardId = invite.boardId,
-            userSenderId = invite.userSenderId,
-            userName = invite.userName,
-            userLastName = invite.userLastName,
-            boardName = invite.boardName
+            id = from.id,
+            boardId = from.boardId,
+            userSenderId = from.userSenderId,
+            userName = from.userName,
+            userLastName = from.userLastName,
+            boardName = from.boardName
         )
     }
 }

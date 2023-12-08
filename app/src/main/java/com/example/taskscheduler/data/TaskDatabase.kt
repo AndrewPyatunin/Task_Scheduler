@@ -6,12 +6,18 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.taskscheduler.data.entities.*
 
-@Database(entities = [BoardEntity::class, NoteEntity::class, ListOfNotesEntity::class, UserEntity::class, InviteEntity::class], version = 1)
+@Database(
+    entities = [BoardEntity::class, NoteEntity::class, ListOfNotesEntity::class, UserEntity::class, InviteEntity::class],
+    version = 1
+)
 abstract class TaskDatabase : RoomDatabase() {
+
     companion object {
+
         private var instance: TaskDatabase? = null
         private val LOCK = Any()
         private const val DB_NAME = "taskDatabase.db"
+
         fun getInstance(application: Application): TaskDatabase {
             instance?.let {
                 return it
@@ -27,5 +33,6 @@ abstract class TaskDatabase : RoomDatabase() {
             }
         }
     }
+
     abstract fun taskDatabaseDao(): TaskDatabaseDao
 }

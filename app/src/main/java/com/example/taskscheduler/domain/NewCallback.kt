@@ -1,6 +1,7 @@
 package com.example.taskscheduler.domain
 
-interface NewCallback{
+interface NewCallback {
+
     fun callbackNew(list: List<BackgroundImage>)
 
 }

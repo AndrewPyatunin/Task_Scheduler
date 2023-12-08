@@ -12,5 +12,4 @@ data class InviteEntity(
     val userName: String,
     val userLastName: String,
     val boardName: String
-) {
-}
+)

@@ -4,7 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.example.taskscheduler.data.mappers.UserEntityToUserMapper
 import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
-import com.example.taskscheduler.domain.AuthUser
+import com.example.taskscheduler.domain.UserAuth
 import com.example.taskscheduler.domain.models.User
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class AuthenticationOfUser @Inject constructor(
+class UserAuthentication @Inject constructor(
     private val localDataSource: LocalDataSource,
     private val userEntityToUserMapper: UserEntityToUserMapper,
     private val userToUserEntityMapper: UserToUserEntityMapper,
@@ -28,9 +28,10 @@ class AuthenticationOfUser @Inject constructor(
     private val storageReference: StorageReference,
     private val dao: TaskDatabaseDao,
     private val auth: FirebaseAuth
-) : AuthUser {
+) : UserAuth {
 
     interface UrlCallback {
+
         fun onUrlCallback(url: String)
     }
 

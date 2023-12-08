@@ -21,20 +21,26 @@ import com.google.firebase.ktx.Firebase
 import java.util.regex.Pattern
 
 class MainActivity : AppCompatActivity() {
+
     val auth = Firebase.auth
     var user = auth.currentUser
     private val databaseUsersRef = Firebase.database.getReference("Users")
-//}
     private var navController: NavController? = null
     private val topLevelDestinations = setOf(getWelcomeDestination(), getLoginDestination())
 
     private val fragmentListener = object : FragmentManager.FragmentLifecycleCallbacks() {
-        override fun onFragmentViewCreated(fm: FragmentManager, f: Fragment, v: View, savedInstanceState: Bundle?) {
+        override fun onFragmentViewCreated(
+            fm: FragmentManager,
+            f: Fragment,
+            v: View,
+            savedInstanceState: Bundle?
+        ) {
             super.onFragmentViewCreated(fm, f, v, savedInstanceState)
             if (f is TabsFragment || f is NavHostFragment) return
             onNavControllerActivated(f.findNavController())
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.Theme_AppCompat_Main)
@@ -82,7 +88,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getRootNavController(): NavController {
-        val navHost = supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
+        val navHost =
+            supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
         return navHost.navController
     }
 
@@ -117,10 +124,11 @@ class MainActivity : AppCompatActivity() {
         return startDestinations.contains(destination.id)
     }
 
-    private val destinationListener = NavController.OnDestinationChangedListener { _, destination, arguments ->
-        supportActionBar?.setDisplayHomeAsUpEnabled(!isStartDestination(destination))
-        supportActionBar?.title = prepareTitle(destination.label, arguments)
-    }
+    private val destinationListener =
+        NavController.OnDestinationChangedListener { _, destination, arguments ->
+            supportActionBar?.setDisplayHomeAsUpEnabled(!isStartDestination(destination))
+            supportActionBar?.title = prepareTitle(destination.label, arguments)
+        }
 
 
     private fun prepareTitle(label: CharSequence?, arguments: Bundle?): String {

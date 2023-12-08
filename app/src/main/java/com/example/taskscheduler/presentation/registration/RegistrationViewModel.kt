@@ -3,9 +3,9 @@ package com.example.taskscheduler.presentation.registration
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.AddUserUseCase
 import com.example.taskscheduler.domain.usecases.RegistrationUseCase
-import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.UserAuthState
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
@@ -20,17 +20,24 @@ class RegistrationViewModel @Inject constructor(
     private val auth: FirebaseAuth
 ) : ViewModel() {
 
-    private fun addUserToRoom(user: User) = addUserUseCase.execute(user)
+    private suspend fun addUserToRoom(user: User) = addUserUseCase.execute(user)
 
 
-    fun signUp(email: String, password: String, name: String, lastName: String, uri: Uri?): Flow<UserAuthState> {
+    fun signUp(
+        email: String,
+        password: String,
+        name: String,
+        lastName: String,
+        uri: Uri?
+    ): Flow<UserAuthState> {
         auth.addAuthStateListener {
             if (it.currentUser == null) return@addAuthStateListener
         }
-        return registrationUseCase.execute(email, password, name, lastName, uri, viewModelScope).map {
-            addUserToRoom(it)
-            UserAuthState.Success(it) as UserAuthState
-        }.onStart {
+        return registrationUseCase.execute(email, password, name, lastName, uri, viewModelScope)
+            .map {
+                addUserToRoom(it)
+                UserAuthState.Success(it) as UserAuthState
+            }.onStart {
             emit(UserAuthState.Loading)
         }.catch {
             it.message?.let { message ->

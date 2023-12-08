@@ -7,7 +7,8 @@ import com.example.taskscheduler.domain.models.*
 class DiffCallback<T>(
     private val oldList: List<T>,
     private val newList: List<T>
-    ) : DiffUtil.Callback() {
+) : DiffUtil.Callback() {
+
     override fun getOldListSize(): Int = oldList.size
 
     override fun getNewListSize(): Int = newList.size
@@ -15,6 +16,7 @@ class DiffCallback<T>(
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
         return oldList[oldItemPosition] == newList[newItemPosition]
     }
+
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
         val old = oldList[oldItemPosition]
         val new = newList[newItemPosition]
