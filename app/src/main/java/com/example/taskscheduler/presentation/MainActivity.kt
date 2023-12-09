@@ -112,8 +112,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun isSignedIn(): Boolean {
-//        val bundle = intent.extras ?: throw IllegalStateException("No required arguments")
-//        val args = MainActivityArgs.fromBundle(bundle)
         return user != null
     }
 
@@ -132,8 +130,6 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun prepareTitle(label: CharSequence?, arguments: Bundle?): String {
-
-        // code for this method has been copied from Google sources :)
 
         if (label == null) return ""
         val title = StringBuffer()

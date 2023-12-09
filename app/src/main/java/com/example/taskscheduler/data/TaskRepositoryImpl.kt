@@ -444,14 +444,11 @@ class TaskRepositoryImpl(
     override fun updateNote(note: Note): LiveData<List<CheckNoteItem>> {
         databaseNotesRef.child(note.id).setValue(note)
         val checkList = ArrayList<CheckNoteItem>()
-//        listNotes as HashMap<String, Boolean>
-//        listNotes.put(note.id, true)
         checkList.addAll(note.listOfTasks)
         CoroutineScope(Dispatchers.IO).launch {
             addNote(note)
         }
 
-//        _noteData.postValue(checkList)
     }
 
     override fun deleteNote(note: Note, board: Board, listOfNotesItem: ListOfNotesItem) {

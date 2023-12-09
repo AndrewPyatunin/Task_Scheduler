@@ -12,8 +12,6 @@ class ReplyToInviteDialogFragment : DialogFragment() {
 
     lateinit var invite: Invite
 
-//    private val args by navArgs<ReplyToInviteDialogFragmentArgs>()
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         parseArgs()
         Log.i("USER_INVITE_SHOW", invite.boardName)
@@ -34,12 +32,13 @@ class ReplyToInviteDialogFragment : DialogFragment() {
         }
 
     }
+
     private fun parseArgs() {
         invite = requireArguments().getParcelable(KEY_INVITE) ?: Invite()
-//        invite = args.invite
     }
 
     companion object {
+
         const val KEY_INVITE = "invite"
 
         fun newInstance(invite: Invite): ReplyToInviteDialogFragment {

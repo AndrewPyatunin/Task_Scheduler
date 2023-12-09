@@ -26,33 +26,24 @@ import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlin.math.abs
 
 
 class OuterBoardFragment : Fragment() {
-    lateinit var binding: FragmentOuterBoardBinding
 
-    //    private val binding: FragmentBoardBinding
-//        get() = _binding ?: throw RuntimeException("FragmentBoardBinding==null")
+    lateinit var binding: FragmentOuterBoardBinding
     lateinit var board: Board
     lateinit var user: User
-    val position = MyDatabaseConnection.currentPosition
     private var parentAdapter: OuterBoardAdapter? = null
     lateinit var viewModel: OuterBoardViewModel
     private var parentList = ArrayList<ListOfNotesItem>()
     private var viewPager: ViewPager2? = null
     private lateinit var tabLayout: TabLayout
     var currentPosition = 0
-    var isFirst = true
 
     private val args by navArgs<OuterBoardFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        if (savedInstanceState != null) {
-//            currentPosition = requireArguments().getInt("position")
-//            Log.i("USER_SAVED", currentPosition.toString())
-//        }
         parseArgs()
         MyDatabaseConnection.currentPosition = 0
         MyDatabaseConnection.updated = true
@@ -80,20 +71,12 @@ class OuterBoardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        sharedPreferences = context?.getSharedPreferences("tabPosition", Context.MODE_PRIVATE)
         viewModel = ViewModelProvider(this)[OuterBoardViewModel::class.java]
 
-//        currentPosition = requireArguments().getInt("position")
-
         currentPosition = MyDatabaseConnection.currentPosition
-//        if (parentAdapter != null) {
-//            parentAdapter?.notifyDataSetChanged()
-//        }
         if (MyDatabaseConnection.updated) {
             viewModel.readData(board.id)
         }
-
-//        initViews()
         observeViewModel()
         binding.imageViewInvite.setOnClickListener {
             launchInviteUserFragment()
@@ -119,7 +102,6 @@ class OuterBoardFragment : Fragment() {
 
             val textTitle = editText.text.toString().trim()
             if (textTitle.isNotEmpty()) {
-                val item = viewModel.createNewList(textTitle, board, user)
                 textView.visibility = View.VISIBLE
                 editText.visibility = View.INVISIBLE
                 buttonAddNewList.visibility = View.INVISIBLE
@@ -156,15 +138,8 @@ class OuterBoardFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-
-//        viewModel.listNotesLiveData.observe(viewLifecycleOwner, Observer {
-//
-//
-//        })
         viewModel.listLiveData.observe(viewLifecycleOwner, Observer {
             parentList = it as ArrayList<ListOfNotesItem>
-//            Log.i("USER_OBSERVE_LIST", parentList[1].title)
-//            val listFragment = ArrayList<Fragment>()
             for (item in it) {
                 binding.tabLayout.visibility = View.VISIBLE
             }
@@ -213,29 +188,6 @@ class OuterBoardFragment : Fragment() {
             cardViewBoard.visibility = View.VISIBLE
             imageViewInvite.visibility = View.VISIBLE
             viewPager.visibility = View.VISIBLE
-//                tabLayout.visibility = View.VISIBLE
         }
     }
-    
-
-}
-
-
-class MyPageTransformer : ViewPager2.PageTransformer {
-    override fun transformPage(view: View, position: Float) {
-        if (position <= -1.0F || position >= 1.0F) {
-            view.translationX = view.width * position
-            view.alpha = 0.0F
-        } else if (position == 0.0F) {
-            view.translationX = view.width * position
-            view.alpha = 1.0F
-        } else {
-            // position is between -1.0F & 0.0F OR 0.0F & 1.0F
-            view.translationX = view.width * -position
-            view.alpha = 1.0F - abs(position)
-        }
-
-    }
-
-
 }

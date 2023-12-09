@@ -16,18 +16,12 @@ import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
 
 class MyInvitesFragment : Fragment() {
+
     lateinit var binding: FragmentMyInvitesBinding
     lateinit var recyclerView: RecyclerView
     lateinit var adapter: MyInvitesAdapter
     lateinit var viewModel: MyInvitesViewModel
     lateinit var user: User
-
-//    private val args by navArgs<MyInvitesFragmentArgs>()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        user = args.user
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,14 +38,14 @@ class MyInvitesFragment : Fragment() {
         observeViewModel()
         initViews()
         adapter.onItemClick = {
-//            findNavController().navigate(MyInvitesFragmentDirections.actionMyInvitesFragmentToReplyToInviteDialogFragment(it))
             ReplyToInviteDialogFragment.newInstance(it).show(childFragmentManager, "ReplyDialog")
         }
     }
 
     private fun initViews() {
         recyclerView = binding.recyclerViewMyInvites
-        recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        recyclerView.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         adapter = MyInvitesAdapter()
         recyclerView.adapter = adapter
     }
@@ -65,10 +59,6 @@ class MyInvitesFragment : Fragment() {
         })
     }
 
-//    private fun parseArgs(): User {
-//        return requireArguments().getParcelable<User>(KEY_USER)!!
-//    }
-
     fun okClicked(invite: Invite) {
         Log.i("USER_AFTER_INVITE_CLICK", user.name)
         viewModel.acceptInvite(user, invite)
@@ -80,6 +70,7 @@ class MyInvitesFragment : Fragment() {
 
 
     companion object {
+
         const val KEY_USER = "user"
 
         fun newInstance(user: User): MyInvitesFragment {
@@ -87,7 +78,6 @@ class MyInvitesFragment : Fragment() {
             return MyInvitesFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(KEY_USER, user)
-//                    putParcelable()
                 }
             }
         }

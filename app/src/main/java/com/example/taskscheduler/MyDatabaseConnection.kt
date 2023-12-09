@@ -22,18 +22,7 @@ object MyDatabaseConnection : DatabaseConnection {
     var list = emptyList<BackgroundImage>()
     var updated = true
     var userId: String? = null
-//    override fun <T>queryUser(ref: DatabaseReference, liveData: LiveData<T>) {
-//        ref.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                snapshot.getValue()
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//
-//            }
-//
-//        })
-//    }
+
     fun onCallbackReady() {
         getBackgroundImages(object : NewCallback {
             override fun callbackNew(list: List<BackgroundImage>) {

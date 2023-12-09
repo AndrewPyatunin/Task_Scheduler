@@ -47,7 +47,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
     ): View? {
         binding = FragmentNewNoteBinding.inflate(inflater, container, false)
         binding.calendarView.visibility = View.GONE
-        return binding.root//super.onCreateView(inflater, container, savedInstanceState)
+        return binding.root
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,7 +88,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
                     calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
 
 
-//                        textViewDate.text = "$dayOfMonth.$newMonth.$year"
+
                         textViewDate.text = String.format(
                             getString(R.string.date),
                             dateIntToString(dayOfMonth, 0), dateIntToString(month, 1), year
@@ -100,13 +100,8 @@ class NewNoteFragment : Fragment(), MenuProvider {
                     }
                 }
 
-//                buttonNewNote.visibility = View.GONE
-//                textViewDescription.visibility = View.VISIBLE
-//                textViewNewNoteTitle.visibility = View.VISIBLE
                 imageViewEditDescription.visibility = View.VISIBLE
                 imageViewEditDescription.setOnClickListener {
-//                    switchVisibility(textViewCheckPercent)
-//                    switchVisibility(progressBar)
                     switchVisibility(textViewDescription)
                     switchVisibility(editTextDescription)
                     switchVisibility(buttonNewNote)
@@ -114,7 +109,6 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 }
             }
         } else {
-//            switchVisibility(binding.imageViewDescription)
             switchVisibility(binding.buttonAddCheckListItem)
         }
 
@@ -130,8 +124,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
                         (note.listOfTasks as ArrayList).add(CheckNoteItem(title, false, "$id"))
                         calculateProgress()
                         viewModel.updateNote(note)
-//                        newNoteAdapter.checkItemsList = note.listOfTasks
-//                        newNoteAdapter.notifyDataSetChanged()
+
                         buttonAddCheckListItem.visibility = View.VISIBLE
                         buttonAddItemToCheckList.visibility = View.GONE
                         editTextCheckTitle.visibility = View.GONE
@@ -217,26 +210,8 @@ class NewNoteFragment : Fragment(), MenuProvider {
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
         newNoteAdapter = NewNoteCheckItemAdapter()
         newNoteAdapter.checkItemsList = ArrayList(note.listOfTasks)
-//        newNoteAdapter.onItemClick = {
-//            it.isChecked = !it.isChecked
-////            if (list.contains(it.id)) {
-////                it.isChecked = false
-////                list.remove(it.id)
-////            }
-////            else {
-////                it.isChecked = true
-////                list.add(it.id)
-////            }
-//            note.listOfTasks
-//            for (item in  note.listOfTasks) {
-//                item.isChecked
-//            }
-//            note.listOfTasks
-//            viewModel.updateNote(note, board, listOfNotesItem)
-//        }
         recyclerView.adapter = newNoteAdapter
         (recyclerView.adapter as NewNoteCheckItemAdapter).onItemClick = {
-//            it.isChecked = !it.isChecked
             if (list.contains(it.id)) list.remove(it.id)
             else list.add(it.id)
             val index = note.listOfTasks.indexOf(it)
@@ -257,16 +232,11 @@ class NewNoteFragment : Fragment(), MenuProvider {
     }
 
     private fun observeViewModel() {
-//        viewModel.boardLiveData.observe(viewLifecycleOwner, Observer {
-//            board = it
-//
-//        })
         viewModel.success.observe(viewLifecycleOwner, Observer {
             launchBoardFragment(it, user)
         })
         viewModel.noteData.observe(viewLifecycleOwner, Observer {
             newNoteAdapter.checkItemsList = it
-//            newNoteAdapter = NewNoteCheckItemAdapter(it)
         })
         viewModel.error.observe(viewLifecycleOwner, Observer {
 
@@ -275,13 +245,6 @@ class NewNoteFragment : Fragment(), MenuProvider {
 
     private fun launchBoardFragment(board: Board, user: User) {
         findNavController().popBackStack()
-//        findNavController().navigate(
-//            NewNoteFragmentDirections.actionNewNoteFragmentToOuterBoardFragment(
-//                user,
-//                board
-//            )
-//        )
-//        findNavController().navigate(NewNoteFragmentDirections.actionNewNoteFragmentToBoardFragment(board, user))
     }
 
     companion object {

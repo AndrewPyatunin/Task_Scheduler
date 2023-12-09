@@ -52,8 +52,6 @@ class NewNoteViewModel : ViewModel() {
         viewModelScope.launch {
             databaseNotesRef.child(note.id).setValue(note)
             val checkList = ArrayList<CheckNoteItem>()
-//        listNotes as HashMap<String, Boolean>
-//        listNotes.put(note.id, true)
             checkList.addAll(note.listOfTasks)
             _noteData.postValue(checkList)
         }

@@ -2,6 +2,8 @@ package com.example.taskscheduler.data
 
 import android.net.Uri
 import android.util.Log
+import com.example.taskscheduler.data.entities.UserEntity
+import com.example.taskscheduler.data.mappers.Mapper
 import com.example.taskscheduler.data.mappers.UserEntityToUserMapper
 import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
 import com.example.taskscheduler.domain.UserAuth
@@ -22,8 +24,8 @@ import javax.inject.Inject
 
 class UserAuthentication @Inject constructor(
     private val localDataSource: LocalDataSource,
-    private val userEntityToUserMapper: UserEntityToUserMapper,
-    private val userToUserEntityMapper: UserToUserEntityMapper,
+    private val userEntityToUserMapper: Mapper<UserEntity, User>,
+    private val userToUserEntityMapper: Mapper<User, UserEntity>,
     private val databaseUsersReference: DatabaseReference,
     private val storageReference: StorageReference,
     private val dao: TaskDatabaseDao,
@@ -53,7 +55,6 @@ class UserAuthentication @Inject constructor(
                             val user = User(userId, name, lastName, email, true, emptyList(), url)
                             databaseUsersReference.child(userId).setValue(user)
                             trySend(user)
-//                        _user.value = user
                             scope.launch {
                                 localDataSource.addUser(userToUserEntityMapper.map(user))
                             }

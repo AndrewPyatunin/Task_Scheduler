@@ -63,7 +63,6 @@ class UserProfileViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun upLoadUserAvatar(uri: Uri, name: String, callback: UrlCallback) {
-//        val imageStorage = storageReference.child("images")
         val imageRef = storageReference.child("images/${uri.lastPathSegment}")
         imageRef.putFile(uri).continueWithTask {
             if (!it.isSuccessful) {

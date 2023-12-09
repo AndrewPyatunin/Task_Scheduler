@@ -69,7 +69,6 @@ class InviteUserAdapter() : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
     override fun onBindViewHolder(holder: InviteUserViewHolder, position: Int) {
         val user = users[position]
         val userInfo = String.format("%s %s", user.name, user.lastName)
-//        holder.checkBoxInvited.onTouchEvent()
         holder.textViewUserInfo.text = userInfo
 
         holder.viewStatus.background = if (user.onlineStatus) {

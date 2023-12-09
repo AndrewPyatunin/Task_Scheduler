@@ -14,14 +14,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.taskscheduler.NewBoardAdapter
 import com.example.taskscheduler.databinding.FragmentNewBoardBinding
 import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
-import com.example.taskscheduler.presentation.boardupdated.RecyclerViewReadyCallback
 
 class NewBoardFragment : Fragment() {
+
     private var _binding: FragmentNewBoardBinding? = null
     private val binding: FragmentNewBoardBinding
         get() = _binding ?: throw RuntimeException("FragmentNewBoardBinding==null")
@@ -29,9 +28,7 @@ class NewBoardFragment : Fragment() {
     lateinit var user: User
     lateinit var board: Board
     lateinit var newBoardAdapter: NewBoardAdapter
-    var listOfImageUrls = ArrayList<String>()
     var urlBackground = ""
-    private var recyclerViewReadyCallback: RecyclerViewReadyCallback? = null
 
     private val args by navArgs<NewBoardFragmentArgs>()
 
@@ -84,31 +81,18 @@ class NewBoardFragment : Fragment() {
     }
 
     private fun launchBoardFragment(board: Board, user: User) {
-        findNavController().navigate(NewBoardFragmentDirections.actionNewBoardFragmentToOuterBoardFragment(user, board))
-//        Log.i("USER_NEW_BOARD", user.name)
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, BoardFragment.newInstance(board, user))
-////            .addToBackStack(null)
-//            .commit()
-    }
-    private fun launchLoginFragment() {
-//        findNavController().navigate(NewBoardFragmentDirections.actionNewBoardFragmentToLoginFragment())
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, LoginFragment.newInstance())
-//            .addToBackStack(null)
-//            .commit()
+        findNavController().navigate(
+            NewBoardFragmentDirections.actionNewBoardFragmentToOuterBoardFragment(
+                user,
+                board
+            )
+        )
     }
 
     private fun initViews() {
         val recyclerView = binding.recyclerViewNewBoard
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
-//        recyclerView.setHasFixedSize(true)
         newBoardAdapter = NewBoardAdapter(requireContext())
-//        if (listOfImageUrls.isNotEmpty()) {
-//            newBoardAdapter.backgroundImageUrls = buildImageList(listOfImageUrls)
-//
-//        }
-//        recyclerView.runWhenReady {  }
         recyclerView.adapter = newBoardAdapter
         with(binding) {
             loadingIndicatorNewBoard.visibility = View.GONE
@@ -117,33 +101,10 @@ class NewBoardFragment : Fragment() {
             saveNewBoard.visibility = View.VISIBLE
 
         }
-//        recyclerViewReadyCallback = object: RecyclerViewReadyCallback {
-//            override fun onLayoutReady() {
-//                with(binding) {
-//                    loadingIndicatorNewBoard.visibility = View.GONE
-//                    pleaseWaitTextViewNewBoard.visibility = View.GONE
-//                    recyclerViewNewBoard.visibility = View.VISIBLE
-//                    saveNewBoard.visibility = View.VISIBLE
-//
-//                }
-//            }
-//
-//        }
-//
-//        recyclerView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-//            override fun onGlobalLayout() {
-//                if (recyclerViewReadyCallback != null) {
-//                    recyclerViewReadyCallback?.onLayoutReady()
-//                }
-//                recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
-//            }
-//
-//        })
-
     }
 
     private fun RecyclerView.runWhenReady(action: () -> Unit) {
-        val globalLayoutListener = object: OnGlobalLayoutListener {
+        val globalLayoutListener = object : OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 action()
                 viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -152,21 +113,6 @@ class NewBoardFragment : Fragment() {
         viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
     }
 
-//    private fun buildImageList(list: List<String>): ArrayList<BackgroundImage> {
-//        val listOfBackgroundImage = ArrayList<BackgroundImage>()
-//        for ((i, item) in list.withIndex()) {
-//            listOfBackgroundImage.add(BackgroundImage(/*"${System.currentTimeMillis()}"*/"$i", item, false))
-//        }
-//        return listOfBackgroundImage
-//    }
-
-    private fun parseArgs(): User {
-        var user = User()
-        requireArguments().getParcelable<User>(USER)?.let {
-            user = it
-        }
-        return user
-    }
 
     private fun observeViewModel() {
         viewModel.user.observe(viewLifecycleOwner, Observer {
@@ -178,11 +124,6 @@ class NewBoardFragment : Fragment() {
             if (it != null) {
                 Log.i("USER_NEW_BOARD", user.name)
                 launchBoardFragment(it, user)
-            }
-        })
-        viewModel.error.observe(viewLifecycleOwner, Observer {
-            if (it != null) {
-                launchLoginFragment()
             }
         })
         viewModel.urlImage.observe(viewLifecycleOwner, Observer {
@@ -197,9 +138,6 @@ class NewBoardFragment : Fragment() {
             }
         })
 
-//        viewModel.recyclerIsReady.observe(viewLifecycleOwner, Observer {
-//
-//        })
     }
 
     companion object {

@@ -10,7 +10,6 @@ import com.example.taskscheduler.domain.models.ListOfNotesItem
 class ListDialogFragment(val list: List<ListOfNotesItem>) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-//        return super.onCreateDialog(savedInstanceState)
         val listTitles = ArrayList<String>()
         for (item in list) {
             listTitles.add(item.title)

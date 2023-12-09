@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.widget.CheckBox
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -14,12 +13,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.taskscheduler.*
+import com.example.taskscheduler.InviteUserAdapter
 import com.example.taskscheduler.databinding.FragmentInviteUserBinding
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 
-class InviteUserFragment : Fragment(){
+class InviteUserFragment : Fragment() {
+
     lateinit var binding: FragmentInviteUserBinding
     lateinit var recyclerViewUser: RecyclerView
     private var userAdapter: InviteUserAdapter? = null
@@ -46,16 +46,6 @@ class InviteUserFragment : Fragment(){
         return binding.root
     }
 
-//    override fun onResume() {
-//        super.onResume()
-//        viewModel.setUserStatus(true)
-//    }
-//
-//    override fun onPause() {
-//        super.onPause()
-//        viewModel.setUserStatus(false)
-//    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModelFactory = InviteUserViewModelFactory(board)
@@ -64,19 +54,16 @@ class InviteUserFragment : Fragment(){
         initViews()
         if (userAdapter != null)
             userAdapter?.onItemClick = {
-                val checkBox = requireActivity().findViewById<CheckBox>(R.id.checkBoxInvited)
                 if (it !in listForInvite) {
-    //                checkBox.isChecked = true
                     listForInvite.add(it)
                 } else if (it in listForInvite) {
-    //                checkBox.isChecked = false
                     listForInvite.remove(it)
                 }
                 Log.i("USER_INVITE_LIST", listForInvite.joinToString { it -> it.toString() })
             }
         binding.buttonInviteUser.setOnClickListener {
             for (userForInvite in listForInvite) {
-                viewModel.inviteUser(userForInvite, user,  board)
+                viewModel.inviteUser(userForInvite, user, board)
             }
         }
         binding.recyclerViewInviteUser.afterMeasured {
@@ -93,20 +80,18 @@ class InviteUserFragment : Fragment(){
     private fun initViews() {
         recyclerViewUser = binding.recyclerViewInviteUser
         recyclerViewUser.layoutManager = GridLayoutManager(requireContext(), 1)
-//        recyclerViewBoardList.isNestedScrollingEnabled = false
         userAdapter = InviteUserAdapter()
         recyclerViewUser.adapter = userAdapter
     }
 
     private fun parseArgs() {
-//        board = requireArguments().getParcelable<Board>(KEY_BOARD) ?: Board()
-//        user = requireArguments().getParcelable<User>(KEY_USER) ?: User()
         board = args.board
         user = args.user
     }
 
-    inline fun <T: View> T.afterMeasured(crossinline f: T.() -> Unit) {
-        viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+    inline fun <T : View> T.afterMeasured(crossinline f: T.() -> Unit) {
+        viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 if (measuredWidth > 0 && measuredHeight > 0) {
                     viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -118,18 +103,7 @@ class InviteUserFragment : Fragment(){
 
 
     private fun observeViewModel() {
-        viewModel.user.observe(viewLifecycleOwner, Observer {
-            if (it == null) {
-//                findNavController().navigate(InviteUserFragmentDirections.actionInviteUserFragmentToLoginFragment())
-//                requireActivity().supportFragmentManager.beginTransaction()
-//                    .replace(R.id.fragment_container, LoginFragment.newInstance())
-//                    .addToBackStack(null)
-//                    .commit()
-            }
-        })
         viewModel.listUsers.observe(viewLifecycleOwner, Observer {
-
-//            initViews(it as ArrayList<User>)
             userAdapter?.users = it as ArrayList<User>
 
             with(binding) {
@@ -147,6 +121,7 @@ class InviteUserFragment : Fragment(){
     }
 
     companion object {
+
         private const val KEY_BOARD = "board_invite"
         private const val KEY_USER = "board_user"
 

@@ -63,13 +63,11 @@ class LoginFragment : Fragment() {
         })
         viewModel.success.observe(viewLifecycleOwner, Observer {
             if (it != null) {
-//                launchTabsFragment()
                 lifecycleScope.launch {
                     repeatOnLifecycle(Lifecycle.State.RESUMED) {
                         viewModel.getUser(it.uid).collect { state ->
                             when (state) {
                                 is UserAuthState.Error -> {
-                                    user = viewModel.getUserFromRoom(it.uid)
                                     Toast.makeText(
                                         requireContext(),
                                         state.message,

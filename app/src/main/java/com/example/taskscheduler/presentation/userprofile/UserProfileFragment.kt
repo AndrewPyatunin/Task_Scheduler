@@ -135,9 +135,6 @@ class UserProfileFragment : Fragment() {
             if (result.resultCode == Activity.RESULT_OK) {
                 uri = result.data?.data
                 Toast.makeText(requireContext(), "$uri", Toast.LENGTH_SHORT).show()
-//                if (data?.getBooleanExtra(App.IS_SIGN_OUT, false) == true) {
-//                    // exit fun
-//                }
             }
         }
 
