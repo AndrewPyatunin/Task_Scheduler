@@ -134,7 +134,6 @@ class TaskRepositoryImpl(
     }
 
     override fun getBoardsFlow(user: User): Flow<List<Board>> = callbackFlow {
-        val boardsFromRoomDb = getBoards()
         val listener = object : ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -142,7 +141,7 @@ class TaskRepositoryImpl(
                 val boardsFromDb = ArrayList<Board>()
                 for (dataSnapshot in snapshot.children) {
                     val board = dataSnapshot.getValue(Board::class.java)
-                    if (board != null && dataSnapshot.key in boardsId && board !in boardsFromRoomDb) {
+                    if (board != null && dataSnapshot.key in boardsId) {
                         boardsFromDb.add(board)
 
                     }
@@ -165,20 +164,15 @@ class TaskRepositoryImpl(
     }
 
     override fun getUser(userId: String) = callbackFlow<User> {
-        val queryForUser = databaseUsersReference.child(auth.currentUser?.uid ?: "")
+        val queryForUser = databaseUsersReference.child(userId)
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val userFromDb = snapshot.getValue(User::class.java) as User
                 trySend(userFromDb)
-//                scope.async {
-//                    addUser(userFromDb)
-//                }
-                // _user.postValue(userFromDb as User)
             }
 
             override fun onCancelled(error: DatabaseError) {
                 throw RuntimeException(error.message)
-                // logout()
             }
         }
         queryForUser.addValueEventListener(listener)
@@ -231,15 +225,12 @@ class TaskRepositoryImpl(
                 ref.child("backgroundUrl").setValue(urlBackground)
                 ref.child("title").setValue(name)
                 val boardDb = board.copy(title = name, backgroundUrl = urlBackground)
-//            addUser(user)
                 trySend(boardDb)
-//            scope.launch {
-//                addBoard(boardDb)
-//            }
             } else {
                 val usersRef = databaseUsersReference.child(user.id)
 
                 usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+
                     override fun onDataChange(snapshot: DataSnapshot) {
                         databaseUsersReference.removeEventListener(this)
                         val listBoardsIds = ArrayList<String>()
@@ -271,17 +262,12 @@ class TaskRepositoryImpl(
                         databaseUsersReference.child(user.id).child("boards")
                             .setValue(listBoardsIds)
                         trySend(boardToDb)
-//                        addUser(userToDb)
-//                        addBoard(boardToDb)
                     }
 
                     override fun onCancelled(error: DatabaseError) {
                         throw RuntimeException(error.message)
                     }
                 })
-//            awaitClose {
-//                usersRef.removeEventListener()
-//            }
             }
         }
 
@@ -418,7 +404,6 @@ class TaskRepositoryImpl(
                         flowNotes.emit(it)
                     }
                 }
-//                _listNotesLiveData.value = listNotes
             }
 
             override fun onCancelled(error: DatabaseError) {

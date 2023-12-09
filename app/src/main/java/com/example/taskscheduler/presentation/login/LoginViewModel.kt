@@ -3,8 +3,8 @@ package com.example.taskscheduler.presentation.login
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.taskscheduler.data.TaskDatabaseDao
 import com.example.taskscheduler.domain.usecases.AddUserUseCase
+import com.example.taskscheduler.domain.usecases.GetUserFlowFromRoomUseCase
 import com.example.taskscheduler.domain.usecases.GetUserFlowUseCase
 import com.example.taskscheduler.presentation.UserAuthState
 import com.google.firebase.auth.FirebaseAuth
@@ -15,8 +15,8 @@ import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 class LoginViewModel @Inject constructor(
-    private val dao: TaskDatabaseDao,
     private val getUserFlowUseCase: GetUserFlowUseCase,
+    private val getUserFlowFromRoomUseCase: GetUserFlowFromRoomUseCase,
     private val addUserUseCase: AddUserUseCase,
     private val auth: FirebaseAuth
 ) : ViewModel() {
@@ -32,7 +32,6 @@ class LoginViewModel @Inject constructor(
     init {
 
         auth.addAuthStateListener {
-            //val userDb = taskDatabase?.taskDatabaseDao()?.getUser(it.currentUser?.email ?: "")
             if (it.currentUser != null) {
                 _success.value = it.currentUser
             }
@@ -51,6 +50,8 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun getUserFromRoom(userId: String) = getUserFlowFromRoomUseCase.execute(userId)
+
 
     fun login(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
@@ -58,9 +59,6 @@ class LoginViewModel @Inject constructor(
         }.addOnFailureListener {
             _error.value = it.message
         }
-//        if (password == user?.password) {
-//            MyDatabaseConnection.userId = user?.id
-//        }
     }
 
 

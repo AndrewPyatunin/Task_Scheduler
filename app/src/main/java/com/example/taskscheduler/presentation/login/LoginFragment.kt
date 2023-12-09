@@ -9,16 +9,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.databinding.FragmentLoginBinding
-import com.example.taskscheduler.domain.Delegate
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.UserAuthState
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
-    private val auth = Firebase.auth
-    lateinit var binding : FragmentLoginBinding
+
+    lateinit var binding: FragmentLoginBinding
     lateinit var user: User
     private var email = ""
     lateinit var viewModel: LoginViewModel
@@ -43,8 +40,10 @@ class LoginFragment : Fragment() {
             if (email != "" && password != "") {
                 viewModel.login(email, password)
             } else
-                Toast.makeText(requireContext(), "Заполните поля email и пароль!",
-                    Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(), "Заполните поля email и пароль!",
+                    Toast.LENGTH_SHORT
+                ).show()
 
         }
         binding.textViewRegistr.setOnClickListener {
@@ -68,8 +67,15 @@ class LoginFragment : Fragment() {
                 lifecycleScope.launch {
                     repeatOnLifecycle(Lifecycle.State.RESUMED) {
                         viewModel.getUser(it.uid).collect { state ->
-                            when(state) {
-                                is UserAuthState.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            when (state) {
+                                is UserAuthState.Error -> {
+                                    user = viewModel.getUserFromRoom(it.uid)
+                                    Toast.makeText(
+                                        requireContext(),
+                                        state.message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                                 UserAuthState.Loading -> {
 
                                 }
@@ -84,7 +90,11 @@ class LoginFragment : Fragment() {
     }
 
     private fun launchWelcomeFragment(user: User) {
-        findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToWelcomeFragment(user))
+        findNavController().navigate(
+            LoginFragmentDirections.actionLoginFragmentToWelcomeFragment(
+                user
+            )
+        )
     }
 
     private fun launchRegistrationFragment() {
@@ -92,7 +102,11 @@ class LoginFragment : Fragment() {
     }
 
     private fun launchForgotPasswordFragment(email: String) {
-        findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToForgotPasswordFragment(email))
+        findNavController().navigate(
+            LoginFragmentDirections.actionLoginFragmentToForgotPasswordFragment(
+                email
+            )
+        )
     }
 
     private fun launchTabsFragment() {
@@ -101,8 +115,9 @@ class LoginFragment : Fragment() {
 
 
     companion object {
+
         @JvmStatic
-        fun newInstance() : LoginFragment {
+        fun newInstance(): LoginFragment {
             return LoginFragment()
         }
     }

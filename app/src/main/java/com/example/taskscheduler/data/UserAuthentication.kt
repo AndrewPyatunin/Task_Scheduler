@@ -56,8 +56,6 @@ class UserAuthentication @Inject constructor(
 //                        _user.value = user
                             scope.launch {
                                 localDataSource.addUser(userToUserEntityMapper.map(user))
-//                            _userFlow.emit(user)
-//                            flowUserAuth.emit()
                             }
                         }
                     })
@@ -75,6 +73,7 @@ class UserAuthentication @Inject constructor(
         creationTask.addOnSuccessListener(successListener)
             .addOnFailureListener(failureListener)
         awaitClose {
+            creationTask.getResult()
         }
     }
 
