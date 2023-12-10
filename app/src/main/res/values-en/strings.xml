@@ -53,6 +53,17 @@
     <string name="note_title">Title</string>
     <string name="tell_about_yourself">Tell about yourself</string>
     <string name="email_profile">Email</string>
-    <string name="change_board_parameters">Изменить параметры доски</string>
-
+    <string name="change_board_parameters">Change board parameters</string>
+    <string name="forgot_password_email_send_letter">A password recovery email has been sent to your email</string>
+    <string name="fill_in_login_parameters">Fill in all the fields!</string>
+    <string name="user_registration_success">User %1$s %2$s registration was successful!</string>
+    <string name="choose_the_list">Select the list to move</string>
+    <string name="select_check_list_title">Select check list title</string>
+    <string name="choose_note_priority">Choose note priority</string>
+    <string name="fill_in_title_field">Fill in the title field and choose background image!</string>
+    <string name="accept_invite">Accept the invitation?</string>
+    <string name="to_accept">Accept</string>
+    <string name="to_decline">Decline</string>
+    <string name="success_invite">The invitation has been sent successfully</string>
+    <string name="cannot_enter_an_empty_name">You cannot enter an empty name!</string>
 </resources>

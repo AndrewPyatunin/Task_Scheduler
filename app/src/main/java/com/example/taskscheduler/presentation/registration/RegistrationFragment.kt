@@ -27,7 +27,6 @@ import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.TakePhotoActivity
 import com.example.taskscheduler.presentation.UserAuthState
 import com.example.taskscheduler.presentation.ViewModelFactory
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -35,7 +34,6 @@ import java.io.File
 class RegistrationFragment : Fragment() {
 
     lateinit var directory: File
-    private lateinit var auth: FirebaseAuth
     private lateinit var binding: FragmentRegistrationBinding
     private lateinit var user: User
     private var uri: Uri? = null
@@ -133,7 +131,11 @@ class RegistrationFragment : Fragment() {
                 val name = editTextPersonName.text.toString().trim()
                 val lastName = editTextPersonLastName.text.toString().trim()
                 if (email == "" || password == "" || name == "" || lastName == "") {
-                    Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.fill_in_login_parameters),
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 } else {
                     buttonSignUp.isEnabled = false
@@ -152,7 +154,11 @@ class RegistrationFragment : Fragment() {
                                         user = it.user
                                         Toast.makeText(
                                             requireContext(),
-                                            "Регистрация пользователя ${user.name} ${user.lastName} прошла успешно!",
+                                            String.format(
+                                                getString(R.string.user_registration_success),
+                                                user.name,
+                                                user.lastName
+                                            ),
                                             Toast.LENGTH_SHORT
                                         ).show()
                                         launchWelcomeFragment(user)

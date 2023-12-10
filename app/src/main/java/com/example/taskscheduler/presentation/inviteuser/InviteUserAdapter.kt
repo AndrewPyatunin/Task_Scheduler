@@ -1,4 +1,4 @@
-package com.example.taskscheduler
+package com.example.taskscheduler.presentation.inviteuser
 
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
+import com.example.taskscheduler.R
 import com.example.taskscheduler.domain.DiffCallback
 import com.example.taskscheduler.domain.models.User
 

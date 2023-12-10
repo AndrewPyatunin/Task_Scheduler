@@ -14,7 +14,6 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.taskscheduler.BoardListAdapter
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentBoardListBinding
 import com.example.taskscheduler.domain.models.Board

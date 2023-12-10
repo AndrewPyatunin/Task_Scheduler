@@ -59,7 +59,7 @@ class InviteUserFragment : Fragment() {
                 } else if (it in listForInvite) {
                     listForInvite.remove(it)
                 }
-                Log.i("USER_INVITE_LIST", listForInvite.joinToString { it -> it.toString() })
+                Log.i("USER_INVITE_LIST", listForInvite.joinToString { it.toString() })
             }
         binding.buttonInviteUser.setOnClickListener {
             for (userForInvite in listForInvite) {

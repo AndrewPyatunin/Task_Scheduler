@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewBoardBinding
 import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.models.Board
@@ -66,7 +67,7 @@ class NewBoardFragment : Fragment() {
                 lifecycleScope.launch {
                     viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                         viewModel.createNewBoard(name, user, urlBackground, board).catch {
-                            Toast.makeText(context, "Произошла ошибка ${it.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
                         }.collect {
                             launchBoardFragment(it, user)
                         }
@@ -75,7 +76,7 @@ class NewBoardFragment : Fragment() {
             else
                 Toast.makeText(
                     requireContext(),
-                    "Заполните поле названия, а также выберите фон!",
+                    getString(R.string.fill_in_title_field),
                     Toast.LENGTH_SHORT
                 ).show()
         }

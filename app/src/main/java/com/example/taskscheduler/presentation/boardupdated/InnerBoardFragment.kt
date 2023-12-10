@@ -140,29 +140,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     }
 
 
-    companion object {
-
-        const val USER = "user"
-        const val LIST = "list"
-        const val BOARD = "board"
-        const val POSITION = "position"
-
-        fun newInstance(
-            notesListItems: ArrayList<NotesListItem>,
-            position: Int,
-            board: Board,
-            user: User
-        ): InnerBoardFragment {
-            return InnerBoardFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelableArrayList(LIST, notesListItems)
-                    putInt(POSITION, position)
-                    putParcelable(BOARD, board)
-                    putParcelable(USER, user)
-                }
-            }
-        }
-    }
 
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -199,7 +176,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
                             listOfNotesTitle.visibility = View.VISIBLE
                         } else {
                             Toast.makeText(
-                                requireContext(), "Нельзя задать пустое название!",
+                                requireContext(), getString(R.string.cannot_enter_an_empty_name),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -229,5 +206,29 @@ class InnerBoardFragment : Fragment(), MenuProvider {
             android.R.id.home -> findNavController().popBackStack()
         }
         return true
+    }
+
+    companion object {
+
+        const val USER = "user"
+        const val LIST = "list"
+        const val BOARD = "board"
+        const val POSITION = "position"
+
+        fun newInstance(
+            notesListItems: ArrayList<NotesListItem>,
+            position: Int,
+            board: Board,
+            user: User
+        ): InnerBoardFragment {
+            return InnerBoardFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelableArrayList(LIST, notesListItems)
+                    putInt(POSITION, position)
+                    putParcelable(BOARD, board)
+                    putParcelable(USER, user)
+                }
+            }
+        }
     }
 }

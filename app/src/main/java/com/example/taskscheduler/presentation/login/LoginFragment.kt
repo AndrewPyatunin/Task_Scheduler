@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
+import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentLoginBinding
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.UserAuthState
@@ -41,7 +42,7 @@ class LoginFragment : Fragment() {
                 viewModel.login(email, password)
             } else
                 Toast.makeText(
-                    requireContext(), "Заполните поля email и пароль!",
+                    requireContext(), getString(R.string.fill_in_login_parameters),
                     Toast.LENGTH_SHORT
                 ).show()
 
@@ -58,10 +59,10 @@ class LoginFragment : Fragment() {
     private fun observeViewModel() {
 
 
-        viewModel.error.observe(viewLifecycleOwner, Observer {
+        viewModel.error.observe(viewLifecycleOwner) {
             if (it != null) Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
-        })
-        viewModel.success.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.success.observe(viewLifecycleOwner) {
             if (it != null) {
                 lifecycleScope.launch {
                     repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -84,7 +85,7 @@ class LoginFragment : Fragment() {
                     }
                 }
             }
-        })
+        }
     }
 
     private fun launchWelcomeFragment(user: User) {

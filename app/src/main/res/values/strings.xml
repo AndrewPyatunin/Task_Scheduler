@@ -54,4 +54,16 @@
     <string name="email_profile">Электронный адрес</string>
     <string name="change_board_parameters">Изменить параметры доски</string>
     <string name="date" translatable="false">%1$s.%2$s.%3$d</string>
+    <string name="forgot_password_email_send_letter">"На ваш электронный адрес было отправлено письмо с ссылкой для восстановления пароля"</string>
+    <string name="fill_in_login_parameters">"Заполните все поля!"</string>
+    <string name="user_registration_success">Регистрация пользователя %1$s %2$s прошла успешно!</string>
+    <string name="choose_the_list">Выберите список для перемещения</string>
+    <string name="select_check_list_title">Введите название элемента</string>
+    <string name="choose_note_priority">Выберите приоритет заметки</string>
+    <string name="fill_in_title_field">Заполните поле названия и выберите фоновое изображение!</string>
+    <string name="accept_invite">Принять приглашение?</string>
+    <string name="to_accept">Принять</string>
+    <string name="to_decline">Отклонить</string>
+    <string name="success_invite">Приглашение успешно отправлено</string>
+    <string name="cannot_enter_an_empty_name">Нельзя задать пустое название!</string>
 </resources>

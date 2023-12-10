@@ -131,7 +131,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
                     } else
                         Toast.makeText(
                             requireContext(),
-                            "Введите название элемента",
+                            getString(R.string.select_check_list_title),
                             Toast.LENGTH_SHORT
                         ).show()
                 }
@@ -299,17 +299,17 @@ class NewNoteFragment : Fragment(), MenuProvider {
                     "Low"
                 )
                 val builder = AlertDialog.Builder(requireActivity())
-                builder.setTitle("Выберите приоритет")
+                builder.setTitle(getString(R.string.choose_note_priority))
                 builder.setItems(array, object : DialogInterface.OnClickListener {
                     override fun onClick(dialog: DialogInterface?, which: Int) {
-                        note.priority = when (array[which]) {
+                        val priority = when (array[which]) {
                             "High" -> UrgencyOfNote.HIGH
                             "Medium" -> UrgencyOfNote.MIDDLE
                             "Low" -> UrgencyOfNote.LOW
                             else -> UrgencyOfNote.LOW
                         }
                         updated = true
-                        viewModel.updateNote(note)
+                        viewModel.updateNote(note.copy(priority = priority))
                     }
 
                 })
