@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.taskscheduler.domain.models.Board
-import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -18,25 +18,25 @@ class OuterBoardViewModel : ViewModel() {
     private val databaseListsOfNotesRef = database.getReference("ListsOfNotes")
     val databaseBoardsRef = database.getReference("Boards")
 
-    private val _liveData = MutableLiveData<ListOfNotesItem>()
-    val livedata: LiveData<ListOfNotesItem>
+    private val _liveData = MutableLiveData<NotesListItem>()
+    val livedata: LiveData<NotesListItem>
         get() = _liveData
 
     private val _boardLiveData = MutableLiveData<Board>()
     val boardLiveData: LiveData<Board>
         get() = _boardLiveData
 
-    private val _listLiveData = MutableLiveData<List<ListOfNotesItem>>()
-    val listLiveData: LiveData<List<ListOfNotesItem>>
+    private val _listLiveData = MutableLiveData<List<NotesListItem>>()
+    val listLiveData: LiveData<List<NotesListItem>>
         get() = _listLiveData
 
 
-    fun createNewList(title: String, board: Board, user: User): ListOfNotesItem {
+    fun createNewList(title: String, board: Board, user: User): NotesListItem {
         val listOfNotesIds = ArrayList<String>()
         val ref = databaseListsOfNotesRef.child(board.id).push()
         val listId = ref.key.toString()
         readData(board.id)
-        val item = ListOfNotesItem(listId, title, user.id, emptyMap())
+        val item = NotesListItem(listId, title, user.id, emptyMap())
         ref.setValue(item)
         databaseBoardsRef.child(board.id)
             .addListenerForSingleValueEvent(object :
@@ -67,13 +67,13 @@ class OuterBoardViewModel : ViewModel() {
     fun readData(boardId: String) {
         databaseListsOfNotesRef.child(boardId).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val listOfNotesItem = ArrayList<ListOfNotesItem>()
+                val notesListItem = ArrayList<NotesListItem>()
                 for (dataSnapshot in snapshot.children) {
-                    val list = dataSnapshot.getValue(ListOfNotesItem::class.java)
-                    if (list != null) listOfNotesItem.add(list)
+                    val list = dataSnapshot.getValue(NotesListItem::class.java)
+                    if (list != null) notesListItem.add(list)
                 }
-                Log.i("USER_LIST_OF_NOTES", listOfNotesItem.size.toString())
-                _listLiveData.value = listOfNotesItem
+                Log.i("USER_LIST_OF_NOTES", notesListItem.size.toString())
+                _listLiveData.value = notesListItem
             }
 
             override fun onCancelled(error: DatabaseError) {

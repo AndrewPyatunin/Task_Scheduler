@@ -34,9 +34,9 @@ interface TaskRepository {
 
     fun deleteBoard(board: Board, user: User)
 
-    fun renameList(listOfNotesItem: ListOfNotesItem, board: Board, title: String)
+    fun renameList(notesListItem: NotesListItem, board: Board, title: String)
 
-    fun deleteList(listOfNotesItem: ListOfNotesItem, board: Board, isList: Boolean)
+    fun deleteList(notesListItem: NotesListItem, board: Board, isList: Boolean)
 
     fun createNewList(title: String, board: Board, user: User): LiveData<Board>
 
@@ -46,7 +46,7 @@ interface TaskRepository {
         title: String,
         description: String,
         board: Board,
-        listOfNotesItem: ListOfNotesItem,
+        notesListItem: NotesListItem,
         user: User,
         scope: CoroutineScope,
         checkList: List<CheckNoteItem> = emptyList()
@@ -54,15 +54,15 @@ interface TaskRepository {
 
     fun updateNote(note: Note): LiveData<List<CheckNoteItem>>
 
-    fun deleteNote(note: Note, board: Board, listOfNotesItem: ListOfNotesItem)
+    fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem)
 
-    fun moveNote(listOfNotesItem: ListOfNotesItem, note: Note, board: Board, user: User)
+    fun moveNote(notesListItem: NotesListItem, note: Note, board: Board, user: User)
 
-    fun getListOfListNotes(boardId: String): LiveData<List<ListOfNotesItem>>
+    fun getListOfListNotes(boardId: String): LiveData<List<NotesListItem>>
 
     suspend fun addBoard(board: Board)
 
-    fun getListsOfNotesFlow(board: Board): Flow<List<ListOfNotesItem>>
+    fun getListsOfNotesFlow(board: Board): Flow<List<NotesListItem>>
 
     fun getInvitesFlow(): Flow<List<Invite>>
 
@@ -109,7 +109,7 @@ interface TaskRepository {
 
     suspend fun addUserForInvites(user: User)
 
-    suspend fun addListOfNote(listOfNotesItem: ListOfNotesItem)
+    suspend fun addListOfNote(notesListItem: NotesListItem)
 
     suspend fun addNote(note: Note)
 

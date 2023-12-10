@@ -1,7 +1,6 @@
 package com.example.taskscheduler.domain.models
 
 import android.os.Parcelable
-import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
 
@@ -14,6 +13,4 @@ data class Board(
     val backgroundUrl: String = "",
     val members: List<String> = emptyList(),
     val listsOfNotesIds: List<String> = emptyList()
-
-    ) :
-    Parcelable
+) : Parcelable

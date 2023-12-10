@@ -5,9 +5,9 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.NotesListItem
 
-class ListDialogFragment(val list: List<ListOfNotesItem>) : DialogFragment() {
+class ListDialogFragment(val list: List<NotesListItem>) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val listTitles = ArrayList<String>()

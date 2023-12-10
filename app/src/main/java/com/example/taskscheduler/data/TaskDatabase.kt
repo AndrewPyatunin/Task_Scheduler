@@ -4,12 +4,15 @@ import android.app.Application
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.taskscheduler.data.entities.*
 
 @Database(
-    entities = [BoardEntity::class, NoteEntity::class, ListOfNotesEntity::class, UserEntity::class, InviteEntity::class],
-    version = 1
+    entities = [BoardEntity::class, NoteEntity::class, NotesListEntity::class, UserEntity::class, InviteEntity::class, UserForInvitesEntity::class],
+    version = 1,
+    exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class TaskDatabase : RoomDatabase() {
 
     companion object {
@@ -26,9 +29,8 @@ abstract class TaskDatabase : RoomDatabase() {
                 instance?.let {
                     return it
                 }
-                instance = Room
-                    .databaseBuilder(application, TaskDatabase::class.java, DB_NAME)
-                    .build()
+                instance =
+                    Room.databaseBuilder(application, TaskDatabase::class.java, DB_NAME).build()
                 return instance as TaskDatabase
             }
         }

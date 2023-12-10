@@ -1,7 +1,6 @@
 package com.example.taskscheduler.domain.models
 
 import android.os.Parcelable
-import androidx.room.Entity
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

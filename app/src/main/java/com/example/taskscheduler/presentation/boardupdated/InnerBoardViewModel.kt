@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.taskscheduler.domain.models.Board
-import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.User
 import com.google.firebase.database.DataSnapshot
@@ -62,8 +62,8 @@ class InnerBoardViewModel : ViewModel() {
 
 
 
-    fun renameList(listOfNotesItem: ListOfNotesItem, board: Board, title: String) {
-        databaseListsOfNotesRef.child(board.id).child(listOfNotesItem.id)
+    fun renameList(notesListItem: NotesListItem, board: Board, title: String) {
+        databaseListsOfNotesRef.child(board.id).child(notesListItem.id)
             .child("title").setValue(title)
     }
 

@@ -23,6 +23,6 @@
         android:label="ReplyToInviteDialogFragment" >
         <argument
             android:name="invite"
-            app:argType="com.example.taskscheduler.domain.Invite" />
+            app:argType="com.example.taskscheduler.domain.models.Invite" />
     </dialog>
 </navigation>

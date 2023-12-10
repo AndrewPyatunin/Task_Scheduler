@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.DiffCallback
-import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 
 class OuterBoardAdapter(
@@ -16,7 +16,7 @@ class OuterBoardAdapter(
     val board: Board,
     val user: User,
     var position: Int,
-    var list: ArrayList<ListOfNotesItem> = ArrayList()
+    var list: ArrayList<NotesListItem> = ArrayList()
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
     var fragmentList = list
         set(value) {

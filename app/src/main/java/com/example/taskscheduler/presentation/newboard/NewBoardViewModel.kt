@@ -53,19 +53,9 @@ class NewBoardViewModel : AndroidViewModel(Application()) {
         name: String,
         user: User,
         urlBackground: String,
-        board: Board,
-        context: Context
-    ) {
-        viewModelScope.launch {
-            repository.createNewBoard(name, user, urlBackground, board).catch {
-                Toast.makeText(context, "Произошла ошибка ${it.message}", Toast.LENGTH_SHORT).show()
-            }.collect {
+        board: Board
+    ) = repository.createNewBoard(name, user, urlBackground, board)
 
-            }
-        }
-
-
-    }
 
     private fun buildImageList(list: List<String>): List<BackgroundImage> {
         return list.mapIndexed { index, item ->

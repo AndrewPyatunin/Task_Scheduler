@@ -12,9 +12,9 @@ data class NoteEntity(
     val id: String,
     val title: String,
     val creatorId: String,
-    val members: List<User>,
+    val members: List<String>,
     val description: String,
     val date: String,
-    val listOfTasks: List<CheckNoteItem>,
+    val listOfTasks: List<CheckNoteEntity>,
     val priority: UrgencyOfNote
 )

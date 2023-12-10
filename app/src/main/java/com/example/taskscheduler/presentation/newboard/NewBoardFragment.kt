@@ -8,8 +8,7 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
@@ -18,6 +17,8 @@ import com.example.taskscheduler.databinding.FragmentNewBoardBinding
 import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 
 class NewBoardFragment : Fragment() {
 
@@ -60,8 +61,17 @@ class NewBoardFragment : Fragment() {
         binding.saveNewBoard.setOnClickListener {
 
             val name = binding.editNameBoard.text.toString().trim()
+
             if (name != "" && urlBackground != "")
-                viewModel.createNewBoard(name, user, urlBackground, board)
+                lifecycleScope.launch {
+                    viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                        viewModel.createNewBoard(name, user, urlBackground, board).catch {
+                            Toast.makeText(context, "Произошла ошибка ${it.message}", Toast.LENGTH_SHORT).show()
+                        }.collect {
+                            launchBoardFragment(it, user)
+                        }
+                    }
+                }
             else
                 Toast.makeText(
                     requireContext(),

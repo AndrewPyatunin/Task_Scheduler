@@ -32,8 +32,8 @@ class TaskRepositoryImpl(
     private val boardEntityToBoardMapper: Mapper<BoardEntity, Board>,
     private val noteToNoteEntityMapper: Mapper<Note, NoteEntity>,
     private val noteEntityToNoteMapper: Mapper<NoteEntity, Note>,
-    private val listOfNotesEntityToListOfNotesItemMapper: Mapper<ListOfNotesEntity, ListOfNotesItem>,
-    private val listOfNotesItemToListOfNotesEntityMapper: Mapper<ListOfNotesItem, ListOfNotesEntity>,
+    private val notesListEntityToNotesListItemMapper: Mapper<NotesListEntity, NotesListItem>,
+    private val notesListItemToNotesListEntityMapper: Mapper<NotesListItem, NotesListEntity>,
     private val inviteEntityToInviteMapper: Mapper<InviteEntity, Invite>,
     private val inviteToInviteEntityMapper: Mapper<Invite, InviteEntity>,
     private val userToUserForInvitesMapper: Mapper<User, UserForInvitesEntity>,
@@ -85,10 +85,10 @@ class TaskRepositoryImpl(
         }
     }
 
-    override fun getListsOfNotesFlow(board: Board): Flow<List<ListOfNotesItem>> {
+    override fun getListsOfNotesFlow(board: Board): Flow<List<NotesListItem>> {
         return localDataSource.getListsOfNotesFlow(board.id).map { list ->
             list.map { listOfNotesEntity ->
-                listOfNotesEntityToListOfNotesItemMapper.map(listOfNotesEntity)
+                notesListEntityToNotesListItemMapper.map(listOfNotesEntity)
             }
         }
     }
@@ -121,8 +121,8 @@ class TaskRepositoryImpl(
         localDataSource.addBoard(boardToBoardEntityMapper.map(board))
     }
 
-    override suspend fun addListOfNote(listOfNotesItem: ListOfNotesItem) {
-        localDataSource.addListOfNotes(listOfNotesItemToListOfNotesEntityMapper.map(listOfNotesItem))
+    override suspend fun addListOfNote(notesListItem: NotesListItem) {
+        localDataSource.addListOfNotes(notesListItemToNotesListEntityMapper.map(notesListItem))
     }
 
     override suspend fun addNote(note: Note) {
@@ -139,11 +139,10 @@ class TaskRepositoryImpl(
             override fun onDataChange(snapshot: DataSnapshot) {
                 val boardsId = user.boards
                 val boardsFromDb = ArrayList<Board>()
-                for (dataSnapshot in snapshot.children) {
+                snapshot.children.forEach { dataSnapshot ->
                     val board = dataSnapshot.getValue(Board::class.java)
                     if (board != null && dataSnapshot.key in boardsId) {
                         boardsFromDb.add(board)
-
                     }
                 }
                 trySend(boardsFromDb as List<Board>)
@@ -189,7 +188,7 @@ class TaskRepositoryImpl(
         databaseUsersReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val usersFromDb = ArrayList<User>()
-                for (dataSnapshot in snapshot.children) {
+                snapshot.children.forEach { dataSnapshot ->
                     val user = dataSnapshot.getValue(User::class.java)
                     if (user != null && user.id != auth.currentUser?.uid &&
                         user.id !in board.members && board.id !in user.invites.keys
@@ -237,8 +236,7 @@ class TaskRepositoryImpl(
                         if (snapshot.child("boards").value == null) {
                             listBoardsIds.add(idBoard)
                         } else {
-                            for (dataSnapshot in snapshot.child("boards")
-                                .children) {
+                            snapshot.child("boards").children.forEach { dataSnapshot ->
                                 val data = dataSnapshot.value as String
                                 listBoardsIds.add(data)
                             }
@@ -297,7 +295,7 @@ class TaskRepositoryImpl(
         scope.launch {
             addBoard(board.copy(listsOfNotesIds = listOfNotesIdsNew))//Добавление в Room
         }
-    }
+        }
 
     override fun deleteBoard(board: Board, user: User) {
         databaseBoardsReference.child(board.id).removeValue()
@@ -305,48 +303,49 @@ class TaskRepositoryImpl(
         listBoardsIds.remove(board.id)
         databaseUsersReference.child(user.id).child("boards").setValue(listBoardsIds)
         val listsOfNotes = getListsOfNotes()
-        val listsFromBoard = listsOfNotes.filter { it.id in board.listsOfNotesIds }
-        for (list in listsFromBoard)
-            deleteList(list, board, false)
+        val listsFromBoard = listsOfNotes.filter {
+            it.id in board.listsOfNotesIds
+        }.forEach {
+            deleteList(it, board, false)
+        }
     }
 
-    private fun getListsOfNotes(): List<ListOfNotesItem> {
+    private fun getListsOfNotes(): List<NotesListItem> {
         return localDataSource.getListsOfNotes()
-            .map { listOfNotesEntityToListOfNotesItemMapper.map(it) }
+            .map { notesListEntityToNotesListItemMapper.map(it) }
     }
 
-    override fun renameList(listOfNotesItem: ListOfNotesItem, board: Board, title: String) {
-        databaseListsOfNotesRef.child(board.id).child(listOfNotesItem.id)
+    override fun renameList(notesListItem: NotesListItem, board: Board, title: String) {
+        databaseListsOfNotesRef.child(board.id).child(notesListItem.id)
             .child("title").setValue(title)
-        addListOfNote(listOfNotesItem.copy(title = title))
+        addListOfNote(notesListItem.copy(title = title))
     }
 
-    override fun deleteList(listOfNotesItem: ListOfNotesItem, board: Board, isList: Boolean) {
-        databaseListsOfNotesRef.child(board.id).child(listOfNotesItem.id).removeValue()
-        localDataSource.removeListOfNotes(listOfNotesItem.id)
+    override fun deleteList(notesListItem: NotesListItem, board: Board, isList: Boolean) {
+        databaseListsOfNotesRef.child(board.id).child(notesListItem.id).removeValue()
+        localDataSource.removeListOfNotes(notesListItem.id)
         val listNotes =
-            localDataSource.getNotes().filter { it.id in listOfNotesItem.listNotes.keys }
+            localDataSource.getNotes().filter { it.id in notesListItem.listNotes.keys }
         listNotes.map {
             databaseNotesRef.child(it.id).removeValue()
             localDataSource.removeNote(it)
         }
-        if (isList) updateBoard(board, listOfNotesItem.id)
+        if (isList) updateBoard(board, notesListItem.id)
     }
 
     private fun readData(boardId: String) {
         databaseListsOfNotesRef.child(boardId).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val listOfNotesItem = ArrayList<ListOfNotesItem>()
-                for (dataSnapshot in snapshot.children) {
-                    val list = dataSnapshot.getValue(ListOfNotesItem::class.java)
-                    if (list != null) listOfNotesItem.add(list)
+                val notesListItem = ArrayList<NotesListItem>()
+                snapshot.children.forEach { dataSnapshot ->
+                    val list = dataSnapshot.getValue(NotesListItem::class.java)
+                    if (list != null) notesListItem.add(list)
                 }
-                Log.i("USER_LIST_OF_NOTES", listOfNotesItem.size.toString())
-                _listLiveData.value = listOfNotesItem
+                Log.i("USER_LIST_OF_NOTES", notesListItem.size.toString())
             }
 
             override fun onCancelled(error: DatabaseError) {
-
+                Log.i("USER_LIST_OF_NOTES", error.message)
             }
 
         })
@@ -357,7 +356,7 @@ class TaskRepositoryImpl(
         val ref = databaseListsOfNotesRef.child(board.id).push()
         val listId = ref.key.toString()
         readData(board.id)
-        val item = ListOfNotesItem(listId, title, user.id, emptyMap())
+        val item = NotesListItem(listId, title, user.id, emptyMap())
         ref.setValue(item)
         databaseBoardsReference.child(board.id)
             .addListenerForSingleValueEvent(object :
@@ -366,9 +365,8 @@ class TaskRepositoryImpl(
                 override fun onDataChange(snapshot: DataSnapshot) {
                     databaseBoardsReference.removeEventListener(this)
                     if (snapshot.hasChild("listsOfNotesIds")) {
-                        for (dataSnapshot in snapshot
-                            .child("listsOfNotesIds").children) {
-                            listOfNotesIds.add(dataSnapshot.value.toString())
+                        snapshot.child("listOfNotesIds").children.forEach {
+                            listOfNotesIds.add(it.value.toString())
                         }
                     }
                     listOfNotesIds.add(listId)
@@ -391,12 +389,11 @@ class TaskRepositoryImpl(
         databaseNotesRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val listNotes = ArrayList<Note>()
-                for (dataSnapshot in snapshot.children) {
+                snapshot.children.forEach { dataSnapshot ->
                     if (dataSnapshot.key in listNotesIds) {
                         val note = dataSnapshot.getValue(Note::class.java)
                         note?.let { listNotes.add(it) }
                         note?.let { addNote(it) }
-
                     }
                 }
                 listNotes.let {
@@ -417,16 +414,16 @@ class TaskRepositoryImpl(
         title: String,
         description: String,
         board: Board,
-        listOfNotesItem: ListOfNotesItem,
+        notesListItem: NotesListItem,
         user: User,
         scope: CoroutineScope,
         checkList: List<CheckNoteItem>
     ): LiveData<Board> {
         val childListNotesRef = databaseListsOfNotesRef
-            .child(board.id).child(listOfNotesItem.id).child("listNotes")
+            .child(board.id).child(notesListItem.id).child("listNotes")
         val url = childListNotesRef.push()
         val idNote = url.key ?: ""
-        val listNotes = listOfNotesItem.listNotes
+        val listNotes = notesListItem.listNotes
 
         val note = Note(idNote, title, user.id, emptyList(), description, "", checkList)
         databaseNotesRef.child(idNote).setValue(note)
@@ -434,7 +431,7 @@ class TaskRepositoryImpl(
         listNotes.put(idNote, true)
         scope.launch {
             addNote(note)
-            addListOfNote(listOfNotesItem.copy(listNotes = listNotes))
+            addListOfNote(notesListItem.copy(listNotes = listNotes))
         }
         url.setValue(true)
         MyDatabaseConnection.updated = true
@@ -451,24 +448,24 @@ class TaskRepositoryImpl(
 
     }
 
-    override fun deleteNote(note: Note, board: Board, listOfNotesItem: ListOfNotesItem) {
+    override fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem) {
         MyDatabaseConnection.updated = true
         databaseNotesRef.child(note.id).removeValue()
-        databaseListsOfNotesRef.child(board.id).child(listOfNotesItem.id)
+        databaseListsOfNotesRef.child(board.id).child(notesListItem.id)
             .child("listNotes").child(note.id).removeValue()
         localDataSource.removeNote(noteToNoteEntityMapper.map(note))
-        val listNotes: HashMap<String, Boolean> = listOfNotesItem.listNotes as HashMap
+        val listNotes: HashMap<String, Boolean> = notesListItem.listNotes as HashMap
         listNotes.remove(note.id)
-        addListOfNote(listOfNotesItem.copy(listNotes = listNotes))
+        addListOfNote(notesListItem.copy(listNotes = listNotes))
     }
 
-    override fun moveNote(listOfNotesItem: ListOfNotesItem, note: Note, board: Board, user: User) {
+    override fun moveNote(notesListItem: NotesListItem, note: Note, board: Board, user: User) {
         MyDatabaseConnection.updated = true
-        deleteNote(note, board, listOfNotesItem)
-        createNewNote(note.title, note.description, board, listOfNotesItem, user, note.listOfTasks)
+        deleteNote(note, board, notesListItem)
+        createNewNote(note.title, note.description, board, notesListItem, user, note.listOfTasks)
     }
 
-    override fun getListOfListNotes(boardId: String): LiveData<List<ListOfNotesItem>> {
+    override fun getListOfListNotes(boardId: String): LiveData<List<NotesListItem>> {
         TODO("Not yet implemented")
     }
 
@@ -608,9 +605,11 @@ class TaskRepositoryImpl(
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val listInvites = ArrayList<Invite>()
-                    for (dataSnapshot in snapshot.children) {
-                        for (data in dataSnapshot.children) {
-                            data.getValue(Invite::class.java)?.let { listInvites.add(it) }
+                    snapshot.children.forEach {
+                        it.children.forEach {
+                            it.getValue(Invite::class.java)?.let { invite ->
+                                listInvites.add(invite)
+                            }
                         }
                     }
                     Log.i("USER_INVITE_LIST_SIZE", listInvites.size.toString())
@@ -635,7 +634,7 @@ class TaskRepositoryImpl(
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     databaseBoardsReference.removeEventListener(this)
-                    for (dataSnapshot in snapshot.children) {
+                    snapshot.children.forEach { dataSnapshot ->
                         listMembers.add(dataSnapshot.value.toString())
                         Log.i("USER_MEMBERS_FROM", dataSnapshot.value.toString())
                     }

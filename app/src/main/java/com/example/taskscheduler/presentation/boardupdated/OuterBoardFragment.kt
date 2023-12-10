@@ -21,7 +21,7 @@ import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentOuterBoardBinding
 import com.example.taskscheduler.domain.models.Board
-import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
 import com.google.android.material.tabs.TabLayout
@@ -35,7 +35,7 @@ class OuterBoardFragment : Fragment() {
     lateinit var user: User
     private var parentAdapter: OuterBoardAdapter? = null
     lateinit var viewModel: OuterBoardViewModel
-    private var parentList = ArrayList<ListOfNotesItem>()
+    private var parentList = ArrayList<NotesListItem>()
     private var viewPager: ViewPager2? = null
     private lateinit var tabLayout: TabLayout
     var currentPosition = 0
@@ -139,7 +139,7 @@ class OuterBoardFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.listLiveData.observe(viewLifecycleOwner, Observer {
-            parentList = it as ArrayList<ListOfNotesItem>
+            parentList = it as ArrayList<NotesListItem>
             for (item in it) {
                 binding.tabLayout.visibility = View.VISIBLE
             }

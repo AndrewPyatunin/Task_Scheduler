@@ -19,11 +19,11 @@ class LocalDataSourceImpl(
         return taskDatabaseDao.getBoards()
     }
 
-    override fun getListsOfNotesFlow(boardId: String): Flow<List<ListOfNotesEntity>> {
+    override fun getListsOfNotesFlow(boardId: String): Flow<List<NotesListEntity>> {
         return taskDatabaseDao.getListsOfNotesFlow()
     }
 
-    override suspend fun getListsOfNotes(): List<ListOfNotesEntity> {
+    override suspend fun getListsOfNotes(): List<NotesListEntity> {
         return taskDatabaseDao.getListsOfNotes()
     }
 
@@ -55,8 +55,8 @@ class LocalDataSourceImpl(
         taskDatabaseDao.addNote(noteEntity)
     }
 
-    override suspend fun addListOfNotes(listOfNotesEntity: ListOfNotesEntity) {
-        taskDatabaseDao.addListOfNotes(listOfNotesEntity)
+    override suspend fun addListOfNotes(notesListEntity: NotesListEntity) {
+        taskDatabaseDao.addListOfNotes(notesListEntity)
     }
 
     override suspend fun addInvite(inviteEntity: InviteEntity) {

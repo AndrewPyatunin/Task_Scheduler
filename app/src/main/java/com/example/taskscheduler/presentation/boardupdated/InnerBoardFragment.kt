@@ -17,7 +17,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentInnerBoardBinding
 import com.example.taskscheduler.domain.models.Board
-import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.User
 import com.google.android.material.tabs.TabLayout
@@ -26,14 +26,14 @@ import com.google.android.material.tabs.TabLayout
 class InnerBoardFragment : Fragment(), MenuProvider {
 
     lateinit var binding: FragmentInnerBoardBinding
-    lateinit var list: ListOfNotesItem
+    lateinit var list: NotesListItem
     lateinit var user: User
     lateinit var board: Board
     lateinit var listNotes: List<Note>
     lateinit var recyclerView: RecyclerView
     lateinit var innerAdapter: InnerBoardAdapter
     lateinit var viewModel: InnerBoardViewModel
-    lateinit var listOfLists: ArrayList<ListOfNotesItem>
+    lateinit var listOfLists: ArrayList<NotesListItem>
     var position: Int = 0
     var tabLayout: TabLayout? = null
     var viewPager: ViewPager2? = null
@@ -42,7 +42,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         super.onCreate(savedInstanceState)
         position = requireArguments().getInt(POSITION)
         listOfLists =
-            requireArguments().getParcelableArrayList(LIST) ?: ArrayList<ListOfNotesItem>()
+            requireArguments().getParcelableArrayList(LIST) ?: ArrayList<NotesListItem>()
         list = listOfLists[position]
         user = requireArguments().getParcelable(USER)!!
         board = requireArguments().getParcelable(BOARD)!!
@@ -109,11 +109,11 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     private fun initViews(list: List<Note>) {
         recyclerView = binding.childRecyclerViewBoard
         var newList = list
-        newList = newList.sortedWith(Comparator { ln, rn ->
+        newList = newList.sortedWith { ln, rn ->
             if (ln.priority < rn.priority || (ln.priority == rn.priority &&
                         dateToInt(ln.date) < dateToInt(rn.date))
             ) -1 else if (ln.priority > rn.priority) 1 else 0
-        })
+        }
         newList.forEach { Log.i("USER_NEW_LIST", it.title) }
 
         innerAdapter = InnerBoardAdapter(newList)
@@ -148,14 +148,14 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         const val POSITION = "position"
 
         fun newInstance(
-            listOfNotesItems: ArrayList<ListOfNotesItem>,
+            notesListItems: ArrayList<NotesListItem>,
             position: Int,
             board: Board,
             user: User
         ): InnerBoardFragment {
             return InnerBoardFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelableArrayList(LIST, listOfNotesItems)
+                    putParcelableArrayList(LIST, notesListItems)
                     putInt(POSITION, position)
                     putParcelable(BOARD, board)
                     putParcelable(USER, user)

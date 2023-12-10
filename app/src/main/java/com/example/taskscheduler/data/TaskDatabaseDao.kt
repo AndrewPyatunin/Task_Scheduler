@@ -18,7 +18,7 @@ interface TaskDatabaseDao {
     fun getNotesFlow(): Flow<List<NoteEntity>>
 
     @Query("SELECT * FROM listsOfNotes")
-    fun getListsOfNotesFlow(): Flow<List<ListOfNotesEntity>>
+    fun getListsOfNotesFlow(): Flow<List<NotesListEntity>>
 
     @Query("SELECT * FROM invites")
     fun getInvitesFlow(): Flow<List<InviteEntity>>
@@ -27,7 +27,7 @@ interface TaskDatabaseDao {
     fun getUser(id: String): Flow<UserEntity>
 
     @Query("SELECT * FROM users")
-    fun getUsersFlow(): Flow<UserEntity>
+    fun getUsersFlow(): Flow<List<UserEntity>>
 
     @Query("SELECT * FROM usersForInvites")
     fun getUsersForInvites(): Flow<List<UserForInvitesEntity>>
@@ -42,7 +42,7 @@ interface TaskDatabaseDao {
     suspend fun addInvite(invite: InviteEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addListOfNotes(listOfNotesItem: ListOfNotesEntity)
+    suspend fun addListOfNotes(listOfNotesItem: NotesListEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addUser(user: UserEntity)
@@ -66,6 +66,6 @@ interface TaskDatabaseDao {
     suspend fun getNotes(): List<NoteEntity>
 
     @Query("SELECT * FROM listsOfNotes")
-    suspend fun getListsOfNotes(): List<ListOfNotesEntity>
+    suspend fun getListsOfNotes(): List<NotesListEntity>
 
 }

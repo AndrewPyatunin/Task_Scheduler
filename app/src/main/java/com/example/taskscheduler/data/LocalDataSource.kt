@@ -11,9 +11,9 @@ interface LocalDataSource {
 
     suspend fun getBoards(): List<BoardEntity>
 
-    fun getListsOfNotesFlow(boardId: String): Flow<List<ListOfNotesEntity>>
+    fun getListsOfNotesFlow(boardId: String): Flow<List<NotesListEntity>>
 
-    suspend fun getListsOfNotes(): List<ListOfNotesEntity>
+    suspend fun getListsOfNotes(): List<NotesListEntity>
 
     fun getNotesFlow(listOfNotesId: String): Flow<List<NoteEntity>>
 
@@ -29,7 +29,7 @@ interface LocalDataSource {
 
     suspend fun addNote(noteEntity: NoteEntity)
 
-    suspend fun addListOfNotes(listOfNotesEntity: ListOfNotesEntity)
+    suspend fun addListOfNotes(notesListEntity: NotesListEntity)
 
     suspend fun addInvite(inviteEntity: InviteEntity)
 

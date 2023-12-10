@@ -15,30 +15,10 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target.SIZE_ORIGINAL
 import com.bumptech.glide.request.transition.Transition
+import com.example.taskscheduler.R
 import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.DiffCallback
 
-class NewBoardDiffCallback(
-    private val oldList: List<String>,
-    private val newList: List<String>
-) : DiffUtil.Callback() {
-
-    override fun getOldListSize(): Int = oldList.size
-
-    override fun getNewListSize(): Int = newList.size
-
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        val oldBoard = oldList[oldItemPosition]
-        val newBoard = newList[newItemPosition]
-        return oldBoard == newBoard
-    }
-
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        val oldBoard = oldList[oldItemPosition]
-        val newBoard = newList[newItemPosition]
-        return oldBoard === newBoard
-    }
-}
 
 class NewBoardAdapter(context: Context) :
     RecyclerView.Adapter<NewBoardAdapter.NewBoardViewHolder>() {

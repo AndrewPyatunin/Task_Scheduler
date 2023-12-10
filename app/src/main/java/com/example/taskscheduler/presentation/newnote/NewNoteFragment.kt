@@ -21,21 +21,21 @@ import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewNoteBinding
 import com.example.taskscheduler.domain.*
 import com.example.taskscheduler.domain.models.Board
-import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.User
 import kotlin.math.roundToInt
 
 class NewNoteFragment : Fragment(), MenuProvider {
     lateinit var binding: FragmentNewNoteBinding
-    lateinit var listOfNotesItem: ListOfNotesItem
+    lateinit var notesListItem: NotesListItem
     lateinit var board: Board
     lateinit var user: User
     lateinit var note: Note
     lateinit var viewModel: NewNoteViewModel
     lateinit var newNoteAdapter: NewNoteCheckItemAdapter
     lateinit var recyclerView: RecyclerView
-    lateinit var listOfLists: Array<ListOfNotesItem>
+    lateinit var listOfLists: Array<NotesListItem>
     var list = ArrayList<String>()
 
     private val args by navArgs<NewNoteFragmentArgs>()
@@ -147,7 +147,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 val description: String = editTextDescription.text.toString().trim()
                 if (note.title == "") {
                     if (title.isNotEmpty()) {
-                        viewModel.createNewNote(title, description, board, listOfNotesItem, user)
+                        viewModel.createNewNote(title, description, board, notesListItem, user)
                     }
                 } else {
                     note.description = description
@@ -160,7 +160,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
             }
         }
         binding.textInList.text =
-            String.format(getString(R.string.note_in_list), listOfNotesItem.title)
+            String.format(getString(R.string.note_in_list), notesListItem.title)
 
 
     }
@@ -226,7 +226,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
         listOfLists = args.listOfLists
         note = args.note
         board = args.board
-        listOfNotesItem = args.listOfNotesItem
+        notesListItem = args.listOfNotesItem
         user = args.user
 
     }
@@ -254,7 +254,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
         const val KEY_NOTE = "note"
 
         fun newInstance(
-            list: ListOfNotesItem,
+            list: NotesListItem,
             board: Board,
             user: User,
             note: Note
@@ -289,7 +289,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 )
             }
             R.id.item_delete_note -> {
-                viewModel.deleteNote(note, board, listOfNotesItem)
+                viewModel.deleteNote(note, board, notesListItem)
                 findNavController().popBackStack()
             }
             R.id.item_change_priority -> {
@@ -320,7 +320,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
         return true
     }
 
-    fun moveNote(listItem: ListOfNotesItem) {
+    fun moveNote(listItem: NotesListItem) {
         viewModel.moveNote(note, listItem, board, user)
     }
 }

@@ -29,8 +29,12 @@ class ChooseAvatarOptionFragment : DialogFragment() {
         }
     }
 
-    fun newInstance(): ChooseAvatarOptionFragment {
+    companion object {
 
-        return ChooseAvatarOptionFragment()
+        fun newInstance(): ChooseAvatarOptionFragment {
+
+            return ChooseAvatarOptionFragment()
+        }
     }
+
 }

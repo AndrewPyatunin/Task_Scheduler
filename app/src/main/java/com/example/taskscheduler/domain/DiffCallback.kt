@@ -28,7 +28,7 @@ class DiffCallback<T>(
             is CheckNoteItem -> old.id
             is Invite -> old.id
             is ListOfBoards -> old.id
-            is ListOfNotesItem -> old.id
+            is NotesListItem -> old.id
             is User -> old.id
             else -> ""
         }
@@ -40,7 +40,7 @@ class DiffCallback<T>(
             is CheckNoteItem -> new.id
             is Invite -> new.id
             is ListOfBoards -> new.id
-            is ListOfNotesItem -> new.id
+            is NotesListItem -> new.id
             is User -> new.id
             else -> ""
         }

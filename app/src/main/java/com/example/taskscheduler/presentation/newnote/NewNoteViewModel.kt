@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.taskscheduler.MyDatabaseConnection.updated
 import com.example.taskscheduler.domain.CheckNoteItem
 import com.example.taskscheduler.domain.models.Board
-import com.example.taskscheduler.domain.models.ListOfNotesItem
+import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.User
 import com.google.firebase.database.ktx.database
@@ -38,11 +38,11 @@ class NewNoteViewModel : ViewModel() {
     val boardLiveData: LiveData<Board>
         get() = _boardLiveData
 
-    fun deleteNote(note: Note, board: Board, listOfNotesItem: ListOfNotesItem) {
+    fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem) {
         updated = true
         viewModelScope.launch(Dispatchers.IO) {
             databaseNotesRef.child(note.id).removeValue()
-            databaseListsOfNotesRef.child(board.id).child(listOfNotesItem.id)
+            databaseListsOfNotesRef.child(board.id).child(notesListItem.id)
                 .child("listNotes").child(note.id).removeValue()
         }
 
@@ -62,22 +62,22 @@ class NewNoteViewModel : ViewModel() {
         title: String,
         description: String,
         board: Board,
-        listOfNotesItem: ListOfNotesItem,
+        notesListItem: NotesListItem,
         user: User,
         checkList: List<CheckNoteItem> = emptyList()
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val childListNotesRef = databaseListsOfNotesRef
-                .child(board.id).child(listOfNotesItem.id).child("listNotes")
+                .child(board.id).child(notesListItem.id).child("listNotes")
             val url = childListNotesRef.push()
             val idNote = url.key ?: ""
-            val listNotes = listOfNotesItem.listNotes
+            val listNotes = notesListItem.listNotes
 
             val note = Note(idNote, title, user.id, emptyList(), description, "", checkList)
             databaseNotesRef.child(idNote).setValue(note)
             listNotes as HashMap<String, Boolean>
             listNotes.put(idNote, true)
-            listOfNotesItem.listNotes = listNotes
+            notesListItem.listNotes = listNotes
             url.setValue(true)
             updated = true
             _success.postValue(board)
@@ -85,9 +85,9 @@ class NewNoteViewModel : ViewModel() {
 
     }
 
-    fun moveNote(note: Note, listOfNotesItem: ListOfNotesItem, board: Board, user: User) {
+    fun moveNote(note: Note, notesListItem: NotesListItem, board: Board, user: User) {
         updated = true
-        deleteNote(note, board, listOfNotesItem)
-        createNewNote(note.title, note.description, board, listOfNotesItem, user, note.listOfTasks)
+        deleteNote(note, board, notesListItem)
+        createNewNote(note.title, note.description, board, notesListItem, user, note.listOfTasks)
     }
 }

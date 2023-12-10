@@ -125,7 +125,7 @@ class RegistrationFragment : Fragment() {
         createDirectory()
         with(binding) {
             imageViewAvatar.setOnClickListener {
-                ChooseAvatarOptionFragment().newInstance()
+                ChooseAvatarOptionFragment.newInstance()
                     .show(childFragmentManager, "ChooseAvatarDialog")
 //                pickImageFromGallery()
                 val email = editTextEmailAddressRegistration.text.toString().trim()
