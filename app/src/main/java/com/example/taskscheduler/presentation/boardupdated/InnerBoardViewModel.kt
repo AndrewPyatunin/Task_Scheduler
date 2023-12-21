@@ -36,8 +36,7 @@ class InnerBoardViewModel : ViewModel() {
                 _listNotesLiveData.value = listNotes
             }
 
-            override fun onCancelled(error: DatabaseError) {
-            }
+            override fun onCancelled(error: DatabaseError) = Unit
 
         })
     }

@@ -57,9 +57,7 @@ class OuterBoardViewModel : ViewModel() {
                 _boardLiveData.value = board
             }
 
-            override fun onCancelled(error: DatabaseError) {
-
-            }
+            override fun onCancelled(error: DatabaseError) = Unit
         })
         return item
     }
@@ -76,9 +74,7 @@ class OuterBoardViewModel : ViewModel() {
                 _listLiveData.value = notesListItem
             }
 
-            override fun onCancelled(error: DatabaseError) {
-
-            }
+            override fun onCancelled(error: DatabaseError) = Unit
 
         })
     }

@@ -8,10 +8,7 @@ import com.example.taskscheduler.domain.usecases.AddUserUseCase
 import com.example.taskscheduler.domain.usecases.RegistrationUseCase
 import com.example.taskscheduler.presentation.UserAuthState
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 class RegistrationViewModel @Inject constructor(
@@ -20,31 +17,23 @@ class RegistrationViewModel @Inject constructor(
     private val auth: FirebaseAuth
 ) : ViewModel() {
 
-    private suspend fun addUserToRoom(user: User) = addUserUseCase.execute(user)
+    private var _userFlow = MutableSharedFlow<UserAuthState>()
+    val userFlow: Flow<UserAuthState> = _userFlow.asSharedFlow()
+
+    suspend fun addUserToRoom(user: User) = addUserUseCase.execute(user)
 
 
-    fun signUp(
+    suspend fun signUp(
         email: String,
         password: String,
         name: String,
         lastName: String,
         uri: Uri?
-    ): Flow<UserAuthState> {
+    ): Flow<UserAuthState> = flow {
         auth.addAuthStateListener {
             if (it.currentUser == null) return@addAuthStateListener
         }
-        return registrationUseCase.execute(email, password, name, lastName, uri, viewModelScope)
-            .map {
-                addUserToRoom(it)
-                UserAuthState.Success(it) as UserAuthState
-            }.onStart {
-            emit(UserAuthState.Loading)
-        }.catch {
-            it.message?.let { message ->
-                emit(UserAuthState.Error(message))
-            }
-        }
-
+        _userFlow.emit(UserAuthState.Success(registrationUseCase.execute(email, password, name, lastName, uri, viewModelScope)))
     }
 
 }

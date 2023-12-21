@@ -58,7 +58,6 @@ class LoginFragment : Fragment() {
 
     private fun observeViewModel() {
 
-
         viewModel.error.observe(viewLifecycleOwner) {
             if (it != null) Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
         }

@@ -1,28 +1,27 @@
-package com.example.taskscheduler.data
+package com.example.taskscheduler.data.repos
 
-import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.data.LocalDataSource
 import com.example.taskscheduler.data.entities.*
 import com.example.taskscheduler.data.mappers.*
 import com.example.taskscheduler.domain.*
 import com.example.taskscheduler.domain.models.*
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class TaskRepositoryImpl(
     private val localDataSource: LocalDataSource,
@@ -40,18 +39,22 @@ class TaskRepositoryImpl(
     private val userForInvitesToUserMapper: Mapper<UserForInvitesEntity, User>
 ) : TaskRepository {
 
-    private val auth = Firebase.auth
-    private var taskDatabase: TaskDatabase? = null
-    private val firebaseDatabase = Firebase.database
-    private val storageReference = Firebase.storage.reference
-    private val databaseBoardsReference = firebaseDatabase.getReference("Boards")
-    private val databaseUsersReference = firebaseDatabase.getReference("Users")
-    private val databaseInvitesReference = firebaseDatabase.getReference("Invites")
-    private val databaseListsOfNotesRef = firebaseDatabase.getReference("ListsOfNotes")
-    private val databaseNotesRef = firebaseDatabase.getReference("Notes")
+    companion object {
 
-    private val flow = MutableSharedFlow<List<Board>>(1)
-    private var list = emptyList<Board>()
+        private const val BOARDS = "Boards"
+        private const val USERS = "Users"
+        private const val LIST_OF_NOTES = "ListOfNotes"
+        private const val INVITES = "Invites"
+        private const val NOTES = "Notes"
+    }
+
+    private val auth = Firebase.auth
+    private val firebaseDatabase = Firebase.database
+    private val databaseBoardsReference = firebaseDatabase.getReference(BOARDS)
+    private val databaseUsersReference = firebaseDatabase.getReference(USERS)
+    private val databaseInvitesReference = firebaseDatabase.getReference(INVITES)
+    private val databaseListsOfNotesRef = firebaseDatabase.getReference(LIST_OF_NOTES)
+    private val databaseNotesRef = firebaseDatabase.getReference(NOTES)
     private val user = auth.currentUser
 
 
@@ -61,13 +64,6 @@ class TaskRepositoryImpl(
         }
     }
 
-    private suspend fun getBoards(): List<Board> {
-        return localDataSource.getBoards().let {
-            it.map { boardEntity ->
-                boardEntityToBoardMapper.map(boardEntity)
-            }
-        }
-    }
 
     override fun getBoardsFlowFromRoom(): Flow<List<Board>> {
         return localDataSource.getBoardsFlow().map {
@@ -214,8 +210,8 @@ class TaskRepositoryImpl(
         TODO("Not yet implemented")
     }
 
-    override fun createNewBoard(name: String, user: User, urlBackground: String, board: Board) =
-        callbackFlow<Board> {
+    override suspend fun createNewBoard(name: String, user: User, urlBackground: String, board: Board): Board =
+        suspendCoroutine { continuation ->
             val urlForBoard = databaseBoardsReference.push()
             val idBoard = urlForBoard.key ?: ""
             if (board.id != "") {
@@ -224,7 +220,7 @@ class TaskRepositoryImpl(
                 ref.child("backgroundUrl").setValue(urlBackground)
                 ref.child("title").setValue(name)
                 val boardDb = board.copy(title = name, backgroundUrl = urlBackground)
-                trySend(boardDb)
+                continuation.resume(boardDb)
             } else {
                 val usersRef = databaseUsersReference.child(user.id)
 
@@ -253,13 +249,9 @@ class TaskRepositoryImpl(
                             emptyList()
                         )
                         urlForBoard.setValue(boardToDb)
-                        val userToDb = user.copy(
-                            onlineStatus = true,
-                            boards = listBoardsIds
-                        )
                         databaseUsersReference.child(user.id).child("boards")
                             .setValue(listBoardsIds)
-                        trySend(boardToDb)
+                        continuation.resume(boardToDb)
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -272,32 +264,27 @@ class TaskRepositoryImpl(
     private val flowBoardUpdate = MutableSharedFlow<String>()
     fun flowBoardUpdate() = flowBoardUpdate.asSharedFlow()
 
-    override fun updateBoard(
+    override suspend fun updateBoard(
         board: Board,
         listOfNotesItemId: String,
         scope: CoroutineScope
-    ): Flow<String> {
+    ): String = suspendCoroutine { continuation ->
+
         val listOfNotesIdsNew = board.listsOfNotesIds
         (listOfNotesIdsNew as ArrayList).remove(listOfNotesItemId)
         databaseBoardsReference.child(board.id).child("listsOfNotesIds").setValue(listOfNotesIdsNew)
             .addOnSuccessListener {
-                scope.launch {
-                    flowBoardUpdate.emit("Update of data was successful")
-                }
+                continuation.resumeWith(Result.success("Data update was successful!"))
 
             }.addOnFailureListener {
-                it.message?.let { it1 ->
-                    scope.launch {
-                        flowBoardUpdate.emit(it1)
-                    }
-                }
+                continuation.resumeWith(Result.failure(it))
             }
         scope.launch {
             addBoard(board.copy(listsOfNotesIds = listOfNotesIdsNew))//Добавление в Room
         }
-        }
+    }
 
-    override fun deleteBoard(board: Board, user: User) {
+    override suspend fun deleteBoard(board: Board, user: User) {
         databaseBoardsReference.child(board.id).removeValue()
         val listBoardsIds = user.boards as ArrayList<String>
         listBoardsIds.remove(board.id)
@@ -310,18 +297,13 @@ class TaskRepositoryImpl(
         }
     }
 
-    private fun getListsOfNotes(): List<NotesListItem> {
-        return localDataSource.getListsOfNotes()
-            .map { notesListEntityToNotesListItemMapper.map(it) }
-    }
-
-    override fun renameList(notesListItem: NotesListItem, board: Board, title: String) {
+    override suspend fun renameList(notesListItem: NotesListItem, board: Board, title: String) {
         databaseListsOfNotesRef.child(board.id).child(notesListItem.id)
             .child("title").setValue(title)
         addListOfNote(notesListItem.copy(title = title))
     }
 
-    override fun deleteList(notesListItem: NotesListItem, board: Board, isList: Boolean) {
+    override suspend fun deleteList(notesListItem: NotesListItem, board: Board, isList: Boolean) {
         databaseListsOfNotesRef.child(board.id).child(notesListItem.id).removeValue()
         localDataSource.removeListOfNotes(notesListItem.id)
         val listNotes =
@@ -331,24 +313,6 @@ class TaskRepositoryImpl(
             localDataSource.removeNote(it)
         }
         if (isList) updateBoard(board, notesListItem.id)
-    }
-
-    private fun readData(boardId: String) {
-        databaseListsOfNotesRef.child(boardId).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val notesListItem = ArrayList<NotesListItem>()
-                snapshot.children.forEach { dataSnapshot ->
-                    val list = dataSnapshot.getValue(NotesListItem::class.java)
-                    if (list != null) notesListItem.add(list)
-                }
-                Log.i("USER_LIST_OF_NOTES", notesListItem.size.toString())
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.i("USER_LIST_OF_NOTES", error.message)
-            }
-
-        })
     }
 
     override fun createNewList(title: String, board: Board, user: User): LiveData<Board> {
@@ -372,13 +336,11 @@ class TaskRepositoryImpl(
                     listOfNotesIds.add(listId)
                     databaseBoardsReference.child(board.id)
                         .child("listsOfNotesIds").setValue(listOfNotesIds)
-                    board.listsOfNotesIds = listOfNotesIds
+                    val board = board.copy(listsOfNotesIds = listOfNotesIds)
                     _boardLiveData.value = board
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-
-                }
+                override fun onCancelled(error: DatabaseError) = Unit
             })
         return item
     }
@@ -403,14 +365,13 @@ class TaskRepositoryImpl(
                 }
             }
 
-            override fun onCancelled(error: DatabaseError) {
-            }
+            override fun onCancelled(error: DatabaseError) = Unit
 
         })
         return flowNotes.asSharedFlow()
     }
 
-    override fun createNewNote(
+    override suspend fun createNewNote(
         title: String,
         description: String,
         board: Board,
@@ -429,10 +390,8 @@ class TaskRepositoryImpl(
         databaseNotesRef.child(idNote).setValue(note)
         listNotes as HashMap<String, Boolean>
         listNotes.put(idNote, true)
-        scope.launch {
-            addNote(note)
-            addListOfNote(notesListItem.copy(listNotes = listNotes))
-        }
+        addNote(note)
+        addListOfNote(notesListItem.copy(listNotes = listNotes))
         url.setValue(true)
         MyDatabaseConnection.updated = true
         _success.postValue(board)
@@ -448,7 +407,7 @@ class TaskRepositoryImpl(
 
     }
 
-    override fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem) {
+    override suspend fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem) {
         MyDatabaseConnection.updated = true
         databaseNotesRef.child(note.id).removeValue()
         databaseListsOfNotesRef.child(board.id).child(notesListItem.id)
@@ -459,95 +418,14 @@ class TaskRepositoryImpl(
         addListOfNote(notesListItem.copy(listNotes = listNotes))
     }
 
-    override fun moveNote(notesListItem: NotesListItem, note: Note, board: Board, user: User) {
+    override suspend fun moveNote(notesListItem: NotesListItem, note: Note, board: Board, user: User) {
         MyDatabaseConnection.updated = true
         deleteNote(note, board, notesListItem)
-        createNewNote(note.title, note.description, board, notesListItem, user, note.listOfTasks)
+        createNewNote(note.title, note.description, board, notesListItem, user, CoroutineScope(Dispatchers.IO), note.listOfTasks)
     }
 
     override fun getListOfListNotes(boardId: String): LiveData<List<NotesListItem>> {
         TODO("Not yet implemented")
-    }
-
-    override fun signUp(
-        email: String,
-        password: String,
-        name: String,
-        lastName: String,
-        uri: Uri?
-    ): LiveData<User> {
-        auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-            val userId = it.user?.uid ?: return@addOnSuccessListener
-            if (uri != null) {
-                uploadUserAvatar(uri, "$name $lastName", object : TaskRepository.UrlCallback {
-                    override fun onUrlCallback(url: String) {
-                        val user = User(userId, name, lastName, email, true, emptyList(), url)
-                        addUser(user)
-                        databaseUsersReference.child(userId).setValue(user)
-                        _user.value = user
-
-                    }
-
-                })
-
-            }
-
-        }.addOnFailureListener {
-            _error.value = it.message
-        }
-
-    }
-
-    interface UrlCallback {
-
-        fun onUrlCallback(url: String)
-    }
-
-    override fun updateUserAvatar(uri: Uri, name: String): LiveData<FirebaseUser> {
-        val user = auth.currentUser
-        val profileUpdates = userProfileChangeRequest {
-            photoUri = uri
-            displayName = name
-        }
-
-
-        user?.updateProfile(profileUpdates)
-            ?.addOnCompleteListener {
-                if (it.isSuccessful) {
-                    Toast.makeText(
-                        getApplication(),
-                        "Обновление данных пользователя прошло успешно",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    Log.i("USER_FIREBASE_SUCCESS", auth.currentUser.toString())
-                    _success.value = auth.currentUser
-                }
-            }
-    }
-
-    override fun uploadUserAvatar(
-        uri: Uri,
-        name: String,
-        callback: TaskRepository.UrlCallback
-    ) {
-        val imageRef = storageReference.child("images/${uri.lastPathSegment}")
-        imageRef.putFile(uri).continueWithTask {
-            if (!it.isSuccessful) {
-                it.exception?.let { exception ->
-                    throw exception
-                }
-            }
-            imageRef.downloadUrl
-        }.addOnCompleteListener {
-            Log.i("USER_URL", it.result.toString())
-            if (it.isSuccessful) {
-                updateUserAvatar(it.result, name)
-                val urlToFile = it.result.toString()
-                callback.onUrlCallback(urlToFile)
-            } else {
-                Toast.makeText(getApplication(), "${it.result}", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     override fun updateUserProfile(description: String, email: String): LiveData<String> {
@@ -558,24 +436,6 @@ class TaskRepositoryImpl(
         }
         if (email != "") {
             updateUserEmail(email, ref)
-        }
-    }
-
-    override fun update(uri: Uri?, name: String) {
-        if (uri != null) {
-            uploadUserAvatar(uri, name, object : TaskRepository.UrlCallback {
-                override fun onUrlCallback(url: String) {
-                    databaseUsersReference.child(user!!.uid).child("uri").setValue(url)
-                    _uriLiveData.value = uri!!
-                    Toast.makeText(
-                        getApplication(),
-                        "Обновление данных пользователя прошло успешно",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                }
-
-            })
         }
     }
 
@@ -624,7 +484,7 @@ class TaskRepositoryImpl(
         return _invitesList
     }
 
-    override fun acceptInvite(user: User, invite: Invite) {
+    override suspend fun acceptInvite(user: User, invite: Invite) {
         val boardsList: ArrayList<String> = user.boards as ArrayList<String>
         val inviteBoardId = invite.boardId
         boardsList.add(inviteBoardId)
@@ -650,11 +510,11 @@ class TaskRepositoryImpl(
         clearInviteInDatabase(user.id, inviteBoardId)
     }
 
-    override fun declineInvite(user: User, invite: Invite) {
+    override suspend fun declineInvite(user: User, invite: Invite) {
         clearInviteInDatabase(user.id, invite.boardId)
     }
 
-    override fun clearInviteInDatabase(userId: String, inviteBoardId: String) {
+    override suspend fun clearInviteInDatabase(userId: String, inviteBoardId: String) {
         databaseInvitesReference.child(userId).child(inviteBoardId).removeValue()
         databaseUsersReference.child(userId).child("invites").child(inviteBoardId).removeValue()
         localDataSource.removeInvite()
@@ -693,9 +553,7 @@ class TaskRepositoryImpl(
 
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-
-                }
+                override fun onCancelled(error: DatabaseError) = Unit
 
             })
         return _success
@@ -703,5 +561,36 @@ class TaskRepositoryImpl(
 
     override fun logout() {
         auth.signOut()
+    }
+
+    private fun readData(boardId: String) {
+        databaseListsOfNotesRef.child(boardId).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val notesListItem = ArrayList<NotesListItem>()
+                snapshot.children.forEach { dataSnapshot ->
+                    val list = dataSnapshot.getValue(NotesListItem::class.java)
+                    if (list != null) notesListItem.add(list)
+                }
+                Log.i("USER_LIST_OF_NOTES", notesListItem.size.toString())
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.i("USER_LIST_OF_NOTES", error.message)
+            }
+
+        })
+    }
+
+    private fun getListsOfNotes(): List<NotesListItem> {
+        return localDataSource.getListsOfNotes()
+            .map { notesListEntityToNotesListItemMapper.map(it) }
+    }
+
+    private suspend fun getBoards(): List<Board> {
+        return localDataSource.getBoards().let {
+            it.map { boardEntity ->
+                boardEntityToBoardMapper.map(boardEntity)
+            }
+        }
     }
 }

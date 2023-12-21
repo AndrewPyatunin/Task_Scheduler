@@ -9,7 +9,7 @@ class AddBoardUseCase(
     private val repository: TaskRepository
 ) {
 
-    fun execute(name: String, user: User, urlBackground: String, board: Board): Flow<Board> {
+    suspend fun execute(name: String, user: User, urlBackground: String, board: Board): Board {
         return repository.createNewBoard(name, user, urlBackground, board)
     }
 }

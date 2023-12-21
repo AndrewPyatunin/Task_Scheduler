@@ -53,11 +53,9 @@ class UserProfileViewModel(application: Application) : AndroidViewModel(applicat
                         _userLiveData.value = user!!
                     }
 
-
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-                }
+                override fun onCancelled(error: DatabaseError) = Unit
 
             })
     }
@@ -133,7 +131,6 @@ class UserProfileViewModel(application: Application) : AndroidViewModel(applicat
 
             })
         }
-
     }
 
 

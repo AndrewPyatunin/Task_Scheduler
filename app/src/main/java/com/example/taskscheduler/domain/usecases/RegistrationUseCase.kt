@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.Flow
 class RegistrationUseCase(
     private val userAuth: UserAuth
 ) {
-    fun execute(
+    suspend fun execute(
         email: String,
         password: String,
         name: String,
         lastName: String,
         uri: Uri?,
         scope: CoroutineScope
-    ): Flow<User> {
+    ): User {
         return userAuth.signUp(email, password, name, lastName, uri, scope)
     }
 }

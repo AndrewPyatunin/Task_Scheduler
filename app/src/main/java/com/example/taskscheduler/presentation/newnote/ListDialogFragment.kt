@@ -12,18 +12,13 @@ class ListDialogFragment(val list: List<NotesListItem>) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val listTitles = ArrayList<String>()
-        for (item in list) {
-            listTitles.add(item.title)
+        list.forEach {
+            listTitles.add(it.title)
         }
         val builder = AlertDialog.Builder(requireActivity())
         builder.setTitle(getString(R.string.choose_the_list))
-        builder.setItems(listTitles.toTypedArray(), object : DialogInterface.OnClickListener {
-            override fun onClick(dialog: DialogInterface?, which: Int) {
-                (parentFragment as NewNoteFragment).moveNote(list[which])
-            }
-
-
-        })
+        builder.setItems(listTitles.toTypedArray()
+        ) { _, which -> (parentFragment as NewNoteFragment).moveNote(list[which]) }
         return builder.create()
     }
 }

@@ -62,8 +62,8 @@ class InviteUserFragment : Fragment() {
                 Log.i("USER_INVITE_LIST", listForInvite.joinToString { it.toString() })
             }
         binding.buttonInviteUser.setOnClickListener {
-            for (userForInvite in listForInvite) {
-                viewModel.inviteUser(userForInvite, user, board)
+            listForInvite.forEach {
+                viewModel.inviteUser(it, user, board)
             }
         }
         binding.recyclerViewInviteUser.afterMeasured {

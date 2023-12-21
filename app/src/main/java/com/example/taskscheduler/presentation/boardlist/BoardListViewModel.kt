@@ -16,9 +16,7 @@ class BoardListViewModel @Inject constructor(
     private val auth: FirebaseAuth
 ) : ViewModel() {
 
-    fun getBoardsFlow(user: User) = getBoardsFlowUseCase.execute(user).onEach {
-
-    }.onStart { }
+    fun getBoardsFlow(user: User) = getBoardsFlowUseCase.execute(user)
 
 
     val userFlow = (auth.currentUser?.uid ?: MyDatabaseConnection.userId)?.let {

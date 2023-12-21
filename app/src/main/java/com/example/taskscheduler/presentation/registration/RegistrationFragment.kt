@@ -30,7 +30,6 @@ import com.example.taskscheduler.presentation.ViewModelFactory
 import kotlinx.coroutines.launch
 import java.io.File
 
-
 class RegistrationFragment : Fragment() {
 
     lateinit var directory: File
@@ -45,6 +44,7 @@ class RegistrationFragment : Fragment() {
             viewModelFactory
         )[RegistrationViewModel::class.java]
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -118,6 +118,8 @@ class RegistrationFragment : Fragment() {
         pickImageFromGalleryForResult.launch(pickIntent)
     }
 
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         createDirectory()
@@ -152,6 +154,7 @@ class RegistrationFragment : Fragment() {
                                     }
                                     is UserAuthState.Success -> {
                                         user = it.user
+                                        viewModel.addUserToRoom(user)
                                         Toast.makeText(
                                             requireContext(),
                                             String.format(
@@ -167,10 +170,7 @@ class RegistrationFragment : Fragment() {
                             }
                         }
                     }
-
-
                 }
-
             }
         }
         observeViewModel()

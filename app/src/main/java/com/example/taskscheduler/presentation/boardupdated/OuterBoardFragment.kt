@@ -27,7 +27,6 @@ import com.example.taskscheduler.findTopNavController
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-
 class OuterBoardFragment : Fragment() {
 
     lateinit var binding: FragmentOuterBoardBinding
@@ -56,7 +55,6 @@ class OuterBoardFragment : Fragment() {
         Log.i("USER_SAVED", item.toString())
         MyDatabaseConnection.currentPosition = item
     }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -94,9 +92,6 @@ class OuterBoardFragment : Fragment() {
             editText.visibility = View.VISIBLE
             buttonAddNewList.visibility = View.VISIBLE
         }
-
-
-
 
         buttonAddNewList.setOnClickListener {
 
@@ -138,9 +133,9 @@ class OuterBoardFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.listLiveData.observe(viewLifecycleOwner, Observer {
-            parentList = it as ArrayList<NotesListItem>
-            for (item in it) {
+        viewModel.listLiveData.observe(viewLifecycleOwner, Observer { list ->
+            parentList = list as ArrayList<NotesListItem>
+            list.forEach {
                 binding.tabLayout.visibility = View.VISIBLE
             }
             parentAdapter = OuterBoardAdapter(
@@ -149,7 +144,7 @@ class OuterBoardFragment : Fragment() {
                 board,
                 user,
                 currentPosition,
-                it
+                list
             )
             viewPager = binding.viewPager
             Glide.with(this).load(board.backgroundUrl).into(object : CustomTarget<Drawable>() {
@@ -165,12 +160,12 @@ class OuterBoardFragment : Fragment() {
                 }
 
             })
-            viewPager?.offscreenPageLimit = it.size + 1
+            viewPager?.offscreenPageLimit = list.size + 1
             tabLayout = binding.tabLayout
             viewPager?.adapter = parentAdapter
             if (viewPager != null) {
                 TabLayoutMediator(tabLayout, viewPager!!) { tab, position ->
-                    tab.text = it[position].title
+                    tab.text = list[position].title
                 }.attach()
             }
             tabLayout.getTabAt(currentPosition)?.select()

@@ -7,12 +7,15 @@ import kotlinx.coroutines.flow.Flow
 
 interface UserAuth {
 
-    fun signUp(
+    suspend fun signUp(
         email: String,
         password: String,
         name: String,
         lastName: String,
         uri: Uri?,
         scope: CoroutineScope
-    ): Flow<User>
+    ): User
+
+    fun updateUserAvatar(uri: Uri, name: String)
+
 }

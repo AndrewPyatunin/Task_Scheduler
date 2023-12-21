@@ -2,6 +2,7 @@ package com.example.taskscheduler
 
 import android.net.Uri
 import com.example.taskscheduler.domain.BackgroundImage
+import com.example.taskscheduler.domain.DiffCallback
 import com.example.taskscheduler.domain.NewCallback
 import com.example.taskscheduler.domain.models.User
 import com.google.firebase.auth.FirebaseUser
@@ -46,9 +47,7 @@ object MyDatabaseConnection : DatabaseConnection {
                 userFrom = snapshot.getValue(User::class.java) ?: User()
             }
 
-            override fun onCancelled(error: DatabaseError) {
-
-            }
+            override fun onCancelled(error: DatabaseError) = Unit
 
         })
     }

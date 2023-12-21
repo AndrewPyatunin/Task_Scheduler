@@ -1,9 +1,7 @@
 package com.example.taskscheduler.domain
 
-import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.example.taskscheduler.domain.models.*
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -23,26 +21,26 @@ interface TaskRepository {
 
     suspend fun addUser(user: User)
 
-    fun createNewBoard(
+    suspend fun createNewBoard(
         name: String,
         user: User,
         urlBackground: String,
         board: Board
-    ): Flow<Board>
+    ): Board
 
-    fun updateBoard(board: Board, listOfNotesItemId: String, scope: CoroutineScope): Flow<String>
+    suspend fun updateBoard(board: Board, listOfNotesItemId: String, scope: CoroutineScope): String
 
-    fun deleteBoard(board: Board, user: User)
+    suspend fun deleteBoard(board: Board, user: User)
 
-    fun renameList(notesListItem: NotesListItem, board: Board, title: String)
+    suspend fun renameList(notesListItem: NotesListItem, board: Board, title: String)
 
-    fun deleteList(notesListItem: NotesListItem, board: Board, isList: Boolean)
+    suspend fun deleteList(notesListItem: NotesListItem, board: Board, isList: Boolean)
 
     fun createNewList(title: String, board: Board, user: User): LiveData<Board>
 
     fun getNotesFlow(listOfNotesItemId: String): Flow<List<Note>>
 
-    fun createNewNote(
+    suspend fun createNewNote(
         title: String,
         description: String,
         board: Board,
@@ -54,9 +52,9 @@ interface TaskRepository {
 
     fun updateNote(note: Note): LiveData<List<CheckNoteItem>>
 
-    fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem)
+    suspend fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem)
 
-    fun moveNote(notesListItem: NotesListItem, note: Note, board: Board, user: User)
+    suspend fun moveNote(notesListItem: NotesListItem, note: Note, board: Board, user: User)
 
     fun getListOfListNotes(boardId: String): LiveData<List<NotesListItem>>
 
@@ -70,21 +68,7 @@ interface TaskRepository {
 
     fun getUsersForInvitesFlow(): Flow<List<User>>
 
-    fun signUp(
-        email: String,
-        password: String,
-        name: String,
-        lastName: String,
-        uri: Uri?
-    ): LiveData<User>
-
-    fun updateUserAvatar(uri: Uri, name: String): LiveData<FirebaseUser>
-
-    fun uploadUserAvatar(uri: Uri, name: String, callback: UrlCallback)
-
     fun updateUserProfile(description: String, email: String): LiveData<String>
-
-    fun update(uri: Uri?, name: String)
 
     fun updateUserEmail(email: String, ref: DatabaseReference): LiveData<String>
 
@@ -92,20 +76,15 @@ interface TaskRepository {
 
     fun getInvites(): LiveData<List<Invite>>
 
-    fun acceptInvite(user: User, invite: Invite)
+    suspend fun acceptInvite(user: User, invite: Invite)
 
-    fun declineInvite(user: User, invite: Invite)
+    suspend fun declineInvite(user: User, invite: Invite)
 
-    fun clearInviteInDatabase(userId: String, inviteBoardId: String)
+    suspend fun clearInviteInDatabase(userId: String, inviteBoardId: String)
 
     fun inviteUser(userForInvite: User, currentUser: User, board: Board): LiveData<String>
 
     fun logout()
-
-
-    interface UrlCallback {
-        fun onUrlCallback(url: String)
-    }
 
     suspend fun addUserForInvites(user: User)
 

@@ -90,9 +90,7 @@ class InviteUserViewModel(board: Board) : ViewModel() {
 
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-
-                }
+                override fun onCancelled(error: DatabaseError) = Unit
 
             })
 

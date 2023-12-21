@@ -77,10 +77,9 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 switchVisibility(textViewNewNoteTitle)
                 switchVisibility(imageViewCalendarEdit)
                 switchVisibility(textViewDate)
-                for (item in note.listOfTasks) {
-                    if (item.isChecked) list.add(item.id)
+                note.listOfTasks.forEach {
+                    if (it.isChecked) list.add(it.id)
                 }
-
 
                 calculateProgress()
                 imageViewCalendarEdit.setOnClickListener {

@@ -66,4 +66,7 @@
     <string name="to_decline">Decline</string>
     <string name="success_invite">The invitation has been sent successfully</string>
     <string name="cannot_enter_an_empty_name">You cannot enter an empty name!</string>
+    <string name="from_where_pick_photo">Where will we get the photo from?</string>
+    <string name="gallery">Gallery</string>
+    <string name="camera">Camera</string>
 </resources>

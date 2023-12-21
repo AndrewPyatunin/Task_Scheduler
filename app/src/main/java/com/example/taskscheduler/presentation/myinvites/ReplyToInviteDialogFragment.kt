@@ -2,7 +2,6 @@ package com.example.taskscheduler.presentation.myinvites
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.DialogFragment
@@ -20,16 +19,12 @@ class ReplyToInviteDialogFragment : DialogFragment() {
             val builder = AlertDialog.Builder(it)
             builder.setTitle(getString(R.string.accept_invite))
                 .setCancelable(true)
-                .setPositiveButton(getString(R.string.to_accept), object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface?, which: Int) {
-                        (parentFragment as MyInvitesFragment).okClicked(invite)
-                    }
-
-                }).setNegativeButton(getString(R.string.to_decline), object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface?, which: Int) {
-                        (parentFragment as MyInvitesFragment).cancelClicked(invite)
-                    }
-                }).create()
+                .setPositiveButton(
+                    getString(R.string.to_accept)
+                ) { _, _ -> (parentFragment as MyInvitesFragment).okClicked(invite) }
+                .setNegativeButton(getString(R.string.to_decline)) { _, _ ->
+                    (parentFragment as MyInvitesFragment).cancelClicked(invite)
+                }.create()
         }
 
     }
