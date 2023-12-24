@@ -6,6 +6,8 @@ import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.GetBoardsFlowUseCase
 import com.example.taskscheduler.domain.usecases.GetUserFlowFromRoomUseCase
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject

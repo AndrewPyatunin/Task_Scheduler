@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface BoardRepository {
 
-    fun getBoardsFlow(user: User): Flow<List<Board>>
+    suspend fun getBoardsFlow(user: User, scope: CoroutineScope)
 
     fun getBoardsFlowFromRoom(user: User): Flow<List<Board>>
 
@@ -23,5 +23,5 @@ interface BoardRepository {
         user: User,
         urlBackground: String,
         board: Board
-    ): Board
+    )
 }

@@ -11,6 +11,6 @@ data class Board(
     val title: String = "",
     val creatorId: String = "",
     val backgroundUrl: String = "",
-    val members: List<String> = emptyList(),
-    val listsOfNotesIds: List<String> = emptyList()
+    val members: Map<String, Boolean> = emptyMap(),
+    val listsOfNotesIds: Map<String, Boolean> = emptyMap()
 ) : Parcelable

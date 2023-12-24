@@ -10,6 +10,6 @@ data class BoardEntity(
     val title: String,
     val creatorId: String,
     val backgroundUrl: String,
-    val members: List<String>,
-    val listOfNotesIds: List<String>
+    val members: Map<String, Boolean>,
+    val listOfNotesIds: Map<String, Boolean>
 )

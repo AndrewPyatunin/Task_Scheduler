@@ -3,17 +3,17 @@ package com.example.taskscheduler.domain.repos
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
 
 interface InviteRepository {
 
-    fun getInvites(): Flow<List<Invite>>
+    suspend fun getInvites(scope: CoroutineScope)
 
-    fun acceptInvite(user: User, invite: Invite)
+    suspend fun acceptInvite(user: User, invite: Invite)
 
-    fun declineInvite(user: User, invite: Invite)
+    suspend fun declineInvite(user: User, invite: Invite)
 
-    fun clearInviteInDatabase(userId: String, inviteBoardId: String)
+    suspend fun clearInviteInDatabase(user: User, invite: Invite)
 
     suspend fun inviteUser(userForInvite: User, currentUser: User, board: Board): String
 

@@ -1,24 +1,22 @@
 package com.example.taskscheduler.data.repos
 
-import android.util.Log
 import com.example.taskscheduler.data.datasources.InviteDataSource
 import com.example.taskscheduler.data.datasources.UserDataSource
 import com.example.taskscheduler.data.entities.InviteEntity
+import com.example.taskscheduler.data.entities.UserEntity
 import com.example.taskscheduler.data.entities.UserForInvitesEntity
 import com.example.taskscheduler.data.mappers.Mapper
-import com.example.taskscheduler.domain.repos.InviteRepository
+import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.domain.repos.InviteRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.channels.awaitClose
+import com.google.firebase.database.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlin.coroutines.suspendCoroutine
 
 class InviteRepositoryImpl(
@@ -28,6 +26,7 @@ class InviteRepositoryImpl(
     private val inviteToInviteEntityMapper: Mapper<Invite, InviteEntity>,
     private val userToUserForInvitesMapper: Mapper<User, UserForInvitesEntity>,
     private val userForInvitesToUserMapper: Mapper<UserForInvitesEntity, User>,
+    private val userToUserEntityMapper: Mapper<User, UserEntity>,
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
     private val databaseInvitesReference: DatabaseReference,
@@ -35,67 +34,47 @@ class InviteRepositoryImpl(
     private val databaseBoardsReference: DatabaseReference
 ) : InviteRepository {
 
-    override fun getInvites(): Flow<List<Invite>> = callbackFlow {
-        val invitesListener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val listInvites = ArrayList<Invite>()
-                snapshot.children.forEach {
-                    it.children.forEach {
-                        it.getValue(Invite::class.java)?.let { invite ->
-                            listInvites.add(invite)
+    override suspend fun getInvites(scope: CoroutineScope) {
+
+        databaseInvitesReference.child(auth.currentUser?.uid.toString())
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    snapshot.children.forEach {
+                        scope.launch {
+                            it.children.forEach {
+                                it.getValue(Invite::class.java)?.let { invite ->
+                                    addInvite(invite)
+                                }
+                            }
                         }
                     }
-                }
-                Log.i("USER_INVITE_LIST_SIZE", listInvites.size.toString())
-                trySend(listInvites)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                throw RuntimeException(error.message)
-            }
-        }
-        val ref = databaseInvitesReference.child(auth.currentUser?.uid.toString())
-        ref.addValueEventListener(invitesListener)
-        awaitClose {
-            ref.removeEventListener(invitesListener)
-        }
-    }
-
-    override fun acceptInvite(user: User, invite: Invite) {
-        val boardsList: ArrayList<String> = user.boards as ArrayList<String>
-        val inviteBoardId = invite.boardId
-        boardsList.add(inviteBoardId)
-        databaseUsersReference.child(user.id).child("boards").setValue(boardsList)
-        val listMembers = ArrayList<String>()
-        databaseBoardsReference.child(inviteBoardId).child("members")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    databaseBoardsReference.removeEventListener(this)
-                    snapshot.children.forEach { dataSnapshot ->
-                        listMembers.add(dataSnapshot.value.toString())
-                        Log.i("USER_MEMBERS_FROM", dataSnapshot.value.toString())
-                    }
-                    listMembers.add(user.id)
-                    databaseBoardsReference.child(inviteBoardId).child("members")
-                        .setValue(listMembers)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     throw RuntimeException(error.message)
                 }
             })
-        clearInviteInDatabase(user.id, inviteBoardId)
     }
 
-    override fun declineInvite(user: User, invite: Invite) {
-        clearInviteInDatabase(user.id, invite.boardId)
+    override suspend fun acceptInvite(user: User, invite: Invite) {
+        val boardsList: ArrayList<String> = user.boards as ArrayList<String>
+        val inviteBoardId = invite.boardId
+        boardsList.add(inviteBoardId)
+        databaseUsersReference.child(user.id).child("boards").setValue(boardsList)
+        databaseBoardsReference.child(inviteBoardId).child("members")
+            .updateChildren(mapOf(Pair(user.id, true)))
+        clearInviteInDatabase(user, invite)
     }
 
-    override fun clearInviteInDatabase(userId: String, inviteBoardId: String) {
-        databaseInvitesReference.child(userId).child(inviteBoardId).removeValue()
-        databaseUsersReference.child(userId).child("invites").child(inviteBoardId).removeValue()
-//        inviteDataSource.removeInvite()
-//        userDataSource.addUser()
+    override suspend fun declineInvite(user: User, invite: Invite) {
+        clearInviteInDatabase(user, invite)
+    }
+
+    override suspend fun clearInviteInDatabase(user: User, invite: Invite) {
+        databaseInvitesReference.child(user.id).child(invite.boardId).removeValue()
+        databaseUsersReference.child(user.id).child("invites").child(invite.boardId).removeValue()
+        inviteDataSource.removeInvite(inviteToInviteEntityMapper.map(invite))
+        userDataSource.addUser(userToUserEntityMapper.map(user))
     }
 
     override suspend fun inviteUser(
@@ -103,7 +82,8 @@ class InviteRepositoryImpl(
         currentUser: User,
         board: Board
     ): String = suspendCoroutine { continuation ->
-        databaseInvitesReference.child(userForInvite.id).child(board.id)
+        databaseInvitesReference.child(userForInvite.id)
+            .child(board.id)//можно избавиться от получения данных из базы и брать их из room
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (!snapshot.hasChildren()) {
@@ -141,5 +121,21 @@ class InviteRepositoryImpl(
 
     override suspend fun addUserForInvites(user: User) {
         inviteDataSource.addUserForInvites(userToUserForInvitesMapper.map(user))
+    }
+
+    fun getInvitesFromRoom(): Flow<List<Invite>> {
+        return inviteDataSource.getInvitesFlow().map { list ->
+            list.map {
+                inviteEntityToInviteMapper.map(it)
+            }
+        }
+    }
+
+    fun getUsersForInvites(): Flow<List<User>> {
+        return inviteDataSource.getUsersForInvites().map { list ->
+            list.map {
+                userForInvitesToUserMapper.map(it)
+            }
+        }
     }
 }

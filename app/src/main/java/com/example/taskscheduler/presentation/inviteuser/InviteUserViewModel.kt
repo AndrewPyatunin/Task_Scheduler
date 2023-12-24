@@ -3,9 +3,11 @@ package com.example.taskscheduler.presentation.inviteuser
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.domain.usecases.InviteUserUseCase
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
@@ -14,8 +16,12 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.launch
 
-class InviteUserViewModel(board: Board) : ViewModel() {
+class InviteUserViewModel(
+    board: Board,
+    private val inviteUserUseCase: InviteUserUseCase
+    ) : ViewModel() {
     var userInList = false
     lateinit var database: FirebaseDatabase
     private val auth = Firebase.auth
@@ -61,38 +67,8 @@ class InviteUserViewModel(board: Board) : ViewModel() {
     }
 
     fun inviteUser(userForInvite: User, currentUser: User, board: Board) {
-        databaseInvitesReference.child(userForInvite.id).child(board.id)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.hasChildren()) {
-
-                    } else {
-                        val pushInvite =
-                            databaseInvitesReference.child(userForInvite.id).child(board.id).push()
-                        val inviteId = pushInvite.key.toString()
-                        pushInvite.setValue(
-                            Invite(
-                                inviteId,
-                                board.id,
-                                currentUser.id,
-                                currentUser.name,
-                                currentUser.lastName,
-                                board.title
-                            )
-                        )
-                        val ref = databaseUsersReference.child(userForInvite.id).child("invites")
-                        val map = HashMap<String, Any>()
-                        map[board.id] = true
-                        ref.updateChildren(map)
-                        _success.value = "Приглашение успешно отправлено"
-
-                    }
-
-                }
-
-                override fun onCancelled(error: DatabaseError) = Unit
-
-            })
-
+        viewModelScope.launch {
+            inviteUserUseCase.execute(userForInvite, currentUser, board)
+        }
     }
 }
