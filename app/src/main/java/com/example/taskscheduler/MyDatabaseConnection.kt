@@ -48,7 +48,6 @@ object MyDatabaseConnection : DatabaseConnection {
             }
 
             override fun onCancelled(error: DatabaseError) = Unit
-
         })
     }
 

@@ -1,7 +1,7 @@
 package com.example.taskscheduler.data.repos
 
 import com.example.taskscheduler.MyDatabaseConnection
-import com.example.taskscheduler.data.FirebaseConstants.LIST_OF_NOTES
+import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
 import com.example.taskscheduler.data.FirebaseConstants.NOTES
 import com.example.taskscheduler.data.datasources.NoteDataSource
 import com.example.taskscheduler.data.entities.NoteEntity
@@ -14,8 +14,6 @@ import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -24,10 +22,10 @@ class NoteRepositoryImpl(
     private val notesListRepository: NotesListRepository,
     private val noteToNoteEntityMapper: Mapper<Note, NoteEntity>,
     private val noteEntityToNoteMapper: Mapper<NoteEntity, Note>,
-    private val database: FirebaseDatabase
+    database: FirebaseDatabase
 ) : NoteRepository {
 
-    private val databaseListsOfNotesReference = database.getReference(LIST_OF_NOTES)
+    private val databaseListsOfNotesReference = database.getReference(NOTES_LIST)
     private val databaseNotesReference = database.getReference(NOTES)
 
     override fun getNotesFlow(listOfNotesItemId: String): Flow<List<Note>> {
@@ -44,7 +42,6 @@ class NoteRepositoryImpl(
         board: Board,
         notesListItem: NotesListItem,
         user: User,
-        scope: CoroutineScope,
         checkList: List<CheckNoteItem>
     ) {
         val childListNotesRef = databaseListsOfNotesReference
@@ -84,7 +81,7 @@ class NoteRepositoryImpl(
     override suspend fun moveNote(notesListItem: NotesListItem, note: Note, board: Board, user: User) {
         MyDatabaseConnection.updated = true
         deleteNote(note, board, notesListItem)
-        createNewNote(note.title, note.description, board, notesListItem, user, CoroutineScope(Dispatchers.IO), note.listOfTasks)
+        createNewNote(note.title, note.description, board, notesListItem, user, note.listOfTasks)
     }
 
     override suspend fun addNote(note: Note) {

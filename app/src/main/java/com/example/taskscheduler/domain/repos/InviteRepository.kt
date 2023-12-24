@@ -4,6 +4,7 @@ import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 
 interface InviteRepository {
 
@@ -20,4 +21,8 @@ interface InviteRepository {
     suspend fun addInvite(invite: Invite)
 
     suspend fun addUserForInvites(user: User)
+
+    fun getInvitesFromRoom(): Flow<List<Invite>>
+
+    fun getUsersForInvites(): Flow<List<User>>
 }

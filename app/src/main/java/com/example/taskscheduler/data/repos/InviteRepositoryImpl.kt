@@ -1,18 +1,23 @@
 package com.example.taskscheduler.data.repos
 
+import com.example.taskscheduler.data.FirebaseConstants.BOARDS
+import com.example.taskscheduler.data.FirebaseConstants.INVITES
+import com.example.taskscheduler.data.FirebaseConstants.USERS
 import com.example.taskscheduler.data.datasources.InviteDataSource
 import com.example.taskscheduler.data.datasources.UserDataSource
 import com.example.taskscheduler.data.entities.InviteEntity
 import com.example.taskscheduler.data.entities.UserEntity
 import com.example.taskscheduler.data.entities.UserForInvitesEntity
 import com.example.taskscheduler.data.mappers.Mapper
-import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.InviteRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.*
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -27,12 +32,12 @@ class InviteRepositoryImpl(
     private val userToUserForInvitesMapper: Mapper<User, UserForInvitesEntity>,
     private val userForInvitesToUserMapper: Mapper<UserForInvitesEntity, User>,
     private val userToUserEntityMapper: Mapper<User, UserEntity>,
-    private val auth: FirebaseAuth,
-    private val database: FirebaseDatabase,
-    private val databaseInvitesReference: DatabaseReference,
-    private val databaseUsersReference: DatabaseReference,
-    private val databaseBoardsReference: DatabaseReference
 ) : InviteRepository {
+
+    private val auth = Firebase.auth
+    private val databaseInvitesReference = Firebase.database.getReference(INVITES)
+    private val databaseUsersReference = Firebase.database.getReference(USERS)
+    private val databaseBoardsReference = Firebase.database.getReference(BOARDS)
 
     override suspend fun getInvites(scope: CoroutineScope) {
 
@@ -101,9 +106,7 @@ class InviteRepositoryImpl(
                             )
                         )
                         val ref = databaseUsersReference.child(userForInvite.id).child("invites")
-                        val map = HashMap<String, Any>()
-                        map[board.id] = true
-                        ref.updateChildren(map)
+                        ref.updateChildren(mapOf(Pair(board.id, true)))
                         continuation.resumeWith(Result.success("Приглашение успешно отправлено"))
                     }
 
@@ -123,7 +126,7 @@ class InviteRepositoryImpl(
         inviteDataSource.addUserForInvites(userToUserForInvitesMapper.map(user))
     }
 
-    fun getInvitesFromRoom(): Flow<List<Invite>> {
+    override fun getInvitesFromRoom(): Flow<List<Invite>> {
         return inviteDataSource.getInvitesFlow().map { list ->
             list.map {
                 inviteEntityToInviteMapper.map(it)
@@ -131,7 +134,7 @@ class InviteRepositoryImpl(
         }
     }
 
-    fun getUsersForInvites(): Flow<List<User>> {
+    override fun getUsersForInvites(): Flow<List<User>> {
         return inviteDataSource.getUsersForInvites().map { list ->
             list.map {
                 userForInvitesToUserMapper.map(it)

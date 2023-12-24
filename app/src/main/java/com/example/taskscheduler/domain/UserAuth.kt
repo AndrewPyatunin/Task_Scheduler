@@ -18,4 +18,8 @@ interface UserAuth {
 
     fun updateUserAvatar(uri: Uri, name: String)
 
+    suspend fun uploadUserAvatar(
+        uri: Uri,
+        name: String
+    ): Result<String>
 }

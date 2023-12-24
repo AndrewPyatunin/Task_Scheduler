@@ -11,9 +11,9 @@ interface UserRepository {
 
     fun getUser(userId: String): Flow<User>
 
-    suspend fun updateUserProfile(description: String, email: String)
+    suspend fun updateUserProfile(description: String, email: String, user: User)
 
-    suspend fun update(uri: Uri?, name: String)
+    suspend fun update(uri: Uri?, name: String, user: User)
 
     suspend fun updateUserEmail(email: String, ref: DatabaseReference): String
 

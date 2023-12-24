@@ -18,7 +18,6 @@ interface NoteRepository {
         board: Board,
         notesListItem: NotesListItem,
         user: User,
-        scope: CoroutineScope,
         checkList: List<CheckNoteItem> = emptyList()
     )
 

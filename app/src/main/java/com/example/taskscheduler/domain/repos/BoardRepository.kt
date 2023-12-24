@@ -12,7 +12,7 @@ interface BoardRepository {
     fun getBoardsFlowFromRoom(user: User): Flow<List<Board>>
 
 
-    suspend fun updateBoard(board: Board, listOfNotesItemId: String, scope: CoroutineScope): String
+    suspend fun updateBoard(board: Board, listOfNotesItemId: String)
 
     suspend fun deleteBoard(board: Board, user: User)
 

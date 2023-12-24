@@ -1,6 +1,8 @@
 package com.example.taskscheduler.data.repos
 
 import android.util.Log
+import com.example.taskscheduler.data.FirebaseConstants.BOARDS
+import com.example.taskscheduler.data.FirebaseConstants.USERS
 import com.example.taskscheduler.data.datasources.BoardDataSource
 import com.example.taskscheduler.data.datasources.NotesListDataSource
 import com.example.taskscheduler.data.entities.BoardEntity
@@ -12,31 +14,30 @@ import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.BoardRepository
 import com.example.taskscheduler.domain.repos.NotesListRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class BoardRepositoryImpl(
     private val boardDataSource: BoardDataSource,
     private val boardToBoardEntityMapper: Mapper<Board, BoardEntity>,
     private val boardEntityToBoardMapper: Mapper<BoardEntity, Board>,
     private val notesListEntityToNotesListItemMapper: Mapper<NotesListEntity, NotesListItem>,
-    private val databaseBoardsReference: DatabaseReference,
-    private val databaseUsersReference: DatabaseReference,
     private val notesListDataSource: NotesListDataSource,
     private val notesListRepository: NotesListRepository,
-    private val auth: FirebaseAuth
 ) : BoardRepository {
+
+    private val auth = Firebase.auth
+    private val databaseBoardsReference = Firebase.database.getReference(BOARDS)
+    private val databaseUsersReference = Firebase.database.getReference(USERS)
 
     override suspend fun getBoardsFlow(user: User, scope: CoroutineScope) {
         auth.addAuthStateListener {
@@ -44,18 +45,13 @@ class BoardRepositoryImpl(
                 databaseBoardsReference.addValueEventListener(object : ValueEventListener {
 
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val boardsFromDb = ArrayList<Board>()
-                        snapshot.children.forEach { dataSnapshot ->
-                            val board = dataSnapshot.getValue(Board::class.java)
-                            if (board != null && dataSnapshot.key in user.boards) {
-                                boardsFromDb.add(board)
-                            }
-                        }
                         scope.launch {
-                            boardsFromDb.forEach {
-                                addBoard(it)
+                            snapshot.children.forEach { dataSnapshot ->
+                                val board = dataSnapshot.getValue(Board::class.java)
+                                if (board != null && dataSnapshot.key in user.boards) {
+                                    addBoard(board)
+                                }
                             }
-
                         }
                     }
 
@@ -76,20 +72,11 @@ class BoardRepositoryImpl(
     }
 
     override suspend fun updateBoard(
-        board: Board, listOfNotesItemId: String, scope: CoroutineScope
-    ): String = suspendCoroutine { continuation ->
+        board: Board, listOfNotesItemId: String
+    ) {
         val nodes = board.listsOfNotesIds.filter { it.key != listOfNotesItemId }
         databaseBoardsReference.child(board.id).child("listsOfNotesIds").setValue(nodes)
-            .addOnSuccessListener {
-                continuation.resumeWith(Result.success("Data update was successful!"))
-
-            }.addOnFailureListener {
-                continuation.resumeWith(Result.failure(it))
-            }
-
-        scope.launch {
-            addBoard(board.copy(listsOfNotesIds = nodes))//Добавление в Room
-        }
+        addBoard(board.copy(listsOfNotesIds = nodes))//Добавление в Room
     }
 
     override suspend fun deleteBoard(board: Board, user: User) {
