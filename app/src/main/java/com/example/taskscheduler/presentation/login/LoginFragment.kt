@@ -6,21 +6,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentLoginBinding
 import com.example.taskscheduler.domain.models.User
-import com.example.taskscheduler.presentation.UserAuthState
-import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
     lateinit var binding: FragmentLoginBinding
     lateinit var user: User
     private var email = ""
-    lateinit var viewModel: LoginViewModel
-
+    private val viewModel by lazy {
+        ViewModelProvider(this)[LoginViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,7 +32,6 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
         observeViewModel()
         binding.buttonLogin.setOnClickListener {
             val password = binding.editTextTextPassword.text.toString().trim()
@@ -58,32 +56,16 @@ class LoginFragment : Fragment() {
 
     private fun observeViewModel() {
 
+        viewModel.success.observe(viewLifecycleOwner) {
+            viewModel.fetchUser()
+        }
+
+        viewModel.userLiveData.observe(viewLifecycleOwner) {
+            launchWelcomeFragment(it)
+        }
+
         viewModel.error.observe(viewLifecycleOwner) {
             if (it != null) Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
-        }
-        viewModel.success.observe(viewLifecycleOwner) {
-            if (it != null) {
-                lifecycleScope.launch {
-                    repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                        viewModel.getUser(it.uid).collect { state ->
-                            when (state) {
-                                is UserAuthState.Error -> {
-                                    Toast.makeText(
-                                        requireContext(),
-                                        state.message,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                                UserAuthState.Loading -> {
-
-                                }
-                                is UserAuthState.Success -> launchWelcomeFragment(state.user)
-                            }
-
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -106,11 +88,6 @@ class LoginFragment : Fragment() {
             )
         )
     }
-
-    private fun launchTabsFragment() {
-        findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToTabsFragment())
-    }
-
 
     companion object {
 

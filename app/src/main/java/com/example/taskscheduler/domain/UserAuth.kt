@@ -22,4 +22,6 @@ interface UserAuth {
         uri: Uri,
         name: String
     ): Result<String>
+
+    suspend fun getUser(userId: String, scope: CoroutineScope)
 }

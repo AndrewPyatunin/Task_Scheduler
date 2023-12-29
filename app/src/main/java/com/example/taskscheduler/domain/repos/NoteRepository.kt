@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface NoteRepository {
 
-    fun getNotesFlow(listOfNotesItemId: String): Flow<List<Note>>
+    fun getNotesFlow(): Flow<List<Note>>
+
+    fun fetchNotes(notesListItem: NotesListItem, listNotes: List<Note>, scope: CoroutineScope)
 
     suspend fun createNewNote(
         title: String,
@@ -28,4 +30,6 @@ interface NoteRepository {
     suspend fun moveNote(notesListItem: NotesListItem, note: Note, board: Board, user: User)
 
     suspend fun addNote(note: Note)
+
+    suspend fun clearAllNotes()
 }

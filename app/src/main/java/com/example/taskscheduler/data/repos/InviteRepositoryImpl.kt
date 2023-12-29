@@ -3,37 +3,38 @@ package com.example.taskscheduler.data.repos
 import com.example.taskscheduler.data.FirebaseConstants.BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.INVITES
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.datasources.InviteDataSource
-import com.example.taskscheduler.data.datasources.UserDataSource
-import com.example.taskscheduler.data.entities.InviteEntity
-import com.example.taskscheduler.data.entities.UserEntity
-import com.example.taskscheduler.data.entities.UserForInvitesEntity
-import com.example.taskscheduler.data.mappers.Mapper
+import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.datasources.InviteDataSourceImpl
+import com.example.taskscheduler.data.datasources.UserDataSourceImpl
+import com.example.taskscheduler.data.mappers.InviteEntityToInviteMapper
+import com.example.taskscheduler.data.mappers.InviteToInviteEntityMapper
+import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.InviteRepository
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.coroutines.suspendCoroutine
 
 class InviteRepositoryImpl(
-    private val inviteDataSource: InviteDataSource,
-    private val userDataSource: UserDataSource,
-    private val inviteEntityToInviteMapper: Mapper<InviteEntity, Invite>,
-    private val inviteToInviteEntityMapper: Mapper<Invite, InviteEntity>,
-    private val userToUserForInvitesMapper: Mapper<User, UserForInvitesEntity>,
-    private val userForInvitesToUserMapper: Mapper<UserForInvitesEntity, User>,
-    private val userToUserEntityMapper: Mapper<User, UserEntity>,
+    dao: TaskDatabaseDao
 ) : InviteRepository {
 
+    private val inviteDataSource = InviteDataSourceImpl(dao)
+    private val userDataSource = UserDataSourceImpl(dao)
+    private val inviteEntityToInviteMapper = InviteEntityToInviteMapper()
+    private val inviteToInviteEntityMapper = InviteToInviteEntityMapper()
+    private val userToUserEntityMapper = UserToUserEntityMapper()
     private val auth = Firebase.auth
     private val databaseInvitesReference = Firebase.database.getReference(INVITES)
     private val databaseUsersReference = Firebase.database.getReference(USERS)
@@ -45,7 +46,7 @@ class InviteRepositoryImpl(
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     snapshot.children.forEach {
-                        scope.launch {
+                        GlobalScope.launch {
                             it.children.forEach {
                                 it.getValue(Invite::class.java)?.let { invite ->
                                     addInvite(invite)
@@ -55,20 +56,21 @@ class InviteRepositoryImpl(
                     }
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-                    throw RuntimeException(error.message)
-                }
+                override fun onCancelled(error: DatabaseError) = Unit
             })
     }
 
     override suspend fun acceptInvite(user: User, invite: Invite) {
-        val boardsList: ArrayList<String> = user.boards as ArrayList<String>
         val inviteBoardId = invite.boardId
-        boardsList.add(inviteBoardId)
-        databaseUsersReference.child(user.id).child("boards").setValue(boardsList)
+        databaseUsersReference.child(user.id).child("boards").updateChildren(mapOf(Pair(inviteBoardId, true)))
         databaseBoardsReference.child(inviteBoardId).child("members")
             .updateChildren(mapOf(Pair(user.id, true)))
-        clearInviteInDatabase(user, invite)
+        clearInviteInDatabase(user.copy(boards = (user.boards as MutableMap).apply {
+            this[inviteBoardId] = true
+        }, invites = user.invites.filter {
+            it.key != invite.id
+        }), invite)
+        // possible to update board
     }
 
     override suspend fun declineInvite(user: User, invite: Invite) {
@@ -89,7 +91,7 @@ class InviteRepositoryImpl(
     ): String = suspendCoroutine { continuation ->
         databaseInvitesReference.child(userForInvite.id)
             .child(board.id)//можно избавиться от получения данных из базы и брать их из room
-            .addValueEventListener(object : ValueEventListener {
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (!snapshot.hasChildren()) {
                         val pushInvite =
@@ -122,8 +124,8 @@ class InviteRepositoryImpl(
         inviteDataSource.addInvite(inviteToInviteEntityMapper.map(invite))
     }
 
-    override suspend fun addUserForInvites(user: User) {
-        inviteDataSource.addUserForInvites(userToUserForInvitesMapper.map(user))
+    override suspend fun clearAllInvitesInRoom() {
+        inviteDataSource.clearAllInvites()
     }
 
     override fun getInvitesFromRoom(): Flow<List<Invite>> {
@@ -134,11 +136,5 @@ class InviteRepositoryImpl(
         }
     }
 
-    override fun getUsersForInvites(): Flow<List<User>> {
-        return inviteDataSource.getUsersForInvites().map { list ->
-            list.map {
-                userForInvitesToUserMapper.map(it)
-            }
-        }
-    }
+
 }

@@ -25,7 +25,6 @@ class InviteUserFragment : Fragment() {
     private var userAdapter: InviteUserAdapter? = null
     private val listForInvite = ArrayList<User>()
     lateinit var viewModel: InviteUserViewModel
-    lateinit var viewModelFactory: InviteUserViewModelFactory
     lateinit var board: Board
     lateinit var user: User
 
@@ -48,8 +47,7 @@ class InviteUserFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModelFactory = InviteUserViewModelFactory(board)
-        viewModel = ViewModelProvider(this, viewModelFactory)[InviteUserViewModel::class.java]
+        viewModel = ViewModelProvider(this)[InviteUserViewModel::class.java]
         observeViewModel()
         initViews()
         if (userAdapter != null)
@@ -103,7 +101,7 @@ class InviteUserFragment : Fragment() {
 
 
     private fun observeViewModel() {
-        viewModel.listUsers.observe(viewLifecycleOwner, Observer {
+        viewModel.listUsers.observe(viewLifecycleOwner) {
             userAdapter?.users = it as ArrayList<User>
 
             with(binding) {
@@ -113,7 +111,9 @@ class InviteUserFragment : Fragment() {
             }
             recyclerViewUser.visibility = View.VISIBLE
             recyclerViewUser.adapter = userAdapter
-        })
+        }
+
+        viewModel.getUsersForInvite(board)
 
         viewModel.success.observe(viewLifecycleOwner, Observer {
             Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()

@@ -20,9 +20,7 @@ interface InviteRepository {
 
     suspend fun addInvite(invite: Invite)
 
-    suspend fun addUserForInvites(user: User)
+    suspend fun clearAllInvitesInRoom()
 
     fun getInvitesFromRoom(): Flow<List<Invite>>
-
-    fun getUsersForInvites(): Flow<List<User>>
 }

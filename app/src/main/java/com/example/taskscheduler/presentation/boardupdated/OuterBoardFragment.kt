@@ -71,9 +71,11 @@ class OuterBoardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[OuterBoardViewModel::class.java]
 
+        viewModel.fetchNotesLists(board)
+
         currentPosition = MyDatabaseConnection.currentPosition
         if (MyDatabaseConnection.updated) {
-            viewModel.readData(board.id)
+            viewModel.readData(board)
         }
         observeViewModel()
         binding.imageViewInvite.setOnClickListener {
@@ -97,6 +99,7 @@ class OuterBoardFragment : Fragment() {
 
             val textTitle = editText.text.toString().trim()
             if (textTitle.isNotEmpty()) {
+                val item = viewModel.createNewList(textTitle, board, user)
                 textView.visibility = View.VISIBLE
                 editText.visibility = View.INVISIBLE
                 buttonAddNewList.visibility = View.INVISIBLE
@@ -133,17 +136,22 @@ class OuterBoardFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.listLiveData.observe(viewLifecycleOwner, Observer { list ->
+
+        viewModel.listReady.observe(viewLifecycleOwner) {
+            viewModel.readData(board)
+        }
+
+        viewModel.listLiveData.observe(viewLifecycleOwner) { list ->
             parentList = list as ArrayList<NotesListItem>
             list.forEach {
                 binding.tabLayout.visibility = View.VISIBLE
             }
+
             parentAdapter = OuterBoardAdapter(
                 lifecycle,
                 childFragmentManager,
                 board,
                 user,
-                currentPosition,
                 list
             )
             viewPager = binding.viewPager
@@ -170,7 +178,7 @@ class OuterBoardFragment : Fragment() {
             }
             tabLayout.getTabAt(currentPosition)?.select()
             viewPager?.currentItem = currentPosition
-        })
+        }
         viewModel.boardLiveData.observe(viewLifecycleOwner, Observer {
             board = it
         })

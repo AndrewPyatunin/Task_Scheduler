@@ -7,8 +7,6 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
@@ -19,34 +17,24 @@ import com.example.taskscheduler.databinding.FragmentBoardListBinding
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
-import com.example.taskscheduler.presentation.ViewModelFactory
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class BoardListFragment : Fragment(), MenuProvider {
 
     private var _binding: FragmentBoardListBinding? = null
     private val binding: FragmentBoardListBinding
         get() = _binding ?: throw RuntimeException("FragmentBoardListBinding==null")
-    lateinit var user: User
-    var boardList = ArrayList<Board>()
-
-    @Inject
-    private lateinit var viewModelFactory: ViewModelFactory
-    lateinit var recyclerViewBoardList: RecyclerView
-    lateinit var boardsAdapter: BoardListAdapter
+    private lateinit var user: User
+    private lateinit var recyclerViewBoardList: RecyclerView
+    private lateinit var boardsAdapter: BoardListAdapter
     private val viewModel by lazy {
-        ViewModelProvider(
-            this,
-            viewModelFactory
-        )[BoardListViewModel::class.java]
+        ViewModelProvider(this)[BoardListViewModel::class.java]
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentBoardListBinding.inflate(inflater, container, false)
 
         return binding.root
@@ -67,49 +55,55 @@ class BoardListFragment : Fragment(), MenuProvider {
         }
     }
 
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
     private fun observeViewModel() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {//flow будет вызван, когда фрагмент перейдет в состояние Resumed и завершится в onPause
-                viewModel.userFlow?.collect {
-                    user = it
-                    Glide.with(this@BoardListFragment).load(it.uri).centerCrop()
-                        .into(binding.imageViewUserAvatarBoardList)
-                    with(binding.textViewWelcomeUser) {
-                        text =
-                            String.format(
-                                getString(
-                                    R.string.welcome_user,
-                                    user.name,
-                                    user.lastName
-                                )
-                            )
-                        visibility = View.VISIBLE
-                    }
-                }
-                viewModel.getBoardsFlow(user).collect { list ->
-                    boardsAdapter.boards = list
-                    with(binding) {
-                        loadingIndicator.visibility = View.GONE
-                        pleaseWaitTextView.visibility = View.GONE
-                        recyclerViewBoardList.visibility = View.VISIBLE
-                    }
-                }
+        viewModel.boardsLiveData.observe(viewLifecycleOwner) {
+            boardsAdapter.boards = it
+            with(binding) {
+                loadingIndicator.visibility = View.GONE
+                pleaseWaitTextView.visibility = View.GONE
+                recyclerViewBoardList.visibility = View.VISIBLE
             }
         }
 
+        viewModel.dataReady.observe(viewLifecycleOwner) {
+            viewModel.getBoardsFlow(user)
+        }
+
+        viewModel.fetchUser()
+
+        viewModel.userLiveData.observe(viewLifecycleOwner) {
+            user = it
+            viewModel.fetchBoards(it, boardsAdapter.boards)
+            drawAvatar()
+        }
+    }
+
+    private fun drawAvatar() {
+        Glide.with(this@BoardListFragment).load(user.uri).centerCrop()
+            .into(binding.imageViewUserAvatarBoardList)
+        with(binding.textViewWelcomeUser) {
+            text =
+                String.format(
+                    getString(
+                        R.string.welcome_user,
+                        user.name,
+                        user.lastName
+                    )
+                )
+            visibility = View.VISIBLE
+        }
     }
 
     private fun initViews() {
         recyclerViewBoardList = binding.recyclerViewBoardList
         recyclerViewBoardList.layoutManager = GridLayoutManager(requireContext(), 2)
         boardsAdapter = BoardListAdapter()
-        if (boardList.isNotEmpty()) boardsAdapter.boards = boardList
+//        if (boardList.isNotEmpty()) boardsAdapter.boards = boardList
         recyclerViewBoardList.adapter = boardsAdapter
     }
 
@@ -133,8 +127,6 @@ class BoardListFragment : Fragment(), MenuProvider {
 
 
     companion object {
-
-        const val NAME_BOARD_LIST = "BoardListFragment"
 
         private const val KEY_USER = "user"
         private const val KEY_BOARDS = "boards"

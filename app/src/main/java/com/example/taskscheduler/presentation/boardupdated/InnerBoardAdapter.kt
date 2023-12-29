@@ -57,9 +57,4 @@ class InnerBoardAdapter(listOfNotesFrom: List<Note>): RecyclerView.Adapter<Inner
 
     override fun getItemCount(): Int = listOfNotes.size
 
-    interface InternalClickDelegate {
-        fun onItemClickedAt(position: Int)
-    }
-
-
 }

@@ -23,4 +23,8 @@ class NotesListDataSourceImpl(
     override suspend fun removeListOfNotes(listId: String) {
         taskDatabaseDao.removeListOfNotes(listId)
     }
+
+    override suspend fun clearAllNotesListsInRoom() {
+        taskDatabaseDao.clearAllListsOfNotes()
+    }
 }

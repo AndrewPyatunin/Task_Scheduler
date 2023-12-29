@@ -8,7 +8,7 @@ class NoteDataSourceImpl(
     private val taskDatabaseDao: TaskDatabaseDao
 ) : NoteDataSource {
 
-    override fun getNotesFlow(listOfNotesId: String): Flow<List<NoteEntity>> {
+    override fun getNotesFlow(): Flow<List<NoteEntity>> {
         return taskDatabaseDao.getNotesFlow()
     }
 
@@ -23,4 +23,10 @@ class NoteDataSourceImpl(
     override suspend fun getNotes(): List<NoteEntity> {
         return taskDatabaseDao.getNotes()
     }
+
+    override suspend fun clearAllNotesInRoom() {
+        taskDatabaseDao.clearAllNotes()
+    }
+
+
 }

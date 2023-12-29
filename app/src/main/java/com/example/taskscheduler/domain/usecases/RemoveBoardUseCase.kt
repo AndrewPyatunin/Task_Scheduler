@@ -1,8 +1,14 @@
 package com.example.taskscheduler.domain.usecases
 
-class RemoveBoardUseCase {
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.domain.repos.BoardRepository
 
-    fun execute() {
+class RemoveBoardUseCase(
+    private val repository: BoardRepository
+) {
 
+    suspend fun execute(board: Board, user: User) {
+        repository.deleteBoard(board, user)
     }
 }

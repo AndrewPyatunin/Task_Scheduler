@@ -3,59 +3,61 @@ package com.example.taskscheduler.presentation.login
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.taskscheduler.domain.usecases.AddUserUseCase
-import com.example.taskscheduler.domain.usecases.GetUserFlowFromRoomUseCase
-import com.example.taskscheduler.domain.usecases.GetUserFlowUseCase
-import com.example.taskscheduler.presentation.UserAuthState
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
-import javax.inject.Inject
+import androidx.lifecycle.viewModelScope
+import com.example.taskscheduler.MyApp
+import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.domain.usecases.GetUserFromRoomUseCase
+import com.example.taskscheduler.domain.usecases.GetUserUseCase
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class LoginViewModel @Inject constructor(
-    private val getUserFlowUseCase: GetUserFlowUseCase,
-    private val getUserFlowFromRoomUseCase: GetUserFlowFromRoomUseCase,
-    private val addUserUseCase: AddUserUseCase,
-    private val auth: FirebaseAuth
-) : ViewModel() {
+class LoginViewModel : ViewModel() {
+
+    private val getUserUseCase: GetUserUseCase = GetUserUseCase(MyApp.userAuthentication)
+    private val getUserFromRoomUseCase = GetUserFromRoomUseCase(MyApp.userRepository)
+    private val auth = Firebase.auth
 
     private val _error = MutableLiveData<String>()
     val error: LiveData<String>
         get() = _error
 
-    private val _success = MutableLiveData<FirebaseUser>()
-    val success: LiveData<FirebaseUser>
+    private val _success = MutableLiveData<Unit>()
+    val success: LiveData<Unit>
         get() = _success
 
-    init {
+    private val _userLiveData = MutableLiveData<User>()
+    val userLiveData: LiveData<User>
+        get() = _userLiveData
 
-        auth.addAuthStateListener {
-            if (it.currentUser != null) {
-                _success.value = it.currentUser
-            }
+    fun fetchUser() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _userLiveData.postValue(
+                getUserFromRoomUseCase.execute(
+                    auth.currentUser?.uid ?: MyDatabaseConnection.userId
+                    ?: throw RuntimeException("User with that id is not found in room")
+                )
+            )
         }
 
     }
-
-    fun getUser(userId: String) = getUserFlowUseCase.execute(userId).map {
-        addUserUseCase.execute(it)
-        UserAuthState.Success(it) as UserAuthState
-    }.onStart {
-        emit(UserAuthState.Loading)
-    }.catch {
-        it.message?.let { message ->
-            emit(UserAuthState.Error(message))
-        }
-    }
-
-    fun getUserFromRoom(userId: String) = getUserFlowFromRoomUseCase.execute(userId)
-
 
     fun login(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
-
+            if (auth.currentUser != null) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    it.user?.uid?.let { it1 ->
+                        _success.postValue(
+                            getUserUseCase.execute(
+                                it1,
+                                viewModelScope
+                            )
+                        )
+                    }
+                }
+            }
         }.addOnFailureListener {
             _error.value = it.message
         }

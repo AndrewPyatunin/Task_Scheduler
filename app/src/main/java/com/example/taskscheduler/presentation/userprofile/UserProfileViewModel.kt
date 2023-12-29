@@ -1,31 +1,35 @@
 package com.example.taskscheduler.presentation.userprofile
 
-import android.app.Application
 import android.net.Uri
-import android.util.Log
-import android.widget.Toast
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.taskscheduler.MyApp
+import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.data.TaskDatabase
 import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.domain.usecases.*
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.auth.ktx.userProfileChangeRequest
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class UserProfileViewModel(application: Application) : AndroidViewModel(application) {
+class UserProfileViewModel : ViewModel() {
 
+    private val userRepository = MyApp.userRepository
+    private val updateUserDataUseCase = UpdateUserDataUseCase(userRepository)
+    private val updateUserProfileUseCase = UpdateUserProfileUseCase(userRepository)
+    private val updateStatusUseCase = UpdateStatusUseCase(userRepository)
+    private val getUserFromRoomUseCase = GetUserFromRoomUseCase(userRepository)
+    private val clearAllDataInRoomUseCase = ClearAllDataInRoomUseCase(
+        MyApp.inviteRepository,
+        MyApp.boardRepository,
+        MyApp.notesListRepository,
+        MyApp.noteRepository,
+        userRepository
+    )
     val auth = Firebase.auth
-    private val databaseUsersRef = Firebase.database.getReference("Users")
-    private val storageReference = Firebase.storage.reference
-    val user = auth.currentUser
-
-    private var urlToFile = ""
 
     private val _emailLiveData = MutableLiveData<String>()
     val emailLiveData: LiveData<String>
@@ -44,118 +48,30 @@ class UserProfileViewModel(application: Application) : AndroidViewModel(applicat
         get() = _userLiveData
 
     init {
-        databaseUsersRef.child(user!!.uid)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.hasChildren()) {
-                        val user = snapshot.getValue(User::class.java)
-                        _descriptionLiveData.value = user?.description
-                        _userLiveData.value = user!!
-                    }
-
-                }
-
-                override fun onCancelled(error: DatabaseError) = Unit
-
-            })
-    }
-
-    private fun upLoadUserAvatar(uri: Uri, name: String, callback: UrlCallback) {
-        val imageRef = storageReference.child("images/${uri.lastPathSegment}")
-        imageRef.putFile(uri).continueWithTask {
-            if (!it.isSuccessful) {
-                it.exception?.let { exception ->
-                    throw exception
-                }
-            }
-            imageRef.downloadUrl
-        }.addOnCompleteListener {
-            Log.i("USER_URL", it.result.toString())
-            if (it.isSuccessful) {
-                updateUserAvatar(it.result, name)
-                urlToFile = it.result.toString()
-                callback.onUrlCallback(urlToFile)
-            } else {
-                Toast.makeText(getApplication(), "${it.result}", Toast.LENGTH_SHORT).show()
+        MyDatabaseConnection.userId?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                _userLiveData.postValue(getUserFromRoomUseCase.execute(it))
             }
         }
     }
 
-    fun updateUserProfile(description: String, email: String) {
-        val ref = databaseUsersRef.child(user!!.uid)
-        if (description != "") {
-            ref.child("description").setValue(description)
-            _descriptionLiveData.value = description
-        }
-        if (email != "") {
-            updateUserEmail(email, ref)
+    fun updateUserProfile(description: String, email: String, user: User) {
+        viewModelScope.launch {
+            updateUserProfileUseCase.execute(description, email, user)
         }
     }
 
-    private fun updateUserAvatar(uri: Uri?, name: String) {
-
-        val profileUpdates = userProfileChangeRequest {
-            if (uri != null) photoUri = uri
-            displayName = name
+    fun update(uri: Uri?, name: String, user: User) {
+        viewModelScope.launch(Dispatchers.IO) {
+            updateUserDataUseCase.execute(uri, name, user)
         }
 
-
-        user?.updateProfile(profileUpdates)
-            ?.addOnCompleteListener {
-                if (it.isSuccessful) {
-                    if (uri != null) _uriLiveData.value = uri!!
-                    Toast.makeText(
-                        getApplication(),
-                        "Обновление данных пользователя прошло успешно",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-
-                }
-            }
-    }
-
-    fun update(uri: Uri?, name: String) {
-        if (uri != null) {
-            upLoadUserAvatar(uri, name, object : UrlCallback {
-                override fun onUrlCallback(url: String) {
-                    databaseUsersRef.child(user!!.uid).child("uri").setValue(url)
-                    _uriLiveData.value = uri!!
-                    Toast.makeText(
-                        getApplication(),
-                        "Обновление данных пользователя прошло успешно",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                }
-
-            })
-        }
-    }
-
-
-    private fun updateUserEmail(email: String, ref: DatabaseReference) {
-        user!!.updateEmail(email)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(
-                        getApplication(), "Электронный адрес пользователя обновлен",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    ref.child("email").setValue(email)
-                    _emailLiveData.value = email
-                }
-            }
     }
 
     fun updateStatus() {
-        if (user != null) {
-            databaseUsersRef.child(user.uid).child("onlineStatus").setValue(false)
+        viewModelScope.launch(Dispatchers.IO) {
+            clearAllDataInRoomUseCase.execute()
         }
-    }
-
-    interface UrlCallback {
-
-        fun onUrlCallback(url: String)
+        updateStatusUseCase.execute()
     }
 }

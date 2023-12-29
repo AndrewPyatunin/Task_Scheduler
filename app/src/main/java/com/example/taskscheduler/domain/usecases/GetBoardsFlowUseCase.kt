@@ -10,6 +10,6 @@ class GetBoardsFlowUseCase(
 ) {
 
     fun execute(user: User): Flow<List<Board>> {
-        return repository.getBoardsFlow(user)
+        return repository.getBoardsFlowFromRoom(user)
     }
 }

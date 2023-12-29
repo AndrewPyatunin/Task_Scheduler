@@ -1,59 +1,47 @@
 package com.example.taskscheduler.data.repos
 
-import androidx.lifecycle.LiveData
+import android.util.Log
 import com.example.taskscheduler.data.FirebaseConstants.BOARDS
-import com.example.taskscheduler.data.FirebaseConstants.NOTES
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
-import com.example.taskscheduler.data.datasources.NoteDataSource
-import com.example.taskscheduler.data.datasources.NotesListDataSource
-import com.example.taskscheduler.data.entities.NotesListEntity
-import com.example.taskscheduler.data.mappers.Mapper
+import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.datasources.BoardDataSourceImpl
+import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
+import com.example.taskscheduler.data.mappers.BoardToBoardEntityMapper
+import com.example.taskscheduler.data.mappers.NotesListEntityToNotesListItemMapper
+import com.example.taskscheduler.data.mappers.NotesListItemToNotesListEntityMapper
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
-import com.example.taskscheduler.domain.repos.BoardRepository
 import com.example.taskscheduler.domain.repos.NotesListRepository
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.launch
 
 class NotesListRepositoryImpl(
-    private val notesListDataSource: NotesListDataSource,
-    private val noteDataSource: NoteDataSource,
-    private val boardRepository: BoardRepository,
-    private val notesListEntityToNotesListItemMapper: Mapper<NotesListEntity, NotesListItem>,
-    private val notesListItemToNotesListEntityMapper: Mapper<NotesListItem, NotesListEntity>,
+    dao: TaskDatabaseDao
 ) : NotesListRepository {
 
+    private val notesListDataSource = NotesListDataSourceImpl(dao)
+    private val boardDataSource = BoardDataSourceImpl(dao)
+
+    private val boardToBoardEntityMapper = BoardToBoardEntityMapper()
+    private val notesListEntityToNotesListItemMapper = NotesListEntityToNotesListItemMapper()
+    private val notesListItemToNotesListEntityMapper = NotesListItemToNotesListEntityMapper()
     private val databaseNotesListReference = Firebase.database.getReference(NOTES_LIST)
-    private val databaseNoteReference = Firebase.database.getReference(NOTES)
     private val databaseBoardsReference = Firebase.database.getReference(BOARDS)
 
     override suspend fun renameList(notesListItem: NotesListItem, board: Board, title: String) {
         databaseNotesListReference.child(board.id).child(notesListItem.id)
             .child("title").setValue(title)
         addListOfNote(notesListItem.copy(title = title))
-    }
-
-    override suspend fun deleteList(notesListItem: NotesListItem, board: Board, isList: Boolean) {
-        databaseNotesListReference.child(board.id).child(notesListItem.id).removeValue()
-        notesListDataSource.removeListOfNotes(notesListItem.id)
-        val listNotes =
-            noteDataSource.getNotes().filter { it.id in notesListItem.listNotes.keys }
-        listNotes.map {
-            databaseNoteReference.child(it.id).removeValue()
-            noteDataSource.removeNote(it)
-        }
-        if (isList) boardRepository.updateBoard(
-            board,
-            notesListItem.id
-        )
     }
 
     override suspend fun createNewList(title: String, board: Board, user: User) {
@@ -66,12 +54,14 @@ class NotesListRepositoryImpl(
         addListOfNote(item)
         val nodes = board.listsOfNotesIds as MutableMap
         nodes[listId] = true
-        boardRepository.addBoard(board.copy(listsOfNotesIds = nodes))
+        boardDataSource.addBoard(boardToBoardEntityMapper.map(board.copy(listsOfNotesIds = nodes)))
     }
 
     override fun getNotesListsFlow(board: Board): Flow<List<NotesListItem>> {
         return notesListDataSource.getListsOfNotesFlow(board.id).map {
-            it.map {
+            it.filter {
+                it.id in board.listsOfNotesIds
+            }.map {
                 notesListEntityToNotesListItemMapper.map(it)
             }
         }
@@ -79,5 +69,28 @@ class NotesListRepositoryImpl(
 
     override suspend fun addListOfNote(notesListItem: NotesListItem) {
         notesListDataSource.addListOfNotes(notesListItemToNotesListEntityMapper.map(notesListItem))
+    }
+
+    override suspend fun fetchNotesLists(boardId: String, scope: CoroutineScope) {
+            databaseNotesListReference.child(boardId).addValueEventListener(object :
+                ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    snapshot.children.forEach {
+                        val list = it.getValue(NotesListItem::class.java)
+                        list?.let {
+                            scope.launch(Dispatchers.IO) {
+                                addListOfNote(it)
+                            }
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) = Unit
+
+            })
+    }
+
+    override suspend fun clearAllNotesLists() {
+        notesListDataSource.clearAllNotesListsInRoom()
     }
 }

@@ -13,4 +13,5 @@ interface NotesListDataSource {
 
     suspend fun removeListOfNotes(listId: String)
 
+    suspend fun clearAllNotesListsInRoom()
 }

@@ -1,42 +1,44 @@
 package com.example.taskscheduler.data.repos
 
 import android.net.Uri
-import android.util.Log
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.datasources.UserDataSource
+import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.datasources.UserDataSourceImpl
 import com.example.taskscheduler.data.entities.UserEntity
-import com.example.taskscheduler.data.mappers.Mapper
-import com.example.taskscheduler.domain.UserAuth
+import com.example.taskscheduler.data.mappers.UserEntityToUserMapper
+import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.UserRepository
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.suspendCoroutine
 
 class UserRepositoryImpl(
-    private val userDataSource: UserDataSource,
-    private val userAuth: UserAuth,
-    private val userToUserEntityMapper: Mapper<User, UserEntity>,
-    private val userEntityToUserMapper: Mapper<UserEntity, User>,
+    dao: TaskDatabaseDao
 ) : UserRepository {
 
+    private val userDataSource = UserDataSourceImpl(dao)
+    private val userToUserEntityMapper = UserToUserEntityMapper()
+    private val userEntityToUserMapper = UserEntityToUserMapper()
     private val auth = Firebase.auth
+    private val userAuth = UserAuthentication(dao)
     private val databaseUsersReference = Firebase.database.getReference(USERS)
 
     override suspend fun addUser(user: User) {
         userDataSource.addUser(userToUserEntityMapper.map(user))
     }
 
-    override fun getUser(userId: String): Flow<User> {
-        return userDataSource.getUser(userId).map {
-            userEntityToUserMapper.map(it)
-        }
+    override suspend fun getUser(userId: String): User {
+        return userEntityToUserMapper.map(userDataSource.getUser(userId))
     }
 
     override suspend fun updateUserProfile(description: String, email: String, user: User) {
@@ -79,8 +81,41 @@ class UserRepositoryImpl(
         }
 
     override fun updateStatus() {
-        auth.currentUser?.let {
-            databaseUsersReference.child(it.uid).child("onlineStatus").setValue(true)
+        auth.addAuthStateListener {
+            it.currentUser?.let {
+                databaseUsersReference.child(it.uid).child("onlineStatus").setValue(true)
+            }
         }
+    }
+
+    override fun getUsers(): Flow<List<User>> {
+        return userDataSource.getUsers().map { list ->
+            list.map {
+                userEntityToUserMapper.map(it)
+            }
+        }
+    }
+
+    override suspend fun addAllUsers(scope: CoroutineScope) {
+        databaseUsersReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val users = ArrayList<User>()
+                snapshot.children.forEach {
+                    it.getValue(User::class.java)?.let { it1 -> users.add(it1) }
+                }
+                scope.launch(Dispatchers.IO) {
+                    userDataSource.addAllUsers(users.map {
+                        userToUserEntityMapper.map(it)
+                    })
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) = Unit
+
+        })
+    }
+
+    override suspend fun clearAllUsers() {
+        userDataSource.clearAllUsersInRoom()
     }
 }

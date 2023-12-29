@@ -1,8 +1,10 @@
 package com.example.taskscheduler.domain.usecases
 
-class GetInvitesUseCase {
+import com.example.taskscheduler.domain.repos.InviteRepository
 
-    fun execute() {
+class GetInvitesUseCase(
+    private val repository: InviteRepository
+) {
 
-    }
+    fun execute() = repository.getInvitesFromRoom()
 }

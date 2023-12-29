@@ -26,7 +26,6 @@ import com.example.taskscheduler.databinding.FragmentRegistrationBinding
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.TakePhotoActivity
 import com.example.taskscheduler.presentation.UserAuthState
-import com.example.taskscheduler.presentation.ViewModelFactory
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -36,13 +35,9 @@ class RegistrationFragment : Fragment() {
     private lateinit var binding: FragmentRegistrationBinding
     private lateinit var user: User
     private var uri: Uri? = null
-    lateinit var viewModelFactory: ViewModelFactory
 
     private val viewModel by lazy {
-        ViewModelProvider(
-            this,
-            viewModelFactory
-        )[RegistrationViewModel::class.java]
+        ViewModelProvider(this)[RegistrationViewModel::class.java]
     }
 
 
@@ -140,45 +135,47 @@ class RegistrationFragment : Fragment() {
                     )
                         .show()
                 } else {
-                    buttonSignUp.isEnabled = false
-                    lifecycleScope.launch {
-                        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                            viewModel.signUp(email, password, name, lastName, uri).collect {
-                                when (it) {
-                                    is UserAuthState.Error -> Toast.makeText(
-                                        this@RegistrationFragment.requireContext(),
-                                        it.message,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    UserAuthState.Loading -> {
-                                    }
-                                    is UserAuthState.Success -> {
-                                        user = it.user
-                                        viewModel.addUserToRoom(user)
-                                        Toast.makeText(
-                                            requireContext(),
-                                            String.format(
-                                                getString(R.string.user_registration_success),
-                                                user.name,
-                                                user.lastName
-                                            ),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        launchWelcomeFragment(user)
-                                    }
-                                }
-                            }
+                    buttonSignUp.setOnClickListener {
+                        observeViewModel(email, password, name, lastName)
+                    }
+                }
+            }
+
+        }
+
+
+    }
+
+    private fun observeViewModel(email: String, password: String, name: String, lastName: String) {
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.signUp(email, password, name, lastName, uri).collect {
+                    when (it) {
+                        is UserAuthState.Error -> Toast.makeText(
+                            this@RegistrationFragment.requireContext(),
+                            it.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        UserAuthState.Loading -> {
+                        }
+                        is UserAuthState.Success -> {
+                            binding.buttonSignUp.isEnabled = false
+                            user = it.user
+                            Toast.makeText(
+                                requireContext(),
+                                String.format(
+                                    getString(R.string.user_registration_success),
+                                    user.name,
+                                    user.lastName
+                                ),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            launchWelcomeFragment(user)
                         }
                     }
                 }
             }
         }
-        observeViewModel()
-
-    }
-
-    private fun observeViewModel() {
-
     }
 
     private fun launchWelcomeFragment(user: User) {

@@ -1,6 +1,5 @@
 package com.example.taskscheduler.presentation.newboard
 
-import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,7 +19,7 @@ import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.DiffCallback
 
 
-class NewBoardAdapter(context: Context) :
+class NewBoardAdapter :
     RecyclerView.Adapter<NewBoardAdapter.NewBoardViewHolder>() {
 
     private var selectedPosition = -1
@@ -92,14 +91,11 @@ class NewBoardAdapter(context: Context) :
     }
 
     private fun click(view: View, holder: NewBoardViewHolder) {
-        view.setOnClickListener(object : View.OnClickListener {
-
-            override fun onClick(v: View?) {
-                urlBackground = ""
-                selectedPosition = holder.adapterPosition
-                onItemClick?.invoke(backgroundImageUrls[holder.adapterPosition])
-                notifyDataSetChanged()
-            }
-        })
+        view.setOnClickListener {
+            urlBackground = ""
+            selectedPosition = holder.adapterPosition
+            onItemClick?.invoke(backgroundImageUrls[holder.adapterPosition])
+            notifyDataSetChanged()
+        }
     }
 }

@@ -14,6 +14,9 @@ interface TaskDatabaseDao {
     @Query("SELECT * FROM boards")
     suspend fun getBoards(): List<BoardEntity>
 
+    @Query("SELECT * FROM boards WHERE id = :id")
+    suspend fun getBoard(id: String): BoardEntity
+
     @Query("SELECT * FROM notes")
     fun getNotesFlow(): Flow<List<NoteEntity>>
 
@@ -24,13 +27,10 @@ interface TaskDatabaseDao {
     fun getInvitesFlow(): Flow<List<InviteEntity>>
 
     @Query("SELECT * FROM users WHERE id = :id")
-    fun getUser(id: String): Flow<UserEntity>
+    suspend fun getUser(id: String): UserEntity
 
     @Query("SELECT * FROM users")
     fun getUsersFlow(): Flow<List<UserEntity>>
-
-    @Query("SELECT * FROM usersForInvites")
-    fun getUsersForInvites(): Flow<List<UserForInvitesEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addNote(note: NoteEntity)
@@ -40,6 +40,9 @@ interface TaskDatabaseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addInvite(invite: InviteEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addAllUsers(users: List<UserEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addListOfNotes(listOfNotesItem: NotesListEntity)
@@ -59,8 +62,20 @@ interface TaskDatabaseDao {
     @Query("DELETE FROM invites WHERE id = :id")
     suspend fun removeInvite(id: String)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addUserForInvites(userForInvitesEntity: UserForInvitesEntity)
+    @Query("DELETE FROM invites")
+    suspend fun clearAllInvites()
+
+    @Query("DELETE FROM boards")
+    suspend fun clearAllBoards()
+
+    @Query("DELETE FROM listsOfNotes")
+    suspend fun clearAllListsOfNotes()
+
+    @Query("DELETE FROM notes")
+    suspend fun clearAllNotes()
+
+    @Query("DELETE FROM users")
+    suspend fun clearAllUsers()
 
     @Query("SELECT * FROM notes")
     suspend fun getNotes(): List<NoteEntity>

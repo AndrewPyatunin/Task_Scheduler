@@ -15,45 +15,26 @@ import com.example.taskscheduler.R
 import com.example.taskscheduler.domain.DiffCallback
 import com.example.taskscheduler.domain.models.User
 
-class UserListDiffCallback(
-    private val oldList: List<User>,
-    private val newList: List<User>
-) : DiffUtil.Callback() {
-    override fun getOldListSize(): Int = oldList.size
+class InviteUserAdapter : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
 
-    override fun getNewListSize(): Int = newList.size
-
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        val oldUser = oldList[oldItemPosition]
-        val newUser = newList[newItemPosition]
-        return oldUser.id == newUser.id
-    }
-
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        val oldUser = oldList[oldItemPosition]
-        val newUser = newList[newItemPosition]
-        return oldUser == newUser
-    }
-
-}
-
-class InviteUserAdapter() : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
     var onItemClick: ((User) -> Unit)? = null
     var users = ArrayList<User>()
-    set(newValue) {
-        val diffCallback = DiffCallback(field, newValue)
-        val diffResult = DiffUtil.calculateDiff(diffCallback)
-        diffResult.dispatchUpdatesTo(this)
-        field = newValue
-    }
+        set(newValue) {
+            val diffCallback = DiffCallback(field, newValue)
+            val diffResult = DiffUtil.calculateDiff(diffCallback)
+            diffResult.dispatchUpdatesTo(this)
+            field = newValue
+        }
 
     inner class InviteUserViewHolder
-        (itemView: View,
-         var textViewUserInfo: TextView = itemView.findViewById(R.id.textViewUserInfo),
-         var checkBoxInvited: CheckBox = itemView.findViewById(R.id.checkBoxInvited),
-         var imageViewUserAvatar: ImageView = itemView.findViewById(R.id.imageViewUserAvatar),
-         var viewStatus: View = itemView.findViewById(R.id.circle_status)
-    ): ViewHolder(itemView) {
+        (
+        itemView: View,
+        var textViewUserInfo: TextView = itemView.findViewById(R.id.textViewUserInfo),
+        var checkBoxInvited: CheckBox = itemView.findViewById(R.id.checkBoxInvited),
+        var imageViewUserAvatar: ImageView = itemView.findViewById(R.id.imageViewUserAvatar),
+        var viewStatus: View = itemView.findViewById(R.id.circle_status)
+    ) : ViewHolder(itemView) {
+
         init {
             itemView.setOnClickListener {
                 onItemClick?.invoke(users[adapterPosition])

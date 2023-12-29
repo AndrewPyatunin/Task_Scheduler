@@ -11,12 +11,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.navOptions
 import com.bumptech.glide.Glide
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentUserProfileBinding
+import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
 import com.example.taskscheduler.presentation.TakePhotoActivity
 import com.google.firebase.auth.ktx.auth
@@ -26,9 +26,12 @@ class UserProfileFragment : Fragment() {
 
     lateinit var binding: FragmentUserProfileBinding
     val auth = Firebase.auth
-    lateinit var viewModel: UserProfileViewModel
     private var uri: Uri? = null
     var userInfo = ""
+    lateinit var user: User
+    private val viewModel by lazy {
+        ViewModelProvider(this)[UserProfileViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,21 +44,19 @@ class UserProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[UserProfileViewModel::class.java]
-
-        val user = auth.currentUser
-        binding.textViewUserName.text = user?.displayName
-        if (user?.photoUrl != null)
-            Glide.with(this).load(user.photoUrl).into(binding.profilePicture)
+        val firebaseUser = auth.currentUser
+        binding.textViewUserName.text = firebaseUser?.displayName
+        if (firebaseUser?.photoUrl != null)
+            Glide.with(this).load(firebaseUser.photoUrl).into(binding.profilePicture)
         onClick(binding.textViewLogout)
         onClick(binding.imageViewLogout)
         with(binding) {
-            textViewEmail.text = user?.email
+            textViewEmail.text = firebaseUser?.email
             imageViewEditUserDescription.setOnClickListener {
                 editTextPersonDescription.setText(textViewDescriptionUser.text)
                 changeVisibilityForAllDescriptionElements()
                 imageViewSaveDescription.setOnClickListener {
-                    viewModel.updateUserProfile(editTextPersonDescription.text.toString(), "")
+                    viewModel.updateUserProfile(editTextPersonDescription.text.toString(), "", user)
                 }
 
             }
@@ -63,7 +64,7 @@ class UserProfileFragment : Fragment() {
                 editTextPersonEmail.setText(textViewEmail.text)
                 changeVisibilityForAllEmailElements()
                 imageViewSaveEmail.setOnClickListener {
-                    viewModel.updateUserProfile("", editTextPersonEmail.text.toString())
+                    viewModel.updateUserProfile("", editTextPersonEmail.text.toString(), user)
                 }
             }
             textViewChangeAvatar.setOnClickListener {
@@ -92,22 +93,23 @@ class UserProfileFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.descriptionLiveData.observe(viewLifecycleOwner, Observer {
+        viewModel.descriptionLiveData.observe(viewLifecycleOwner) {
             if (binding.textViewDescriptionUser.visibility != View.VISIBLE)
                 changeVisibilityForAllDescriptionElements()
             if (it != null) binding.textViewDescriptionUser.text = it
-        })
-        viewModel.emailLiveData.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.emailLiveData.observe(viewLifecycleOwner) {
             if (binding.textViewEmail.visibility != View.VISIBLE)
                 changeVisibilityForAllEmailElements()
             binding.textViewEmail.text = it
-        })
-        viewModel.uriLiveData.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.uriLiveData.observe(viewLifecycleOwner) {
             Glide.with(this).load(it).into(binding.profilePicture)
-        })
+        }
         viewModel.userLiveData.observe(viewLifecycleOwner) {
+            user = it
             userInfo = String.format(getString(R.string.full_name), it.name, it.lastName)
-            viewModel.update(null, userInfo)
+            viewModel.update(null, userInfo, user)
             binding.textViewUserName.text = userInfo
         }
     }
@@ -143,7 +145,7 @@ class UserProfileFragment : Fragment() {
             if (it.resultCode == Activity.RESULT_OK) {
                 uri = it.data?.data
                 Toast.makeText(requireContext(), uri.toString(), Toast.LENGTH_SHORT).show()
-                viewModel.update(uri, userInfo)
+                viewModel.update(uri, userInfo, user)
             }
         }
 

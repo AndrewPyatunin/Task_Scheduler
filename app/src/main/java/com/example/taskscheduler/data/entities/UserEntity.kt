@@ -7,12 +7,12 @@ import androidx.room.PrimaryKey
 data class UserEntity(
     @PrimaryKey
     val id: String,
-    val name: String,
-    val lastName: String,
-    val email: String,
-    val onlineStatus: Boolean,
-    val boards: List<String>,
-    val uri: String,
-    val description: String,
-    val invites: Map<String, Boolean>
+    val name: String?,
+    val lastName: String?,
+    val email: String?,
+    val onlineStatus: Boolean?,
+    val boards: Map<String, Boolean>?,
+    val uri: String?,
+    val description: String?,
+    val invites: Map<String, Boolean>?
 )

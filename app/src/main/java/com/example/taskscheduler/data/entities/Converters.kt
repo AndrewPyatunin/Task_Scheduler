@@ -6,13 +6,11 @@ import com.google.gson.reflect.TypeToken
 
 class Converters {
 
-    private inline fun <reified T> Gson.fromJson(json: String?) =
-        fromJson<T>(json, object : TypeToken<List<T>>() {}.type)
-
-
     @TypeConverter
     fun fromString(value: String?): List<String> {
-        return Gson().fromJson(value)
+        if (value == null) return emptyList()
+
+        return Gson().fromJson(value, object : TypeToken<List<String>>() {}.type)
     }
 
     @TypeConverter
@@ -24,7 +22,7 @@ class Converters {
     fun fromStringToListUser(value: String?): List<UserEntity> {
         if (value == null) return emptyList()
 
-        return Gson().fromJson<List<UserEntity>>(value)
+        return Gson().fromJson(value, object : TypeToken<List<UserEntity>>() {}.type)
     }
 
     @TypeConverter
@@ -36,11 +34,11 @@ class Converters {
     fun fromStringToListCheckNoteEntity(value: String?): List<CheckNoteEntity> {
         if (value == null) return emptyList()
 
-        return Gson().fromJson<List<CheckNoteEntity>>(value)
+        return Gson().fromJson(value, object : TypeToken<List<CheckNoteEntity>>() {}.type)
     }
 
     @TypeConverter
-    fun fromListCheckNoteItemToString(list: List<CheckNoteEntity>): String {
+    fun fromListCheckNoteItemToString(list: List<CheckNoteEntity?>?): String {
         return Gson().toJson(list)
     }
 
@@ -48,11 +46,11 @@ class Converters {
     fun fromStringToMapStringBoolean(value: String?): Map<String, Boolean> {
         if (value == null) return emptyMap()
 
-        return Gson().fromJson<Map<String, Boolean>>(value)
+        return Gson().fromJson(value, object : TypeToken<Map<String, Boolean>>() {}.type)
     }
 
     @TypeConverter
-    fun fromMapStringBooleanToString(map: Map<String, Boolean>): String {
+    fun fromMapStringBooleanToString(map: Map<String?, Boolean?>?): String {
         return Gson().toJson(map)
     }
 }

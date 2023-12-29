@@ -29,7 +29,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     lateinit var list: NotesListItem
     lateinit var user: User
     lateinit var board: Board
-    lateinit var listNotes: List<Note>
     lateinit var recyclerView: RecyclerView
     lateinit var innerAdapter: InnerBoardAdapter
     lateinit var viewModel: InnerBoardViewModel
@@ -37,6 +36,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     var position: Int = 0
     var tabLayout: TabLayout? = null
     var viewPager: ViewPager2? = null
+    var listNotes: List<Note> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +59,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         viewModel = ViewModelProvider(this)[InnerBoardViewModel::class.java]
-        viewModel.getNotes(list.listNotes.keys.toList())
+//        viewModel.getNotes(list.listNotes)
         observeViewModel()
         viewPager = requireActivity().findViewById(R.id.view_pager)
         tabLayout = requireActivity().findViewById(R.id.tab_layout)
@@ -134,13 +134,17 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     }
 
     private fun observeViewModel() {
-        viewModel.listNotesLiveData.observe(viewLifecycleOwner, Observer {
+        viewModel.listNotesLiveData.observe(viewLifecycleOwner) {
+            listNotes = it
             initViews(it)
-        })
+        }
+
+        viewModel.fetchNotes(list, listNotes)
+
+        viewModel.readyLiveData.observe(viewLifecycleOwner) {
+            viewModel.getNotes(list.listNotes)
+        }
     }
-
-
-
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menu.clear()
@@ -196,7 +200,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
                 if (board.listsOfNotesIds.size < 2) {
                     tabLayout?.visibility = View.GONE
                 }
-                viewModel.deleteList(list.id, board, true)
+                viewModel.deleteList(list, board, true)
 
             }
             R.id.item_delete_board -> {

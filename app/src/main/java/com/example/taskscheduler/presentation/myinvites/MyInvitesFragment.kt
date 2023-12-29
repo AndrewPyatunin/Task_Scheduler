@@ -6,35 +6,38 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.taskscheduler.MyInvitesAdapter
 import com.example.taskscheduler.databinding.FragmentMyInvitesBinding
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
+import kotlinx.coroutines.launch
 
 class MyInvitesFragment : Fragment() {
 
     lateinit var binding: FragmentMyInvitesBinding
     lateinit var recyclerView: RecyclerView
     lateinit var adapter: MyInvitesAdapter
-    lateinit var viewModel: MyInvitesViewModel
     lateinit var user: User
+    private val viewModel by lazy {
+        ViewModelProvider(this)[MyInvitesViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentMyInvitesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[MyInvitesViewModel::class.java]
         observeViewModel()
         initViews()
         adapter.onItemClick = {
@@ -51,12 +54,17 @@ class MyInvitesFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.inviteList.observe(viewLifecycleOwner, Observer {
+        viewModel.invitesLiveData.observe(viewLifecycleOwner) {
             adapter.invitesList = it
-        })
-        viewModel.user.observe(viewLifecycleOwner, Observer {
+        }
+
+        viewModel.user.observe(viewLifecycleOwner) {
             user = it
-        })
+        }
+
+        viewModel.invitesReady.observe(viewLifecycleOwner) {
+            viewModel.getInvitesFromRoom()
+        }
     }
 
     fun okClicked(invite: Invite) {

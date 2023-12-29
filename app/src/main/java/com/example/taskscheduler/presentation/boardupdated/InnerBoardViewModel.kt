@@ -3,75 +3,69 @@ package com.example.taskscheduler.presentation.boardupdated
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.taskscheduler.domain.models.Board
-import com.example.taskscheduler.domain.models.NotesListItem
-import com.example.taskscheduler.domain.models.Note
-import com.example.taskscheduler.domain.models.User
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
+import androidx.lifecycle.viewModelScope
+import com.example.taskscheduler.MyApp
+import com.example.taskscheduler.domain.models.*
+import com.example.taskscheduler.domain.usecases.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class InnerBoardViewModel : ViewModel() {
-    private val database = Firebase.database
-    private val databaseNotesRef = database.getReference("Notes")
-    private val databaseBoardsRef = database.getReference("Boards")
-    private val databaseListsOfNotesRef = database.getReference("ListsOfNotes")
-    private val databaseUsersRef = database.getReference("Users")
+
+    private val boardRepository = MyApp.boardRepository
+    private val notesListRepository = MyApp.notesListRepository
+    private val noteRepository = MyApp.noteRepository
+    private val removeBoardUseCase = RemoveBoardUseCase(boardRepository)
+    private val updateBoardUseCase = UpdateBoardUseCase(boardRepository)
+    private val removeNotesListItemUseCase = RemoveNotesListItemUseCase(boardRepository)
+    private val renameListUseCase = RenameListUseCase(notesListRepository)
+    private val getNotesUseCase = GetNotesUseCase(noteRepository)
+    private val fetchNotesUseCase = FetchNotesUseCase(noteRepository)
 
     private val _listNotesLiveData = MutableLiveData<List<Note>>()
     val listNotesLiveData: LiveData<List<Note>>
         get() = _listNotesLiveData
 
-    fun getNotes(listNotesIds: List<String>) {
-        databaseNotesRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val listNotes = ArrayList<Note>()
-                for (dataSnapshot in snapshot.children) {
-                    if (dataSnapshot.key in listNotesIds) {
-                        dataSnapshot.getValue(Note::class.java)?.let { listNotes.add(it) }
-                    }
-                }
-                _listNotesLiveData.value = listNotes
-            }
+    private val _readyLiveData = MutableLiveData<Unit>()
+    val readyLiveData: LiveData<Unit> = _readyLiveData
 
-            override fun onCancelled(error: DatabaseError) = Unit
-
-        })
-    }
-
-    private fun updateBoard(board: Board, listOfNotesItemId: String) {
-
-        val listOfNotesIdsNew = board.listsOfNotesIds
-        (listOfNotesIdsNew as ArrayList).remove(listOfNotesItemId)
-        databaseBoardsRef.child(board.id).child("listsOfNotesIds").setValue(listOfNotesIdsNew)
-    }
-
-    fun deleteList(listOfNotesItemId: String, board: Board, isList: Boolean) {
-        databaseListsOfNotesRef.child(board.id).child(listOfNotesItemId).removeValue()
-        val listNotes = _listNotesLiveData.value
-        if (listNotes != null) {
-            for (note in listNotes) {
-                databaseNotesRef.child(note.id).removeValue()
+    fun getNotes(listNotesIds: Map<String, Boolean>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getNotesUseCase.execute().collect {
+                _listNotesLiveData.postValue(it.filter {
+                    it.id in listNotesIds
+                })
             }
         }
-        if (isList) updateBoard(board, listOfNotesItemId)
     }
 
+    fun fetchNotes(notesListItem: NotesListItem, listNotes: List<Note>) {
+        _readyLiveData.value = fetchNotesUseCase.execute(notesListItem, listNotes, viewModelScope)
+    }
+
+    private fun updateBoard(board: Board, notesListItem: NotesListItem) {
+        viewModelScope.launch {
+            updateBoardUseCase.execute(board, notesListItem)
+        }
+    }
+
+    fun deleteList(notesListItem: NotesListItem, board: Board, isList: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            removeNotesListItemUseCase.execute(notesListItem, board, isList)
+        }
+    }
 
 
     fun renameList(notesListItem: NotesListItem, board: Board, title: String) {
-        databaseListsOfNotesRef.child(board.id).child(notesListItem.id)
-            .child("title").setValue(title)
+        viewModelScope.launch(Dispatchers.IO) {
+            renameListUseCase.execute(notesListItem, board, title)
+        }
     }
 
     fun deleteBoard(board: Board, user: User) {
-        databaseBoardsRef.child(board.id).removeValue()
-        val listBoardsIds = user.boards as ArrayList<String>
-        listBoardsIds.remove(board.id)
-        databaseUsersRef.child(user.id).child("boards").setValue(listBoardsIds)
-        for (list in board.listsOfNotesIds)
-            deleteList(list, board, false)
+        viewModelScope.launch(Dispatchers.IO) {
+            removeBoardUseCase.execute(board, user)
+        }
+
     }
 }

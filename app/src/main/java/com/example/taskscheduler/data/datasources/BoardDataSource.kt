@@ -13,4 +13,7 @@ interface BoardDataSource {
 
     suspend fun removeBoard(boardEntity: BoardEntity)
 
+    suspend fun getBoard(boardId: String): BoardEntity
+
+    suspend fun clearAllBoardsInRoom()
 }

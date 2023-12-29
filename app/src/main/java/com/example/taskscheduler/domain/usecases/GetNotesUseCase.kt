@@ -1,8 +1,10 @@
 package com.example.taskscheduler.domain.usecases
 
-class GetNotesUseCase {
+import com.example.taskscheduler.domain.repos.NoteRepository
 
-    fun execute() {
+class GetNotesUseCase(
+    private val repository: NoteRepository
+) {
 
-    }
+    fun execute() = repository.getNotesFlow()
 }

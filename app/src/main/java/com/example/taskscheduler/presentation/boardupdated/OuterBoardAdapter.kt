@@ -15,7 +15,6 @@ class OuterBoardAdapter(
     fragmentManager: FragmentManager,
     val board: Board,
     val user: User,
-    var position: Int,
     var list: ArrayList<NotesListItem> = ArrayList()
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
     var fragmentList = list

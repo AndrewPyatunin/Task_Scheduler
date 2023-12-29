@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.example.taskscheduler.data.entities.*
 
 @Database(
-    entities = [BoardEntity::class, NoteEntity::class, NotesListEntity::class, UserEntity::class, InviteEntity::class, UserForInvitesEntity::class],
+    entities = [BoardEntity::class, NoteEntity::class, NotesListEntity::class, UserEntity::class, InviteEntity::class],
     version = 1,
     exportSchema = false
 )

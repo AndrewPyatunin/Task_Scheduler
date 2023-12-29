@@ -1,7 +1,6 @@
 package com.example.taskscheduler.presentation.newnote
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
@@ -9,34 +8,36 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.MyDatabaseConnection.updated
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewNoteBinding
-import com.example.taskscheduler.domain.*
+import com.example.taskscheduler.domain.CheckNoteItem
+import com.example.taskscheduler.domain.UrgencyOfNote
 import com.example.taskscheduler.domain.models.Board
-import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.Note
+import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import kotlin.math.roundToInt
 
 class NewNoteFragment : Fragment(), MenuProvider {
+
     lateinit var binding: FragmentNewNoteBinding
     lateinit var notesListItem: NotesListItem
     lateinit var board: Board
     lateinit var user: User
     lateinit var note: Note
-    lateinit var viewModel: NewNoteViewModel
     lateinit var newNoteAdapter: NewNoteCheckItemAdapter
     lateinit var recyclerView: RecyclerView
     lateinit var listOfLists: Array<NotesListItem>
     var list = ArrayList<String>()
+    private val viewModel by lazy {
+        ViewModelProvider(this)[NewNoteViewModel::class.java]
+    }
 
     private val args by navArgs<NewNoteFragmentArgs>()
 
@@ -57,8 +58,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[NewNoteViewModel::class.java]
-        MyDatabaseConnection.updated = false
+        updated = false
         observeViewModel()
         binding.cardNewNoteDescription.background.alpha = 0
         binding.newNoteCard.background.alpha = 0
@@ -85,17 +85,13 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 imageViewCalendarEdit.setOnClickListener {
                     switchVisibilityForCalendar()
                     calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
-
-
-
                         textViewDate.text = String.format(
                             getString(R.string.date),
                             dateIntToString(dayOfMonth, 0), dateIntToString(month, 1), year
                         )
-                        note.date = textViewDate.text.toString()
                         switchVisibilityForCalendar()
                         updated = true
-                        viewModel.updateNote(note)
+                        viewModel.updateNote(note.copy(date = textViewDate.text.toString()))
                     }
                 }
 
@@ -134,11 +130,8 @@ class NewNoteFragment : Fragment(), MenuProvider {
                             Toast.LENGTH_SHORT
                         ).show()
                 }
-
             }
         }
-
-
 
         binding.buttonNewNote.setOnClickListener {
             with(binding) {
@@ -149,18 +142,16 @@ class NewNoteFragment : Fragment(), MenuProvider {
                         viewModel.createNewNote(title, description, board, notesListItem, user)
                     }
                 } else {
-                    note.description = description
                     switchVisibility(buttonNewNote)
                     textViewDescription.text = description.trim()
                     switchVisibility(textViewDescription)
                     switchVisibility(editTextDescription)
-                    viewModel.updateNote(note)
+                    viewModel.updateNote(note.copy(description = description))
                 }
             }
         }
         binding.textInList.text =
             String.format(getString(R.string.note_in_list), notesListItem.title)
-
 
     }
 
@@ -182,7 +173,6 @@ class NewNoteFragment : Fragment(), MenuProvider {
             progressBar.visibility = View.VISIBLE
             textViewCheckPercent.visibility = View.VISIBLE
         }
-
     }
 
     private fun switchVisibilityForCalendar() {
@@ -213,10 +203,14 @@ class NewNoteFragment : Fragment(), MenuProvider {
         (recyclerView.adapter as NewNoteCheckItemAdapter).onItemClick = {
             if (list.contains(it.id)) list.remove(it.id)
             else list.add(it.id)
-            val index = note.listOfTasks.indexOf(it)
-            note.listOfTasks[index].isChecked = !it.isChecked
             calculateProgress()
-            viewModel.updateNote(note)
+            viewModel.updateNote(note.copy(listOfTasks = note.listOfTasks.map { item ->
+                if (item == it) {
+                    item.copy(isChecked = !it.isChecked)
+                } else {
+                    item
+                }
+            }))
 
         }
     }
@@ -231,15 +225,15 @@ class NewNoteFragment : Fragment(), MenuProvider {
     }
 
     private fun observeViewModel() {
-        viewModel.success.observe(viewLifecycleOwner, Observer {
+        viewModel.success.observe(viewLifecycleOwner) {
             launchBoardFragment(it, user)
-        })
-        viewModel.noteData.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.noteData.observe(viewLifecycleOwner) {
             newNoteAdapter.checkItemsList = it
-        })
-        viewModel.error.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.error.observe(viewLifecycleOwner) {
 
-        })
+        }
     }
 
     private fun launchBoardFragment(board: Board, user: User) {
@@ -247,6 +241,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
     }
 
     companion object {
+
         const val KEY_LIST_NOTE = "list"
         const val KEY_BOARD = "board"
         const val KEY_USER = "user"
@@ -299,19 +294,18 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 )
                 val builder = AlertDialog.Builder(requireActivity())
                 builder.setTitle(getString(R.string.choose_note_priority))
-                builder.setItems(array, object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface?, which: Int) {
-                        val priority = when (array[which]) {
-                            "High" -> UrgencyOfNote.HIGH
-                            "Medium" -> UrgencyOfNote.MIDDLE
-                            "Low" -> UrgencyOfNote.LOW
-                            else -> UrgencyOfNote.LOW
-                        }
-                        updated = true
-                        viewModel.updateNote(note.copy(priority = priority))
+                builder.setItems(
+                    array
+                ) { dialog, which ->
+                    val priority = when (array[which]) {
+                        "High" -> UrgencyOfNote.HIGH
+                        "Medium" -> UrgencyOfNote.MIDDLE
+                        "Low" -> UrgencyOfNote.LOW
+                        else -> UrgencyOfNote.LOW
                     }
-
-                })
+                    updated = true
+                    viewModel.updateNote(note.copy(priority = priority))
+                }
                 builder.create().show()
             }
             android.R.id.home -> findNavController().popBackStack()

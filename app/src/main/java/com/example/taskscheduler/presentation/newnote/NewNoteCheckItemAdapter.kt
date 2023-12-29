@@ -13,7 +13,7 @@ import com.example.taskscheduler.domain.CheckNoteItem
 import com.example.taskscheduler.domain.DiffCallback
 
 
-class NewNoteCheckItemAdapter(checkItems: List<CheckNoteItem> = ArrayList()) :
+class NewNoteCheckItemAdapter :
     RecyclerView.Adapter<NewNoteCheckItemAdapter.NewNoteCheckItemViewHolder>() {
 
     var onItemClick: ((CheckNoteItem) -> Unit)? = null

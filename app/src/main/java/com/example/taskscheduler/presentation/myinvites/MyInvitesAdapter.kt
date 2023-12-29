@@ -1,4 +1,4 @@
-package com.example.taskscheduler
+package com.example.taskscheduler.presentation.myinvites
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,33 +7,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.example.taskscheduler.R
+import com.example.taskscheduler.domain.DiffCallback
 import com.example.taskscheduler.domain.models.Invite
-
-class MyInvitesDiffCallback(
-    private val oldList: List<Invite>,
-    private val newList: List<Invite>
-) : DiffUtil.Callback() {
-    override fun getOldListSize(): Int = oldList.size
-
-    override fun getNewListSize(): Int = newList.size
-
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        val oldInvite = oldList[oldItemPosition]
-        val newInvite = newList[newItemPosition]
-        return oldInvite.id == newInvite.id
-    }
-
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition] == newList[newItemPosition]
-    }
-
-}
 
 class MyInvitesAdapter: RecyclerView.Adapter<MyInvitesAdapter.MyInvitesViewHolder>() {
     var onItemClick: ((Invite) -> Unit)? = null
     var invitesList: List<Invite> = emptyList()
         set(value) {
-            val diffCallback = MyInvitesDiffCallback(field, value)
+            val diffCallback = DiffCallback(field, value)
             val diffResult = DiffUtil.calculateDiff(diffCallback)
             diffResult.dispatchUpdatesTo(this)
             field = value

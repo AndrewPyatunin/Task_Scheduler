@@ -17,6 +17,14 @@ class BoardDataSourceImpl(
         return taskDatabaseDao.getBoards()
     }
 
+    override suspend fun getBoard(boardId: String): BoardEntity {
+        return taskDatabaseDao.getBoard(boardId)
+    }
+
+    override suspend fun clearAllBoardsInRoom() {
+        taskDatabaseDao.clearAllBoards()
+    }
+
     override suspend fun addBoard(boardEntity: BoardEntity) {
         taskDatabaseDao.addBoard(boardEntity)
     }

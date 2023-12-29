@@ -1,23 +1,23 @@
 package com.example.taskscheduler
 
+import android.app.Application
 import android.net.Uri
 import com.example.taskscheduler.domain.BackgroundImage
-import com.example.taskscheduler.domain.DiffCallback
 import com.example.taskscheduler.domain.NewCallback
 import com.example.taskscheduler.domain.models.User
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import com.example.taskscheduler.domain.repos.UserRepository
+import com.example.taskscheduler.domain.usecases.AddAllUsersUseCase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
 
 object MyDatabaseConnection : DatabaseConnection {
+
     val database = Firebase.database
-    private val databaseUsersRef = database.getReference("Users")
-    val databaseBoardsRef = database.getReference("Boards")
     private val databaseImagesReference = database.getReference("ImageUrls")
-    var userFrom = User()
+    lateinit var repository: UserRepository
+    private var addAllUsersUseCase: AddAllUsersUseCase? = null
+    var user = User()
     var uri: Uri? = null
     var currentPosition = 0
     var list = emptyList<BackgroundImage>()
@@ -41,14 +41,14 @@ object MyDatabaseConnection : DatabaseConnection {
         }
     }
 
-    override fun query(user: FirebaseUser) {
-        databaseUsersRef.child(user.uid).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                userFrom = snapshot.getValue(User::class.java) ?: User()
-            }
-
-            override fun onCancelled(error: DatabaseError) = Unit
-        })
+    override suspend fun query(application: Application, scope: CoroutineScope) {
+        if (addAllUsersUseCase == null) {
+            repository = MyApp.userRepository
+            addAllUsersUseCase = AddAllUsersUseCase(repository)
+        }
+        addAllUsersUseCase?.let {
+            it.execute(scope)
+        }
     }
 
     override fun getBoard() {

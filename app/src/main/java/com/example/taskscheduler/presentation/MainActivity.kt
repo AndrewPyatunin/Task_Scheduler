@@ -1,6 +1,7 @@
 package com.example.taskscheduler.presentation
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.MotionEvent
@@ -14,6 +15,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
+import com.example.taskscheduler.MyApp
+import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
@@ -27,6 +30,11 @@ class MainActivity : AppCompatActivity() {
     private val databaseUsersRef = Firebase.database.getReference("Users")
     private var navController: NavController? = null
     private val topLevelDestinations = setOf(getWelcomeDestination(), getLoginDestination())
+    private var pref: SharedPreferences? = null
+
+    companion object {
+        const val USER_ID_KEY = "user_id"
+    }
 
     private val fragmentListener = object : FragmentManager.FragmentLifecycleCallbacks() {
         override fun onFragmentViewCreated(
@@ -46,13 +54,13 @@ class MainActivity : AppCompatActivity() {
         setTheme(R.style.Theme_AppCompat_Main)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
-
+        MyApp.initialize(application)
+        pref = getSharedPreferences("Id", MODE_PRIVATE)
+        MyDatabaseConnection.userId = pref?.getString(USER_ID_KEY, "")
         val navController = getRootNavController()
         prepareRootNavController(isSignedIn(), navController)
         onNavControllerActivated(navController)
-
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, true)
-
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
@@ -161,10 +169,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUserOnline(isOnline: Boolean) {
-        user = auth.currentUser
-        if (user != null) {
-            databaseUsersRef.child(user!!.uid).child("onlineStatus").setValue(isOnline)
+        auth.currentUser?.let {
+            databaseUsersRef.child(it.uid).child("onlineStatus").setValue(isOnline)
+            val edit = pref?.edit()
+            edit?.putString(USER_ID_KEY, it.uid)
+            edit?.apply()
         }
+
     }
 
     private fun getMainNavigationGraphId() = R.navigation.main_navigation
