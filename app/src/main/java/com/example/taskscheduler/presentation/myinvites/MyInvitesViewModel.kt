@@ -47,7 +47,6 @@ class MyInvitesViewModel : ViewModel() {
                 _invitesListData.postValue(it)
             }
         }
-
     }
 
     fun acceptInvite(user: User, invite: Invite) {
@@ -72,7 +71,7 @@ class MyInvitesViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             _user.postValue(
                 getUserFromRoomUseCase.execute(
-                    auth.currentUser?.uid ?: MyDatabaseConnection.userId!!
+                    auth.currentUser?.uid ?: MyDatabaseConnection.userId ?: throw RuntimeException("Exception this user is not exist")
                 )
             )
         }

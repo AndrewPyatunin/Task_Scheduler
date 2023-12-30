@@ -56,6 +56,7 @@ class MyInvitesFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.invitesLiveData.observe(viewLifecycleOwner) {
             adapter.invitesList = it
+            binding.progressBarInvites.visibility = View.GONE
         }
 
         viewModel.user.observe(viewLifecycleOwner) {

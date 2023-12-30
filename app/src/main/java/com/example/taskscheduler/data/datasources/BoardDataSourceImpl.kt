@@ -29,6 +29,10 @@ class BoardDataSourceImpl(
         taskDatabaseDao.addBoard(boardEntity)
     }
 
+    override suspend fun addBoards(boardList: List<BoardEntity>) {
+        taskDatabaseDao.addBoardList(boardList)
+    }
+
     override suspend fun removeBoard(boardEntity: BoardEntity) {
         taskDatabaseDao.removeBoard(boardEntity.id)
     }

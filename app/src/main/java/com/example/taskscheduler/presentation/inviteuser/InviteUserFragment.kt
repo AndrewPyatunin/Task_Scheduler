@@ -50,29 +50,28 @@ class InviteUserFragment : Fragment() {
         viewModel = ViewModelProvider(this)[InviteUserViewModel::class.java]
         observeViewModel()
         initViews()
-        if (userAdapter != null)
-            userAdapter?.onItemClick = {
-                if (it !in listForInvite) {
-                    listForInvite.add(it)
-                } else if (it in listForInvite) {
-                    listForInvite.remove(it)
-                }
-                Log.i("USER_INVITE_LIST", listForInvite.joinToString { it.toString() })
+        userAdapter?.onItemClick = {
+            if (it !in listForInvite) {
+                listForInvite.add(it)
+            } else if (it in listForInvite) {
+                listForInvite.remove(it)
             }
+            Log.i("USER_INVITE_LIST", listForInvite.joinToString { it.toString() })
+        }
         binding.buttonInviteUser.setOnClickListener {
             listForInvite.forEach {
                 viewModel.inviteUser(it, user, board)
             }
         }
-        binding.recyclerViewInviteUser.afterMeasured {
-            Log.i("USER_RECYCLER", this.id.toString())
-            with(binding) {
-                buttonInviteUser.visibility = View.VISIBLE
-                pleaseWaitTextViewInvite.visibility = View.GONE
-                loadingIndicatorInvite.visibility = View.GONE
-            }
-
-        }
+//        binding.recyclerViewInviteUser.afterMeasured {
+//            Log.i("USER_RECYCLER", this.id.toString())
+//            with(binding) {
+//                buttonInviteUser.visibility = View.VISIBLE
+//                pleaseWaitTextViewInvite.visibility = View.GONE
+//                loadingIndicatorInvite.visibility = View.GONE
+//            }
+//
+//        }
     }
 
     private fun initViews() {
@@ -103,7 +102,6 @@ class InviteUserFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.listUsers.observe(viewLifecycleOwner) {
             userAdapter?.users = it as ArrayList<User>
-
             with(binding) {
                 buttonInviteUser.visibility = View.VISIBLE
                 pleaseWaitTextViewInvite.visibility = View.GONE
@@ -115,9 +113,9 @@ class InviteUserFragment : Fragment() {
 
         viewModel.getUsersForInvite(board)
 
-        viewModel.success.observe(viewLifecycleOwner, Observer {
+        viewModel.success.observe(viewLifecycleOwner) {
             Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
-        })
+        }
     }
 
     companion object {

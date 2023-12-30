@@ -39,7 +39,13 @@ interface TaskDatabaseDao {
     suspend fun addBoard(board: BoardEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addBoardList(boards: List<BoardEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addInvite(invite: InviteEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addInvites(inviteList: List<InviteEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addAllUsers(users: List<UserEntity>)

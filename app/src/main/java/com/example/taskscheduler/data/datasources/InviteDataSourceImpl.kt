@@ -16,6 +16,10 @@ class InviteDataSourceImpl(
         taskDatabaseDao.addInvite(inviteEntity)
     }
 
+    override suspend fun addInvites(inviteList: List<InviteEntity>) {
+        taskDatabaseDao.addInvites(inviteList)
+    }
+
     override suspend fun removeInvite(inviteEntity: InviteEntity) {
         taskDatabaseDao.removeInvite(inviteEntity.id)
     }

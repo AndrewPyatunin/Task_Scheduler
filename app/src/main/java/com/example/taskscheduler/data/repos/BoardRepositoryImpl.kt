@@ -52,7 +52,7 @@ class BoardRepositoryImpl(
 
     override suspend fun getBoardsFlow(user: User, scope: CoroutineScope, boardList: List<Board>) {
         auth.addAuthStateListener {
-            if (it.currentUser != null) {
+            it.currentUser?.let {
                 databaseBoardsReference.addValueEventListener(object : ValueEventListener {
 
                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -63,10 +63,8 @@ class BoardRepositoryImpl(
                                 boards.add(board)
                             }
                         }
-                        scope.launch(Dispatchers.IO) {
-                            boards.forEach {
-                                addBoard(it)
-                            }
+                        GlobalScope.launch(Dispatchers.IO) {
+                            addBoards(boards)
                         }
                     }
 
@@ -138,6 +136,12 @@ class BoardRepositoryImpl(
 
     override suspend fun addBoard(board: Board) {
         boardDataSource.addBoard(boardToBoardEntityMapper.map(board))
+    }
+
+    override suspend fun addBoards(boardList: List<Board>) {
+        boardDataSource.addBoards(boardList.map {
+            boardToBoardEntityMapper.map(it)
+        })
     }
 
     override suspend fun createNewBoard(

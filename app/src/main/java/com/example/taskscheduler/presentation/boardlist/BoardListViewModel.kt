@@ -13,7 +13,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -45,10 +44,13 @@ class BoardListViewModel : ViewModel() {
     val dataReady: LiveData<Unit> = _dataReady
 
     init {
+        addAllUsers()
+    }
+
+    private fun addAllUsers() {
         viewModelScope.launch(Dispatchers.IO) {
             addAllUsersUseCase.execute(viewModelScope)
         }
-
     }
 
     fun fetchUser() {
@@ -68,8 +70,8 @@ class BoardListViewModel : ViewModel() {
 
     fun getBoardsFlow(user: User) {
         viewModelScope.launch(Dispatchers.IO) {
-            getBoardsFlowUseCase.execute(user).map {
-                it.filter {
+            getBoardsFlowUseCase.execute(user).map { list ->
+                list.filter {
                     it.id in user.boards
                 }
             }.collect {

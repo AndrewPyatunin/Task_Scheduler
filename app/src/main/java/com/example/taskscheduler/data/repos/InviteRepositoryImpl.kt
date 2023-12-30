@@ -19,11 +19,10 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class InviteRepositoryImpl(
@@ -40,19 +39,21 @@ class InviteRepositoryImpl(
     private val databaseUsersReference = Firebase.database.getReference(USERS)
     private val databaseBoardsReference = Firebase.database.getReference(BOARDS)
 
-    override suspend fun getInvites(scope: CoroutineScope) {
+    override suspend fun getInvites(scope: CoroutineScope) = suspendCancellableCoroutine {
 
         databaseInvitesReference.child(auth.currentUser?.uid.toString())
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    val invites = ArrayList<Invite>()
                     snapshot.children.forEach {
-                        GlobalScope.launch {
-                            it.children.forEach {
-                                it.getValue(Invite::class.java)?.let { invite ->
-                                    addInvite(invite)
-                                }
+                        it.children.forEach {
+                            it.getValue(Invite::class.java)?.let { invite ->
+                                invites.add(invite) //add Invite to room
                             }
                         }
+                    }
+                    scope.launch(Dispatchers.IO) {
+                        it.resumeWith(Result.success(addInvites(invites)))
                     }
                 }
 
@@ -62,7 +63,8 @@ class InviteRepositoryImpl(
 
     override suspend fun acceptInvite(user: User, invite: Invite) {
         val inviteBoardId = invite.boardId
-        databaseUsersReference.child(user.id).child("boards").updateChildren(mapOf(Pair(inviteBoardId, true)))
+        databaseUsersReference.child(user.id).child("boards")
+            .updateChildren(mapOf(Pair(inviteBoardId, true)))
         databaseBoardsReference.child(inviteBoardId).child("members")
             .updateChildren(mapOf(Pair(user.id, true)))
         clearInviteInDatabase(user.copy(boards = (user.boards as MutableMap).apply {
@@ -123,6 +125,13 @@ class InviteRepositoryImpl(
     override suspend fun addInvite(invite: Invite) {
         inviteDataSource.addInvite(inviteToInviteEntityMapper.map(invite))
     }
+
+    override suspend fun addInvites(inviteList: List<Invite>) {
+        inviteDataSource.addInvites(inviteList.map { invite ->
+            inviteToInviteEntityMapper.map(invite)
+        })
+    }
+
 
     override suspend fun clearAllInvitesInRoom() {
         inviteDataSource.clearAllInvites()

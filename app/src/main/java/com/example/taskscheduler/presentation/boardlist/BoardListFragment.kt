@@ -1,6 +1,7 @@
 package com.example.taskscheduler.presentation.boardlist
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -12,6 +13,8 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.MyDatabaseConnection.boardList
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentBoardListBinding
 import com.example.taskscheduler.domain.models.Board
@@ -26,6 +29,7 @@ class BoardListFragment : Fragment(), MenuProvider {
     private lateinit var user: User
     private lateinit var recyclerViewBoardList: RecyclerView
     private lateinit var boardsAdapter: BoardListAdapter
+    private var isFragmentAlreadyExist = false
     private val viewModel by lazy {
         ViewModelProvider(this)[BoardListViewModel::class.java]
     }
@@ -36,12 +40,15 @@ class BoardListFragment : Fragment(), MenuProvider {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentBoardListBinding.inflate(inflater, container, false)
-
+//        isFragmentAlreadyExist = this.isAdded
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+//        if (!isFragmentAlreadyExist) {
+//            viewModel.addAllUsers()
+//        }
         observeViewModel()
         initViews()
         val menuHost: MenuHost = requireActivity()
@@ -62,6 +69,7 @@ class BoardListFragment : Fragment(), MenuProvider {
 
     private fun observeViewModel() {
         viewModel.boardsLiveData.observe(viewLifecycleOwner) {
+            boardList = it
             boardsAdapter.boards = it
             with(binding) {
                 loadingIndicator.visibility = View.GONE
@@ -78,7 +86,8 @@ class BoardListFragment : Fragment(), MenuProvider {
 
         viewModel.userLiveData.observe(viewLifecycleOwner) {
             user = it
-            viewModel.fetchBoards(it, boardsAdapter.boards)
+            Log.d("BOARD_LIST_ADAPTER", boardsAdapter.boards.size.toString())
+            viewModel.fetchBoards(it, boardList)
             drawAvatar()
         }
     }

@@ -9,6 +9,8 @@ interface InviteDataSource {
 
     suspend fun addInvite(inviteEntity: InviteEntity)
 
+    suspend fun addInvites(inviteList: List<InviteEntity>)
+
     suspend fun removeInvite(inviteEntity: InviteEntity)
 
     suspend fun clearAllInvites()

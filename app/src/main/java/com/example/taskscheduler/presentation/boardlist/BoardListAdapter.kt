@@ -30,7 +30,7 @@ class BoardListAdapter : Adapter<BoardListAdapter.BoardListViewHolder>() {
 
     inner class BoardListViewHolder(
         itemView: View,
-        var textViewBoardName: TextView = itemView.findViewById(R.id.textViewBoardName),
+        val textViewBoardName: TextView = itemView.findViewById(R.id.textViewBoardName),
         val linearLayout: LinearLayout = itemView.findViewById(R.id.linear_board_item)
 
     ) : ViewHolder(itemView) {

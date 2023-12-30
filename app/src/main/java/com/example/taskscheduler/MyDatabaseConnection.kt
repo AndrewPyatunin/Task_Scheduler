@@ -4,6 +4,7 @@ import android.app.Application
 import android.net.Uri
 import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.NewCallback
+import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.UserRepository
 import com.example.taskscheduler.domain.usecases.AddAllUsersUseCase
@@ -17,6 +18,7 @@ object MyDatabaseConnection : DatabaseConnection {
     private val databaseImagesReference = database.getReference("ImageUrls")
     lateinit var repository: UserRepository
     private var addAllUsersUseCase: AddAllUsersUseCase? = null
+    @Volatile var boardList = emptyList<Board>()
     var user = User()
     var uri: Uri? = null
     var currentPosition = 0

@@ -18,6 +18,8 @@ interface BoardRepository {
 
     suspend fun addBoard(board: Board)
 
+    suspend fun addBoards(boardList: List<Board>)
+
     suspend fun createNewBoard(
         name: String,
         user: User,
