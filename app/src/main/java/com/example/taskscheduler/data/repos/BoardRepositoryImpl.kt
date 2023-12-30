@@ -24,12 +24,9 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class BoardRepositoryImpl(
     dao: TaskDatabaseDao
@@ -43,6 +40,7 @@ class BoardRepositoryImpl(
     private val userToUserEntityMapper = UserToUserEntityMapper()
     private val notesListEntityToNotesListItemMapper = NotesListEntityToNotesListItemMapper()
     private val notesListDataSource = NotesListDataSourceImpl(dao)
+    @Volatile private var myContinuation: CancellableContinuation<Unit>? = null
 
     private val auth = Firebase.auth
     private val databaseNotesListReference = Firebase.database.getReference(NOTES_LIST)
@@ -50,29 +48,38 @@ class BoardRepositoryImpl(
     private val databaseBoardsReference = Firebase.database.getReference(BOARDS)
     private val databaseUsersReference = Firebase.database.getReference(USERS)
 
-    override suspend fun getBoardsFlow(user: User, scope: CoroutineScope, boardList: List<Board>) {
-        auth.addAuthStateListener {
-            it.currentUser?.let {
-                databaseBoardsReference.addValueEventListener(object : ValueEventListener {
+    override suspend fun getBoardsFlow(user: User, scope: CoroutineScope, boardList: List<Board>) =
+        suspendCancellableCoroutine { continuation ->
+            auth.addAuthStateListener {
+                it.currentUser?.let {
+                    databaseBoardsReference.addValueEventListener(object : ValueEventListener {
 
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val boards = ArrayList<Board>()
-                        snapshot.children.forEach { dataSnapshot ->
-                            val board = dataSnapshot.getValue(Board::class.java)
-                            if (board != null && dataSnapshot.key in user.boards && board !in boardList) {
-                                boards.add(board)
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val boards = ArrayList<Board>()
+                            snapshot.children.forEach { dataSnapshot ->
+                                val board = dataSnapshot.getValue(Board::class.java)
+                                if (board != null && dataSnapshot.key in user.boards) { //&& board !in boardList) {
+                                    boards.add(board)
+                                }
+                                Log.d("DataUpdate_list", boards.size.toString())
+                            }
+                            scope.launch(Dispatchers.IO) {
+                                val result =
+                                    withContext(Dispatchers.IO) {
+                                        addBoards(boards)
+                                    }
+                                Log.d("DataUpdate_list_scope", boards.size.toString())
+                                if (continuation.isActive)
+                                    continuation.resumeWith(Result.success(result))//add to room database
+
                             }
                         }
-                        GlobalScope.launch(Dispatchers.IO) {
-                            addBoards(boards)
-                        }
-                    }
 
-                    override fun onCancelled(error: DatabaseError) = Unit
-                })
+                        override fun onCancelled(error: DatabaseError) = Unit
+                    })
+                }
             }
         }
-    }
 
     override fun getBoardsFlowFromRoom(user: User): Flow<List<Board>> {
         return boardDataSource.getBoardsFlow().map { list ->

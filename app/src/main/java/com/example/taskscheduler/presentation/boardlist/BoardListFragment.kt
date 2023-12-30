@@ -69,6 +69,7 @@ class BoardListFragment : Fragment(), MenuProvider {
 
     private fun observeViewModel() {
         viewModel.boardsLiveData.observe(viewLifecycleOwner) {
+            Log.d("DataUpdate", "LiveData changed: $it") // Log the updated LiveData
             boardList = it
             boardsAdapter.boards = it
             with(binding) {
@@ -79,6 +80,7 @@ class BoardListFragment : Fragment(), MenuProvider {
         }
 
         viewModel.dataReady.observe(viewLifecycleOwner) {
+            Log.d("DataUpdate", "Start_getting_boards")
             viewModel.getBoardsFlow(user)
         }
 

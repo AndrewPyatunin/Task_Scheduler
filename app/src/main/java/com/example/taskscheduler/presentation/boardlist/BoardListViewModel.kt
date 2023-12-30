@@ -1,5 +1,6 @@
 package com.example.taskscheduler.presentation.boardlist
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,7 +14,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class BoardListViewModel : ViewModel() {
@@ -70,15 +73,15 @@ class BoardListViewModel : ViewModel() {
 
     fun getBoardsFlow(user: User) {
         viewModelScope.launch(Dispatchers.IO) {
-            getBoardsFlowUseCase.execute(user).map { list ->
+            getBoardsFlowUseCase.execute(user).onEach { Log.d("DataUpdate", "Flow emission: $it") }.map { list ->
                 list.filter {
                     it.id in user.boards
                 }
-            }.collect {
+            }.collectLatest {
+                Log.d("DataUpdate", "New data collected: $it") // Log the new data
                 _boardsLiveData.postValue(it)
             }
         }
-
     }
 
     private suspend fun getUser() =

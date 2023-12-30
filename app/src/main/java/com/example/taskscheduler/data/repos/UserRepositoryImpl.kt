@@ -96,7 +96,7 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun addAllUsers(scope: CoroutineScope) {
+    override suspend fun addAllUsers(scope: CoroutineScope) = suspendCancellableCoroutine { continuation ->
         databaseUsersReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val users = ArrayList<User>()
@@ -104,9 +104,10 @@ class UserRepositoryImpl(
                     it.getValue(User::class.java)?.let { it1 -> users.add(it1) }
                 }
                 scope.launch(Dispatchers.IO) {
-                    userDataSource.addAllUsers(users.map {
-                        userToUserEntityMapper.map(it)
-                    })
+                    if (continuation.isActive)
+                        continuation.resumeWith(Result.success(userDataSource.addAllUsers(users.map {
+                            userToUserEntityMapper.map(it)
+                        })))
                 }
             }
 
