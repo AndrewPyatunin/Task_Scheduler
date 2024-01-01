@@ -1,6 +1,5 @@
 package com.example.taskscheduler.data.repos
 
-import android.util.Log
 import com.example.taskscheduler.data.FirebaseConstants.BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
 import com.example.taskscheduler.data.TaskDatabaseDao
@@ -18,12 +17,9 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class NotesListRepositoryImpl(
     dao: TaskDatabaseDao
@@ -71,16 +67,30 @@ class NotesListRepositoryImpl(
         notesListDataSource.addListOfNotes(notesListItemToNotesListEntityMapper.map(notesListItem))
     }
 
-    override suspend fun fetchNotesLists(boardId: String, scope: CoroutineScope) {
+    override suspend fun addAllListsOfNoteListItem(listNoteList: List<NotesListItem>) {
+        notesListDataSource.addAllNotesListItems(listNoteList.map {
+            notesListItemToNotesListEntityMapper.map(it)
+        })
+    }
+
+    override suspend fun fetchNotesLists(boardId: String, scope: CoroutineScope, list: List<NotesListItem>) = suspendCancellableCoroutine { continuation ->
             databaseNotesListReference.child(boardId).addValueEventListener(object :
                 ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    val listOfLists = ArrayList<NotesListItem>()
                     snapshot.children.forEach {
-                        val list = it.getValue(NotesListItem::class.java)
-                        list?.let {
-                            scope.launch(Dispatchers.IO) {
-                                addListOfNote(it)
+                        val listItem = it.getValue(NotesListItem::class.java)
+                        if (listItem != null && listItem !in listOfLists) {
+                            listOfLists.add(listItem)
+                        }
+                    }
+                    scope.launch(Dispatchers.IO) {
+                        val result =
+                            withContext(Dispatchers.IO) {
+                                addAllListsOfNoteListItem(listOfLists)
                             }
+                        if (continuation.isActive) {
+                            continuation.resumeWith(Result.success(result))
                         }
                     }
                 }

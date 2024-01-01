@@ -9,7 +9,7 @@ class FetchNotesUseCase(
     private val repository: NoteRepository
 ) {
 
-    fun execute(notesListItem: NotesListItem, listNotes: List<Note>, scope: CoroutineScope) {
+    suspend fun execute(notesListItem: NotesListItem, listNotes: List<Note>, scope: CoroutineScope) {
         repository.fetchNotes(notesListItem, listNotes, scope)
     }
 }

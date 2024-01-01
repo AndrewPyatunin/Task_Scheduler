@@ -1,5 +1,6 @@
 package com.example.taskscheduler.presentation.boardupdated
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -33,6 +34,7 @@ class InnerBoardViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             getNotesUseCase.execute().collect {
                 _listNotesLiveData.postValue(it.filter {
+                    Log.d("INNER_BOARD", "get_notes")
                     it.id in listNotesIds
                 })
             }
@@ -40,7 +42,12 @@ class InnerBoardViewModel : ViewModel() {
     }
 
     fun fetchNotes(notesListItem: NotesListItem, listNotes: List<Note>) {
-        _readyLiveData.value = fetchNotesUseCase.execute(notesListItem, listNotes, viewModelScope)
+        viewModelScope.launch(Dispatchers.IO) {
+            fetchNotesUseCase.execute(notesListItem, listNotes, viewModelScope).let {
+                Log.d("INNER_BOARD", "fetch_notes")
+                _readyLiveData.postValue(it)
+            }
+        }
     }
 
     private fun updateBoard(board: Board, notesListItem: NotesListItem) {

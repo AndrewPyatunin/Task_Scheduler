@@ -37,16 +37,18 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     var tabLayout: TabLayout? = null
     var viewPager: ViewPager2? = null
     var listNotes: List<Note> = emptyList()
+    var isFirst = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         position = requireArguments().getInt(POSITION)
+        isFirst = false
         listOfLists =
             requireArguments().getParcelableArrayList(LIST) ?: ArrayList<NotesListItem>()
         list = listOfLists[position]
         user = requireArguments().getParcelable(USER)!!
         board = requireArguments().getParcelable(BOARD)!!
-        Log.i("USER_BOARD_FROM_OUTER", board.title)
+        Log.i("INNER_BOARD_FROM_OUTER", board.title)
     }
 
 
@@ -54,7 +56,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentInnerBoardBinding.inflate(inflater, container, false)
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
@@ -89,7 +91,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     }
 
     private fun dateToInt(date: String): Int {
-        Log.i("USER_note_date", date)
+        Log.i("INNER_BOARD", date)
         var dateForm = ""
         date.forEach { if (it != '.') dateForm += it }
         Log.i("USER_NOTE_DATE", dateForm)
@@ -107,25 +109,29 @@ class InnerBoardFragment : Fragment(), MenuProvider {
 
 
     private fun initViews(list: List<Note>) {
-        recyclerView = binding.childRecyclerViewBoard
-        var newList = list
-        newList = newList.sortedWith { ln, rn ->
-            if (ln.priority < rn.priority || (ln.priority == rn.priority &&
-                        dateToInt(ln.date) < dateToInt(rn.date))
-            ) -1 else if (ln.priority > rn.priority) 1 else 0
+        if (!isFirst) {
+            recyclerView = binding.childRecyclerViewBoard
+            var newList = list
+            newList = newList.sortedWith { ln, rn ->
+                if (ln.priority < rn.priority || (ln.priority == rn.priority &&
+                            dateToInt(ln.date) < dateToInt(rn.date))
+                ) -1 else if (ln.priority > rn.priority) 1 else 0
+            }
+            newList.forEach { Log.i("INNER_BOARD_TITLE", it.title) }
+
+            innerAdapter = InnerBoardAdapter(newList)
+            recyclerView.layoutManager = GridLayoutManager(
+                requireContext(), 1,
+                GridLayoutManager.VERTICAL, false
+            )
+            recyclerView.adapter = innerAdapter
+            recyclerView.setHasFixedSize(true)
+
+            binding.loadingIndicatorList.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
+//            isFirst = true
         }
-        newList.forEach { Log.i("USER_NEW_LIST", it.title) }
 
-        innerAdapter = InnerBoardAdapter(newList)
-        recyclerView.layoutManager = GridLayoutManager(
-            requireContext(), 1,
-            GridLayoutManager.VERTICAL, false
-        )
-        recyclerView.adapter = innerAdapter
-        recyclerView.setHasFixedSize(true)
-
-        binding.loadingIndicatorList.visibility = View.GONE
-        recyclerView.visibility = View.VISIBLE
 
         innerAdapter.onItemClick = {
             launchNewNoteFragment(it)
@@ -136,9 +142,10 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     private fun observeViewModel() {
         viewModel.listNotesLiveData.observe(viewLifecycleOwner) {
             listNotes = it
+            Log.i("INNER_BOARD_SIZE", it.size.toString())
+//            viewModel.fetchNotes(list, it)
             initViews(it)
         }
-
         viewModel.fetchNotes(list, listNotes)
 
         viewModel.readyLiveData.observe(viewLifecycleOwner) {

@@ -42,9 +42,9 @@ class OuterBoardViewModel : ViewModel() {
         }
     }
 
-    fun fetchNotesLists(board: Board) {
+    fun fetchNotesLists(board: Board, listOfNotesList: List<NotesListItem>) {
         viewModelScope.launch(Dispatchers.IO) {
-            _listReady.postValue(fetchNotesListUseCase.execute(board.id, viewModelScope))
+            _listReady.postValue(fetchNotesListUseCase.execute(board.id, viewModelScope, listOfNotesList))
         }
     }
 

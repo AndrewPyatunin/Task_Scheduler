@@ -21,11 +21,9 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class NoteRepositoryImpl(
     dao: TaskDatabaseDao
@@ -49,7 +47,7 @@ class NoteRepositoryImpl(
         }
     }
 
-    override fun fetchNotes(notesListItem: NotesListItem, listNotes: List<Note>, scope: CoroutineScope) {
+    override suspend fun fetchNotes(notesListItem: NotesListItem, listNotes: List<Note>, scope: CoroutineScope) = suspendCancellableCoroutine { continuation ->
         databaseNotesReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val notes = ArrayList<Note>()
@@ -62,9 +60,10 @@ class NoteRepositoryImpl(
                     }
                 }
                 scope.launch(Dispatchers.IO) {
-                    notes.forEach {
-                        addNote(it)
+                    val result = withContext(Dispatchers.IO) {
+                        addNotes(notes)
                     }
+                    if (continuation.isActive) continuation.resumeWith(Result.success(result))
                 }
             }
 
@@ -126,6 +125,12 @@ class NoteRepositoryImpl(
 
     override suspend fun addNote(note: Note) {
         noteDataSource.addNote(noteToNoteEntityMapper.map(note))
+    }
+
+    override suspend fun addNotes(notes: List<Note>) {
+        noteDataSource.addNotes(notes.map {
+            noteToNoteEntityMapper.map(it)
+        })
     }
 
     override suspend fun clearAllNotes() {

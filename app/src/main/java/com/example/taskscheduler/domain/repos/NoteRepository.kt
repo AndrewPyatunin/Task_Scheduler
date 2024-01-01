@@ -12,7 +12,7 @@ interface NoteRepository {
 
     fun getNotesFlow(): Flow<List<Note>>
 
-    fun fetchNotes(notesListItem: NotesListItem, listNotes: List<Note>, scope: CoroutineScope)
+    suspend fun fetchNotes(notesListItem: NotesListItem, listNotes: List<Note>, scope: CoroutineScope)
 
     suspend fun createNewNote(
         title: String,
@@ -32,4 +32,5 @@ interface NoteRepository {
     suspend fun addNote(note: Note)
 
     suspend fun clearAllNotes()
+    suspend fun addNotes(notes: List<Note>)
 }

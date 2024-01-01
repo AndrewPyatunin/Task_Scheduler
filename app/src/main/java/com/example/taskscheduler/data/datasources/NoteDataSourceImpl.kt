@@ -16,6 +16,10 @@ class NoteDataSourceImpl(
         taskDatabaseDao.addNote(noteEntity)
     }
 
+    override suspend fun addNotes(notes: List<NoteEntity>) {
+        taskDatabaseDao.addNotes(notes)
+    }
+
     override suspend fun removeNote(noteEntity: NoteEntity) {
         taskDatabaseDao.removeNote(noteEntity.id)
     }

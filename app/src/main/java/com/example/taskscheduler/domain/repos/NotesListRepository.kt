@@ -16,7 +16,9 @@ interface NotesListRepository {
 
     suspend fun addListOfNote(notesListItem: NotesListItem)
 
-    suspend fun fetchNotesLists(boardId: String, scope: CoroutineScope)
+    suspend fun addAllListsOfNoteListItem(listNoteList: List<NotesListItem>)
+
+    suspend fun fetchNotesLists(boardId: String, scope: CoroutineScope, list: List<NotesListItem>)
 
     suspend fun clearAllNotesLists()
 }

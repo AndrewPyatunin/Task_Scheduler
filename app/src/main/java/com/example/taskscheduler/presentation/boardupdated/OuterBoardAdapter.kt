@@ -17,7 +17,7 @@ class OuterBoardAdapter(
     val user: User,
     var list: ArrayList<NotesListItem> = ArrayList()
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
-    var fragmentList = list
+    var fragmentList = list//not empty
         set(value) {
             val diffCallback = DiffCallback(field, value)
             val diffResult = DiffUtil.calculateDiff(diffCallback)

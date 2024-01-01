@@ -27,4 +27,8 @@ class NotesListDataSourceImpl(
     override suspend fun clearAllNotesListsInRoom() {
         taskDatabaseDao.clearAllListsOfNotes()
     }
+
+    override suspend fun addAllNotesListItems(notesListEntityList: List<NotesListEntity>) {
+        taskDatabaseDao.addAllListsOfNotes(notesListEntityList)
+    }
 }

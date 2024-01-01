@@ -36,6 +36,9 @@ interface TaskDatabaseDao {
     suspend fun addNote(note: NoteEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addNotes(notes: List<NoteEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addBoard(board: BoardEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -52,6 +55,9 @@ interface TaskDatabaseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addListOfNotes(listOfNotesItem: NotesListEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addAllListsOfNotes(list: List<NotesListEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addUser(user: UserEntity)
