@@ -1,6 +1,8 @@
 package com.example.taskscheduler.data.repos
 
 import android.net.Uri
+import android.util.Log
+import com.example.taskscheduler.data.FirebaseConstants.IMAGES
 import com.example.taskscheduler.data.FirebaseConstants.USERS
 import com.example.taskscheduler.data.TaskDatabaseDao
 import com.example.taskscheduler.data.datasources.UserDataSourceImpl
@@ -10,6 +12,7 @@ import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.UserRepository
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -17,9 +20,11 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class UserRepositoryImpl(
@@ -30,8 +35,8 @@ class UserRepositoryImpl(
     private val userToUserEntityMapper = UserToUserEntityMapper()
     private val userEntityToUserMapper = UserEntityToUserMapper()
     private val auth = Firebase.auth
-    private val userAuth = UserAuthentication(dao)
     private val databaseUsersReference = Firebase.database.getReference(USERS)
+    private val storageReference = Firebase.storage.getReference(IMAGES)
 
     override suspend fun addUser(user: User) {
         userDataSource.addUser(userToUserEntityMapper.map(user))
@@ -41,30 +46,61 @@ class UserRepositoryImpl(
         return userEntityToUserMapper.map(userDataSource.getUser(userId))
     }
 
-    override suspend fun updateUserProfile(description: String, email: String, user: User) {
+    override suspend fun updateUserProfile(description: String, email: String, user: User, scope: CoroutineScope) = suspendCancellableCoroutine {
         val ref = auth.currentUser?.let {
             databaseUsersReference.child(it.uid)
         }
-        var userUpdated: User = user
         if (description != "") {
             ref?.child("description")?.setValue(description)
-            userUpdated = user.copy(description = description)
-//            it.resumeWith(Result.success(description))
+            scope.launch(Dispatchers.IO) {
+                if (it.isActive) it.resumeWith(Result.success(addUser(user.copy(description = description))))
+            }
         }
         if (email != "" && ref != null) {
-            updateUserEmail(email, ref)
-            userUpdated = user.copy(email = email)
+            scope.launch(Dispatchers.IO) {
+                updateUserEmail(email, ref)
+                if(it.isActive) it.resumeWith(Result.success(addUser(user.copy(email = email))))
+            }
         }
-        addUser(userUpdated)
     }
 
-    override suspend fun update(uri: Uri?, name: String, user: User) {
+    override suspend fun update(uri: Uri?, name: String, user: User, scope: CoroutineScope) = suspendCancellableCoroutine { continuation ->
         uri?.let {
-            userAuth.uploadUserAvatar(uri, name).onSuccess {
-                auth.currentUser?.uid?.let { userId ->
-                    databaseUsersReference.child(userId).child("uri").setValue(it)
-                    addUser(user.copy(uri = it))
+            scope.launch(Dispatchers.IO) {
+                uploadUserAvatar(uri, name).onSuccess {
+                    auth.currentUser?.uid?.let { userId ->
+                        databaseUsersReference.child(userId).child("uri").setValue(it)
+                        if (continuation.isActive) {
+                            continuation.resumeWith(Result.success(addUser(user.copy(uri = it))))
+                        }
+                    }
                 }
+            }
+
+        }
+    }
+
+    override suspend fun uploadUserAvatar(
+        uri: Uri,
+        name: String
+    ) = suspendCancellableCoroutine { continuation ->
+        val imageRef = storageReference.child("images/${uri.lastPathSegment}")
+        imageRef.putFile(uri).continueWithTask {
+            if (!it.isSuccessful) {
+                it.exception?.let { exception ->
+                    throw exception
+                }
+            }
+            imageRef.downloadUrl
+        }.addOnCompleteListener {
+            Log.i("USER_URL", it.result.toString())
+            if (it.isSuccessful) {
+                updateUserAvatar(it.result, name)
+                val urlToFile = it.result.toString()
+                if (continuation.isActive) continuation.resume(Result.success(urlToFile))
+            } else {
+                if (continuation.isActive)
+                    continuation.resume(Result.failure<String>(RuntimeException(it.result.toString())))
             }
         }
     }
@@ -114,6 +150,24 @@ class UserRepositoryImpl(
             override fun onCancelled(error: DatabaseError) = Unit
 
         })
+    }
+
+    private fun updateUserAvatar(uri: Uri, name: String) {
+
+        val user = auth.currentUser
+        val profileUpdates = userProfileChangeRequest {
+            photoUri = uri
+            displayName = name
+        }
+
+        user?.updateProfile(profileUpdates)
+            ?.addOnCompleteListener {
+                if (it.isSuccessful) {
+                    Log.i("USER_FIREBASE_SUCCESS", auth.currentUser.toString())
+                }
+            }?.addOnFailureListener {
+                throw RuntimeException(it.message)
+            }
     }
 
     override suspend fun clearAllUsers() {

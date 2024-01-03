@@ -13,7 +13,6 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.MyDatabaseConnection.boardList
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentBoardListBinding
@@ -29,7 +28,6 @@ class BoardListFragment : Fragment(), MenuProvider {
     private lateinit var user: User
     private lateinit var recyclerViewBoardList: RecyclerView
     private lateinit var boardsAdapter: BoardListAdapter
-    private var isFragmentAlreadyExist = false
     private val viewModel by lazy {
         ViewModelProvider(this)[BoardListViewModel::class.java]
     }
@@ -40,15 +38,11 @@ class BoardListFragment : Fragment(), MenuProvider {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentBoardListBinding.inflate(inflater, container, false)
-//        isFragmentAlreadyExist = this.isAdded
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        if (!isFragmentAlreadyExist) {
-//            viewModel.addAllUsers()
-//        }
         observeViewModel()
         initViews()
         val menuHost: MenuHost = requireActivity()
@@ -114,7 +108,6 @@ class BoardListFragment : Fragment(), MenuProvider {
         recyclerViewBoardList = binding.recyclerViewBoardList
         recyclerViewBoardList.layoutManager = GridLayoutManager(requireContext(), 2)
         boardsAdapter = BoardListAdapter()
-//        if (boardList.isNotEmpty()) boardsAdapter.boards = boardList
         recyclerViewBoardList.adapter = boardsAdapter
     }
 

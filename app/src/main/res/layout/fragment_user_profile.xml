@@ -65,7 +65,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewDescriptionUser2"
+        app:layout_constraintTop_toBottomOf="@+id/textViewUserProfileEmail"
         app:srcCompat="@drawable/my_baseline_email_24" />
 
     <ImageView
@@ -75,7 +75,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewDescriptionUser3"
+        app:layout_constraintTop_toBottomOf="@+id/textViewUserProfileDescription"
         app:srcCompat="@drawable/my_baseline_notes_24" />
 
     <ImageView
@@ -125,7 +125,7 @@
         app:layout_constraintTop_toTopOf="@+id/imageViewUserDescription" />
 
     <TextView
-        android:id="@+id/textViewDescriptionUser3"
+        android:id="@+id/textViewUserProfileDescription"
         android:layout_width="175dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -136,7 +136,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textViewUserName" />
 
     <TextView
-        android:id="@+id/textViewDescriptionUser2"
+        android:id="@+id/textViewUserProfileEmail"
         android:layout_width="175dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -197,7 +197,7 @@
         android:id="@+id/imageViewSaveDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/my_baseline_save_24"
+        android:src="@drawable/my_baseline_check_24"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/editTextPersonDescription"
         app:layout_constraintStart_toEndOf="@+id/editTextPersonDescription"
@@ -207,10 +207,42 @@
         android:id="@+id/imageViewSaveEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/my_baseline_save_24"
+        android:src="@drawable/my_baseline_check_24"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/editTextPersonEmail"
         app:layout_constraintStart_toEndOf="@+id/editTextPersonEmail"
         app:layout_constraintTop_toTopOf="@+id/editTextPersonEmail" />
+
+    <ImageView
+        android:id="@+id/imageViewDescriptionClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/my_baseline_close_24"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@+id/imageViewSaveDescription"
+        app:layout_constraintTop_toTopOf="@id/editTextPersonDescription"
+        app:layout_constraintBottom_toBottomOf="@id/editTextPersonDescription"/>
+
+    <ImageView
+        android:id="@+id/imageViewEmailClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/my_baseline_close_24"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/imageViewSaveEmail"
+        app:layout_constraintTop_toTopOf="@id/editTextPersonEmail"
+        app:layout_constraintBottom_toBottomOf="@id/editTextPersonEmail"/>
+
+    <ProgressBar
+        android:id="@+id/progressBarAvatarImage"
+        style="?android:attr/progressBarStyle"
+        android:indeterminateTint="@color/purple_500"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/profile_picture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

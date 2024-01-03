@@ -12,9 +12,9 @@ interface UserRepository {
 
     suspend fun getUser(userId: String): User
 
-    suspend fun updateUserProfile(description: String, email: String, user: User)
+    suspend fun updateUserProfile(description: String, email: String, user: User, scope: CoroutineScope)
 
-    suspend fun update(uri: Uri?, name: String, user: User)
+    suspend fun update(uri: Uri?, name: String, user: User, scope: CoroutineScope)
 
     suspend fun updateUserEmail(email: String, ref: DatabaseReference): String
 
@@ -25,4 +25,6 @@ interface UserRepository {
     suspend fun addAllUsers(scope: CoroutineScope)
 
     suspend fun clearAllUsers()
+
+    suspend fun uploadUserAvatar(uri: Uri, name: String): Any
 }

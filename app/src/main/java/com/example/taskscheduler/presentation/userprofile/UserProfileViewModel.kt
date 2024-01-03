@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
-import com.example.taskscheduler.data.TaskDatabase
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.*
 import com.google.firebase.auth.ktx.auth
@@ -31,13 +30,13 @@ class UserProfileViewModel : ViewModel() {
     )
     val auth = Firebase.auth
 
-    private val _emailLiveData = MutableLiveData<String>()
-    val emailLiveData: LiveData<String>
-        get() = _emailLiveData
+    private val _avatarLiveData = MutableLiveData<Unit>()
+    val avatarLiveData: LiveData<Unit>
+        get() = _avatarLiveData
 
-    private val _descriptionLiveData = MutableLiveData<String>()
-    val descriptionLiveData: LiveData<String>
-        get() = _descriptionLiveData
+    private val _updateLiveData = MutableLiveData<Unit>()
+    val updateLiveData: LiveData<Unit>
+        get() = _updateLiveData
 
     private val _uriLiveData = MutableLiveData<Uri>()
     val uriLiveData: LiveData<Uri>
@@ -48,30 +47,34 @@ class UserProfileViewModel : ViewModel() {
         get() = _userLiveData
 
     init {
-        MyDatabaseConnection.userId?.let {
+        getUser()
+    }
+
+    fun updateUserProfile(description: String, email: String, user: User) {
+        viewModelScope.launch {
+            _updateLiveData.postValue(updateUserProfileUseCase.execute(description, email, user, viewModelScope))
+        }
+    }
+
+    fun getUser() {
+        (auth.currentUser?.uid ?: MyDatabaseConnection.userId)?.let {
             viewModelScope.launch(Dispatchers.IO) {
                 _userLiveData.postValue(getUserFromRoomUseCase.execute(it))
             }
         }
     }
 
-    fun updateUserProfile(description: String, email: String, user: User) {
-        viewModelScope.launch {
-            updateUserProfileUseCase.execute(description, email, user)
-        }
-    }
-
     fun update(uri: Uri?, name: String, user: User) {
         viewModelScope.launch(Dispatchers.IO) {
-            updateUserDataUseCase.execute(uri, name, user)
+            _avatarLiveData.postValue(updateUserDataUseCase.execute(uri, name, user, viewModelScope))
         }
 
     }
 
     fun updateStatus() {
         viewModelScope.launch(Dispatchers.IO) {
+            updateStatusUseCase.execute()
             clearAllDataInRoomUseCase.execute()
         }
-        updateStatusUseCase.execute()
     }
 }

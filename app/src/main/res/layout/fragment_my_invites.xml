@@ -16,6 +16,7 @@
     <ProgressBar
         android:id="@+id/progressBarInvites"
         style="?android:attr/progressBarStyle"
+        android:indeterminateTint="@color/purple_700"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_marginTop="32dp"
