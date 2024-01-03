@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         pref = getSharedPreferences("Id", MODE_PRIVATE)
         MyDatabaseConnection.userId = pref?.getString(USER_ID_KEY, "")
         val navController = getRootNavController()
-        prepareRootNavController(isSignedIn(), navController)
+        prepareRootNavController(user != null, navController)
         onNavControllerActivated(navController)
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, true)
     }
@@ -78,12 +78,6 @@ class MainActivity : AppCompatActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
-    private fun hideKeyboard(editText: EditText) {
-        val imm: InputMethodManager =
-            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(editText.windowToken, 0)
-    }
-
     override fun onDestroy() {
         supportFragmentManager.unregisterFragmentLifecycleCallbacks(fragmentListener)
         navController = null
@@ -93,6 +87,12 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         return (navController?.navigateUp() ?: false) || super.onSupportNavigateUp()
 
+    }
+
+    private fun hideKeyboard(editText: EditText) {
+        val imm: InputMethodManager =
+            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(editText.windowToken, 0)
     }
 
     private fun getRootNavController(): NavController {
@@ -117,10 +117,6 @@ class MainActivity : AppCompatActivity() {
                 getLoginDestination()
         )
         navController.graph = graph
-    }
-
-    private fun isSignedIn(): Boolean {
-        return user != null
     }
 
     private fun isStartDestination(destination: NavDestination?): Boolean {
@@ -179,8 +175,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getMainNavigationGraphId() = R.navigation.main_navigation
-
-    private fun getTabsDestination() = R.id.tabsFragment
 
     private fun getLoginDestination() = R.id.loginFragment
 

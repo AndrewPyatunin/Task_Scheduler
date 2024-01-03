@@ -12,7 +12,6 @@ import com.example.taskscheduler.domain.usecases.*
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MyInvitesViewModel : ViewModel() {
@@ -71,7 +70,8 @@ class MyInvitesViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             _user.postValue(
                 getUserFromRoomUseCase.execute(
-                    auth.currentUser?.uid ?: MyDatabaseConnection.userId ?: throw RuntimeException("Exception this user is not exist")
+                    auth.currentUser?.uid ?: MyDatabaseConnection.userId
+                    ?: throw RuntimeException("Exception this user is not exist")
                 )
             )
         }

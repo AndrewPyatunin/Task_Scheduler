@@ -63,15 +63,6 @@ class InviteUserFragment : Fragment() {
                 viewModel.inviteUser(it, user, board)
             }
         }
-//        binding.recyclerViewInviteUser.afterMeasured {
-//            Log.i("USER_RECYCLER", this.id.toString())
-//            with(binding) {
-//                buttonInviteUser.visibility = View.VISIBLE
-//                pleaseWaitTextViewInvite.visibility = View.GONE
-//                loadingIndicatorInvite.visibility = View.GONE
-//            }
-//
-//        }
     }
 
     private fun initViews() {

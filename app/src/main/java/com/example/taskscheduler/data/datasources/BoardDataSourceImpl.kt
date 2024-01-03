@@ -6,8 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 class BoardDataSourceImpl(
     private val taskDatabaseDao: TaskDatabaseDao
-) : BoardDataSource
-{
+) : BoardDataSource {
 
     override fun getBoardsFlow(): Flow<List<BoardEntity>> {
         return taskDatabaseDao.getBoardsFlow()

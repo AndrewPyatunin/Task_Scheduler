@@ -62,75 +62,15 @@ class NewNoteFragment : Fragment(), MenuProvider {
         observeViewModel()
         binding.cardNewNoteDescription.background.alpha = 0
         binding.newNoteCard.background.alpha = 0
-        initViews()
+        initRecyclerView()
         if (note.id != "") {
-            val menuHost: MenuHost = requireActivity()
-            menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-            with(binding) {
-                newNoteTitle.visibility = View.GONE
-                editTextDescription.visibility = View.GONE
-                textViewDescription.text = note.description
-                textViewNewNoteTitle.text = note.title
-                textViewDate.text = note.date
-                switchVisibility(buttonNewNote)
-                switchVisibility(textViewDescription)
-                switchVisibility(textViewNewNoteTitle)
-                switchVisibility(imageViewCalendarEdit)
-                switchVisibility(textViewDate)
-                note.listOfTasks.forEach {
-                    if (it.isChecked) list.add(it.id)
-                }
-
-                calculateProgress()
-                imageViewCalendarEdit.setOnClickListener {
-                    switchVisibilityForCalendar()
-                    calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
-                        textViewDate.text = String.format(
-                            getString(R.string.date),
-                            dateIntToString(dayOfMonth, 0), dateIntToString(month, 1), year
-                        )
-                        switchVisibilityForCalendar()
-                        updated = true
-                        viewModel.updateNote(note.copy(date = textViewDate.text.toString()))
-                    }
-                }
-
-                imageViewEditDescription.visibility = View.VISIBLE
-                imageViewEditDescription.setOnClickListener {
-                    switchVisibility(textViewDescription)
-                    switchVisibility(editTextDescription)
-                    switchVisibility(buttonNewNote)
-                    editTextDescription.setText(note.description)
-                }
-            }
+            initViews()
         } else {
             switchVisibility(binding.buttonAddCheckListItem)
         }
 
         binding.buttonAddCheckListItem.setOnClickListener {
-            with(binding) {
-                buttonAddCheckListItem.visibility = View.GONE
-                buttonAddItemToCheckList.visibility = View.VISIBLE
-                editTextCheckTitle.visibility = View.VISIBLE
-                buttonAddItemToCheckList.setOnClickListener {
-                    val title = editTextCheckTitle.text.toString()
-                    val id = System.currentTimeMillis()
-                    if (title != "") {
-                        (note.listOfTasks as ArrayList).add(CheckNoteItem(title, false, "$id"))
-                        calculateProgress()
-                        viewModel.updateNote(note)
-
-                        buttonAddCheckListItem.visibility = View.VISIBLE
-                        buttonAddItemToCheckList.visibility = View.GONE
-                        editTextCheckTitle.visibility = View.GONE
-                    } else
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.select_check_list_title),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                }
-            }
+            checkListItemClick()
         }
 
         binding.buttonNewNote.setOnClickListener {
@@ -155,11 +95,77 @@ class NewNoteFragment : Fragment(), MenuProvider {
 
     }
 
+    private fun checkListItemClick() {
+        with(binding) {
+            buttonAddCheckListItem.visibility = View.GONE
+            buttonAddItemToCheckList.visibility = View.VISIBLE
+            editTextCheckTitle.visibility = View.VISIBLE
+            buttonAddItemToCheckList.setOnClickListener {
+                val title = editTextCheckTitle.text.toString()
+                val id = System.currentTimeMillis()
+                if (title != "") {
+                    (note.listOfTasks as ArrayList).add(CheckNoteItem(title, false, "$id"))
+                    calculateProgress()
+                    viewModel.updateNote(note)
+
+                    buttonAddCheckListItem.visibility = View.VISIBLE
+                    buttonAddItemToCheckList.visibility = View.GONE
+                    editTextCheckTitle.visibility = View.GONE
+                } else
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.select_check_list_title),
+                        Toast.LENGTH_SHORT
+                    ).show()
+            }
+        }
+    }
+
+    private fun initViews() {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        with(binding) {
+            newNoteTitle.visibility = View.GONE
+            editTextDescription.visibility = View.GONE
+            textViewDescription.text = note.description
+            textViewNewNoteTitle.text = note.title
+            textViewDate.text = note.date
+            switchVisibility(buttonNewNote)
+            switchVisibility(textViewDescription)
+            switchVisibility(textViewNewNoteTitle)
+            switchVisibility(imageViewCalendarEdit)
+            switchVisibility(textViewDate)
+            note.listOfTasks.forEach {
+                if (it.isChecked) list.add(it.id)
+            }
+
+            calculateProgress()
+            imageViewCalendarEdit.setOnClickListener {
+                switchVisibilityForCalendar()
+                calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
+                    textViewDate.text = String.format(
+                        getString(R.string.date),
+                        dateIntToString(dayOfMonth, 0), dateIntToString(month, 1), year
+                    )
+                    switchVisibilityForCalendar()
+                    updated = true
+                    viewModel.updateNote(note.copy(date = textViewDate.text.toString()))
+                }
+            }
+
+            imageViewEditDescription.visibility = View.VISIBLE
+            imageViewEditDescription.setOnClickListener {
+                switchVisibility(textViewDescription)
+                switchVisibility(editTextDescription)
+                switchVisibility(buttonNewNote)
+                editTextDescription.setText(note.description)
+            }
+        }
+    }
+
     private fun dateIntToString(item: Int, predicate: Int): String {
-        var newItem = ""
-        newItem = if (item + predicate < 10) "0${item + predicate}"
+        return if (item + predicate < 10) "0${item + predicate}"
         else "${item + predicate}"
-        return newItem
     }
 
     private fun calculateProgress() {
@@ -194,7 +200,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
             view.visibility = View.VISIBLE
     }
 
-    private fun initViews() {
+    private fun initRecyclerView() {
         recyclerView = binding.recyclerViewCheckList
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
         newNoteAdapter = NewNoteCheckItemAdapter()

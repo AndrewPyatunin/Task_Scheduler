@@ -1,11 +1,12 @@
-package com.example.taskscheduler.presentation
+package com.example.taskscheduler.presentation.welcome
 
-import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.domain.models.User
-import com.example.taskscheduler.domain.usecases.AddAllUsersUseCase
 import com.example.taskscheduler.domain.usecases.GetUserFromRoomUseCase
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -15,7 +16,6 @@ import kotlinx.coroutines.launch
 class WelcomeViewModel : ViewModel() {
 
     private val userRepository = MyApp.userRepository
-    private val addAllUsersUseCase = AddAllUsersUseCase(userRepository)
     private val getUserFromRoomUseCase = GetUserFromRoomUseCase(userRepository)
     private val auth = Firebase.auth
 
@@ -29,8 +29,6 @@ class WelcomeViewModel : ViewModel() {
     init {
         viewModelScope.launch(Dispatchers.IO) {
             MyDatabaseConnection.onCallbackReady()
-//            MyDatabaseConnection.query(application, this)
-//            _usersReady.postValue(addAllUsersUseCase.execute(viewModelScope))
             _usersReady.postValue(Unit)
         }
     }
@@ -42,5 +40,4 @@ class WelcomeViewModel : ViewModel() {
             })
         }
     }
-
 }

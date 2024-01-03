@@ -16,10 +16,10 @@ class ChooseAvatarOptionFragment : DialogFragment() {
                 .setCancelable(true)
                 .setPositiveButton(
                     getString(R.string.gallery)
-                ) { dialog, which -> (parentFragment as RegistrationFragment).galleryClicked() }
+                ) { _, _ -> (parentFragment as RegistrationFragment).pickImageFromGallery() }
                 .setNegativeButton(
                     getString(R.string.camera)
-                ) { dialog, which -> (parentFragment as RegistrationFragment).cameraClicked() }
+                ) { _, _ -> (parentFragment as RegistrationFragment).takePhotoFromCamera() }
                 .create()
         }
     }
@@ -31,5 +31,4 @@ class ChooseAvatarOptionFragment : DialogFragment() {
             return ChooseAvatarOptionFragment()
         }
     }
-
 }

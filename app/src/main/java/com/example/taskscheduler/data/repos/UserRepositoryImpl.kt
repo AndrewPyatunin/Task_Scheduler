@@ -6,7 +6,6 @@ import com.example.taskscheduler.data.FirebaseConstants.IMAGES
 import com.example.taskscheduler.data.FirebaseConstants.USERS
 import com.example.taskscheduler.data.TaskDatabaseDao
 import com.example.taskscheduler.data.datasources.UserDataSourceImpl
-import com.example.taskscheduler.data.entities.UserEntity
 import com.example.taskscheduler.data.mappers.UserEntityToUserMapper
 import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
 import com.example.taskscheduler.domain.models.User
@@ -18,12 +17,14 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
-import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -46,39 +47,47 @@ class UserRepositoryImpl(
         return userEntityToUserMapper.map(userDataSource.getUser(userId))
     }
 
-    override suspend fun updateUserProfile(description: String, email: String, user: User, scope: CoroutineScope) = suspendCancellableCoroutine {
+    override suspend fun updateUserProfile(
+        description: String,
+        email: String,
+        user: User,
+        scope: CoroutineScope
+    ) = suspendCancellableCoroutine {
         val ref = auth.currentUser?.let {
             databaseUsersReference.child(it.uid)
         }
         if (description != "") {
             ref?.child("description")?.setValue(description)
             scope.launch(Dispatchers.IO) {
-                if (it.isActive) it.resumeWith(Result.success(addUser(user.copy(description = description))))
+                if (it.isActive) {
+                    it.resumeWith(Result.success(addUser(user.copy(description = description))))
+                }
             }
         }
         if (email != "" && ref != null) {
             scope.launch(Dispatchers.IO) {
                 updateUserEmail(email, ref)
-                if(it.isActive) it.resumeWith(Result.success(addUser(user.copy(email = email))))
+                if (it.isActive) it.resumeWith(Result.success(addUser(user.copy(email = email))))
             }
         }
     }
 
-    override suspend fun update(uri: Uri?, name: String, user: User, scope: CoroutineScope) = suspendCancellableCoroutine { continuation ->
-        uri?.let {
-            scope.launch(Dispatchers.IO) {
-                uploadUserAvatar(uri, name).onSuccess {
-                    auth.currentUser?.uid?.let { userId ->
-                        databaseUsersReference.child(userId).child("uri").setValue(it)
-                        if (continuation.isActive) {
-                            continuation.resumeWith(Result.success(addUser(user.copy(uri = it))))
+    override suspend fun update(uri: Uri?, name: String, user: User, scope: CoroutineScope) =
+        suspendCancellableCoroutine { continuation ->
+            uri?.let {
+                scope.launch(Dispatchers.IO) {
+                    uploadUserAvatar(uri, name).onSuccess {
+                        auth.currentUser?.uid?.let { userId ->
+                            databaseUsersReference.child(userId).child("uri").setValue(it)
+                            if (continuation.isActive) {
+                                continuation.resumeWith(Result.success(addUser(user.copy(uri = it))))
+                            }
                         }
                     }
                 }
-            }
 
+            }
         }
-    }
 
     override suspend fun uploadUserAvatar(
         uri: Uri,
@@ -119,7 +128,7 @@ class UserRepositoryImpl(
     override fun updateStatus() {
         auth.addAuthStateListener {
             it.currentUser?.let {
-                databaseUsersReference.child(it.uid).child("onlineStatus").setValue(true)
+                databaseUsersReference.child(it.uid).child("onlineStatus").setValue(false)
             }
         }
     }
@@ -132,25 +141,26 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun addAllUsers(scope: CoroutineScope) = suspendCancellableCoroutine { continuation ->
-        databaseUsersReference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val users = ArrayList<User>()
-                snapshot.children.forEach {
-                    it.getValue(User::class.java)?.let { it1 -> users.add(it1) }
+    override suspend fun addAllUsers(scope: CoroutineScope) =
+        suspendCancellableCoroutine { continuation ->
+            databaseUsersReference.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val users = ArrayList<User>()
+                    snapshot.children.forEach {
+                        it.getValue(User::class.java)?.let { it1 -> users.add(it1) }
+                    }
+                    scope.launch(Dispatchers.IO) {
+                        if (continuation.isActive)
+                            continuation.resumeWith(Result.success(userDataSource.addAllUsers(users.map {
+                                userToUserEntityMapper.map(it)
+                            })))
+                    }
                 }
-                scope.launch(Dispatchers.IO) {
-                    if (continuation.isActive)
-                        continuation.resumeWith(Result.success(userDataSource.addAllUsers(users.map {
-                            userToUserEntityMapper.map(it)
-                        })))
-                }
-            }
 
-            override fun onCancelled(error: DatabaseError) = Unit
+                override fun onCancelled(error: DatabaseError) = Unit
 
-        })
-    }
+            })
+        }
 
     private fun updateUserAvatar(uri: Uri, name: String) {
 

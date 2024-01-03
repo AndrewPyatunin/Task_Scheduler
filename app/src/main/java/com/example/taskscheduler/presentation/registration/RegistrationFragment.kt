@@ -68,11 +68,12 @@ class RegistrationFragment : Fragment() {
             }
         }
 
-    private fun startTakePhotoActivity() {
-        takePhotoForResult.launch(Intent(requireActivity(), TakePhotoActivity::class.java))
+    fun pickImageFromGallery() {
+        val pickIntent = Intent(Intent.ACTION_PICK)
+        pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
+        pickImageFromGalleryForResult.launch(pickIntent)
     }
-
-    private fun takePhotoFromCamera() {
+    fun takePhotoFromCamera() {
         val builder = VmPolicy.Builder()
         StrictMode.setVmPolicy(builder.build())
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -80,6 +81,10 @@ class RegistrationFragment : Fragment() {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, generateFileUri());
         takePhotoForResult.launch(intent)
 //        startActivityForResult(intent, CAMERA)
+    }
+
+    private fun startTakePhotoActivity() {
+        takePhotoForResult.launch(Intent(requireActivity(), TakePhotoActivity::class.java))
     }
 
     private fun generateFileUri(): Uri? {
@@ -107,14 +112,6 @@ class RegistrationFragment : Fragment() {
         if (!directory.exists()) directory.mkdirs()
     }
 
-    private fun pickImageFromGallery() {
-        val pickIntent = Intent(Intent.ACTION_PICK)
-        pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
-        pickImageFromGalleryForResult.launch(pickIntent)
-    }
-
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         createDirectory()
@@ -140,10 +137,7 @@ class RegistrationFragment : Fragment() {
                     }
                 }
             }
-
         }
-
-
     }
 
     private fun observeViewModel(email: String, password: String, name: String, lastName: String) {
@@ -180,18 +174,8 @@ class RegistrationFragment : Fragment() {
 
     private fun launchWelcomeFragment(user: User) {
         findNavController().navigate(
-            RegistrationFragmentDirections.actionRegistrationFragmentToWelcomeFragment(
-                user
-            )
+            RegistrationFragmentDirections.actionRegistrationFragmentToWelcomeFragment(user)
         )
-    }
-
-    fun galleryClicked() {
-        pickImageFromGallery()
-    }
-
-    fun cameraClicked() {
-        takePhotoFromCamera()
     }
 
     companion object {

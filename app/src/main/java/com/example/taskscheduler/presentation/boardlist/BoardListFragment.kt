@@ -151,7 +151,7 @@ class BoardListFragment : Fragment(), MenuProvider {
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         if (menuItem.itemId == R.id.item_logout) {
-            viewModel.logout()
+            viewModel.logout(user)
             findTopNavController().navigate(R.id.loginFragment, null, navOptions {
                 popUpTo(R.id.tabsFragment) {
                     inclusive = true

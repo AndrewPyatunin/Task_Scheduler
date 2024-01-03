@@ -9,5 +9,8 @@ class FetchBoardsUseCase(
     private val boardRepository: BoardRepository
 ) {
 
-    suspend fun execute(user: User, scope: CoroutineScope, boardList: List<Board>) = boardRepository.getBoardsFlow(user, scope, boardList)
+    suspend fun execute(user: User, scope: CoroutineScope, boardList: List<Board>) {
+        boardRepository.getBoardsFlow(user, scope, boardList)
+    }
+
 }

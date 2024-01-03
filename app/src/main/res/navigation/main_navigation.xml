@@ -81,7 +81,7 @@
         tools:layout="@layout/activity_take_photo" />
     <fragment
         android:id="@+id/welcomeFragment"
-        android:name="com.example.taskscheduler.presentation.WelcomeFragment"
+        android:name="com.example.taskscheduler.presentation.welcome.WelcomeFragment"
         android:label="Welcome"
         tools:layout="@layout/fragment_welcome">
         <action

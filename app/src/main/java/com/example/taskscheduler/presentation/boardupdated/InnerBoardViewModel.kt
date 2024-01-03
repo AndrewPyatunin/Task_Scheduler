@@ -17,7 +17,6 @@ class InnerBoardViewModel : ViewModel() {
     private val notesListRepository = MyApp.notesListRepository
     private val noteRepository = MyApp.noteRepository
     private val removeBoardUseCase = RemoveBoardUseCase(boardRepository)
-    private val updateBoardUseCase = UpdateBoardUseCase(boardRepository)
     private val removeNotesListItemUseCase = RemoveNotesListItemUseCase(boardRepository)
     private val renameListUseCase = RenameListUseCase(notesListRepository)
     private val getNotesUseCase = GetNotesUseCase(noteRepository)
@@ -47,12 +46,6 @@ class InnerBoardViewModel : ViewModel() {
                 Log.d("INNER_BOARD", "fetch_notes")
                 _readyLiveData.postValue(it)
             }
-        }
-    }
-
-    private fun updateBoard(board: Board, notesListItem: NotesListItem) {
-        viewModelScope.launch {
-            updateBoardUseCase.execute(board, notesListItem)
         }
     }
 

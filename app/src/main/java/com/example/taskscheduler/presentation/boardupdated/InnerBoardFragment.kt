@@ -61,7 +61,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         viewModel = ViewModelProvider(this)[InnerBoardViewModel::class.java]
-//        viewModel.getNotes(list.listNotes)
         observeViewModel()
         viewPager = requireActivity().findViewById(R.id.view_pager)
         tabLayout = requireActivity().findViewById(R.id.tab_layout)
@@ -129,7 +128,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
 
             binding.loadingIndicatorList.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
-//            isFirst = true
         }
 
 
@@ -143,7 +141,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         viewModel.listNotesLiveData.observe(viewLifecycleOwner) {
             listNotes = it
             Log.i("INNER_BOARD_SIZE", it.size.toString())
-//            viewModel.fetchNotes(list, it)
             initViews(it)
         }
         viewModel.fetchNotes(list, listNotes)

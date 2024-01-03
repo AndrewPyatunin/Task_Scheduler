@@ -1,4 +1,4 @@
-package com.example.taskscheduler.presentation
+package com.example.taskscheduler.presentation.welcome
 
 import android.os.Bundle
 import android.os.Handler
@@ -23,7 +23,7 @@ class WelcomeFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentWelcomeBinding.inflate(inflater, container, false)
         return binding.root
     }

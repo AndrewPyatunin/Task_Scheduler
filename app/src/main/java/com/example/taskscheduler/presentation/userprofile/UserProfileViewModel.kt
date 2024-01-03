@@ -38,10 +38,6 @@ class UserProfileViewModel : ViewModel() {
     val updateLiveData: LiveData<Unit>
         get() = _updateLiveData
 
-    private val _uriLiveData = MutableLiveData<Uri>()
-    val uriLiveData: LiveData<Uri>
-        get() = _uriLiveData
-
     private val _userLiveData = MutableLiveData<User>()
     val userLiveData: LiveData<User>
         get() = _userLiveData

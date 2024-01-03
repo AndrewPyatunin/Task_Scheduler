@@ -24,6 +24,7 @@ class BoardListViewModel : ViewModel() {
     private val boardRepository = MyApp.boardRepository
     private val userRepository = MyApp.userRepository
     private val getBoardsFlowUseCase: GetBoardsFlowUseCase = GetBoardsFlowUseCase(boardRepository)
+    private val logOutUseCase: LogOutUseCase = LogOutUseCase(MyApp.userAuthentication)
     private val getUserFromRoomUseCase: GetUserFromRoomUseCase =
         GetUserFromRoomUseCase(MyApp.userRepository)
     private val addAllUsersUseCase = AddAllUsersUseCase(userRepository)
@@ -87,7 +88,8 @@ class BoardListViewModel : ViewModel() {
     private suspend fun getUser() =
         getUserFromRoomUseCase.execute(auth.currentUser?.uid ?: MyDatabaseConnection.userId!!)
 
-    fun logout() {
+    fun logout(user: User) {
+        logOutUseCase.execute(user, viewModelScope)
         viewModelScope.launch(Dispatchers.IO) {
             clearAllDataInRoomUseCase.execute()
         }

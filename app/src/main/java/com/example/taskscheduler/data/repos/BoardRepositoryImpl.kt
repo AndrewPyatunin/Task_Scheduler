@@ -40,7 +40,6 @@ class BoardRepositoryImpl(
     private val userToUserEntityMapper = UserToUserEntityMapper()
     private val notesListEntityToNotesListItemMapper = NotesListEntityToNotesListItemMapper()
     private val notesListDataSource = NotesListDataSourceImpl(dao)
-    @Volatile private var myContinuation: CancellableContinuation<Unit>? = null
 
     private val auth = Firebase.auth
     private val databaseNotesListReference = Firebase.database.getReference(NOTES_LIST)
@@ -103,9 +102,6 @@ class BoardRepositoryImpl(
 
     override suspend fun deleteBoard(board: Board, user: User) {
         databaseBoardsReference.child(board.id).removeValue()
-//        databaseUsersReference.child(user.id).child("boards").setValue(user.boards.filter {
-//            it.key != user.id
-//        })
         board.members.keys.forEach {
             databaseUsersReference.child(it).child("boards").child(board.id).removeValue()
         }

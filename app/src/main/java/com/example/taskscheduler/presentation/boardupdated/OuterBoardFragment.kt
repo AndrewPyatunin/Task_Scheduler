@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -37,8 +36,7 @@ class OuterBoardFragment : Fragment() {
     private var parentList = emptyList<NotesListItem>()
     private var viewPager: ViewPager2? = null
     private lateinit var tabLayout: TabLayout
-    var currentPosition = 0
-    var isCreated = false
+    private var currentPosition = 0
 
     private val args by navArgs<OuterBoardFragmentArgs>()
 
@@ -52,7 +50,6 @@ class OuterBoardFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-//        MyDatabaseConnection.parentList = parentList
         val item = viewPager?.currentItem ?: 0
         requireArguments().putInt("position", item)
         Log.i("USER_SAVED", item.toString())
@@ -63,7 +60,7 @@ class OuterBoardFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentOuterBoardBinding.inflate(inflater, container, false)
         registerForContextMenu(binding.viewPager)
         return binding.root
@@ -77,8 +74,6 @@ class OuterBoardFragment : Fragment() {
         if (MyDatabaseConnection.updated) {
             viewModel.fetchNotesLists(board, parentList)
         }
-
-
         currentPosition = MyDatabaseConnection.currentPosition
         observeViewModel()
         binding.imageViewInvite.setOnClickListener {
@@ -97,7 +92,6 @@ class OuterBoardFragment : Fragment() {
             editText.visibility = View.VISIBLE
             buttonAddNewList.visibility = View.VISIBLE
         }
-//        initViewPager(parentList as? ArrayList ?: ArrayList())
         buttonAddNewList.setOnClickListener {
 
             val textTitle = editText.text.toString().trim()
@@ -143,12 +137,12 @@ class OuterBoardFragment : Fragment() {
         Log.i("OUTER_BOARD_LIST", list.toString())
         parentAdapter =
             OuterBoardAdapter(
-            lifecycle,
-            childFragmentManager,
-            board,
-            user,
-            list as ArrayList<NotesListItem>
-        )
+                lifecycle,
+                childFragmentManager,
+                board,
+                user,
+                list as ArrayList<NotesListItem>
+            )
         parentList = list //
         repeat(list.size) {
             binding.tabLayout.visibility = View.VISIBLE
@@ -174,6 +168,7 @@ class OuterBoardFragment : Fragment() {
                 tab.text = list[position].title
             }.attach()
         }
+        viewPager?.currentItem = MyDatabaseConnection.currentPosition
         tabLayout.getTabAt(currentPosition)?.select()
     }
 
@@ -186,24 +181,6 @@ class OuterBoardFragment : Fragment() {
 
         viewModel.listLiveData.observe(viewLifecycleOwner) { list ->
             initViewPager(list)
-//            parentList = list as? ArrayList<NotesListItem> ?: ArrayList()
-//            repeat(list.size) {
-//                binding.tabLayout.visibility = View.VISIBLE
-//            }
-//            parentAdapter = OuterBoardAdapter(
-//                lifecycle,
-//                childFragmentManager,
-//                board,
-//                user,
-//                parentList as ArrayList
-//            )
-//            viewPager?.adapter = parentAdapter
-//            viewPager?.let {
-//                TabLayoutMediator(tabLayout, viewPager!!) { tab, position ->
-//                    tab.text = list[position].title
-//                }.attach()
-//            }
-//            tabLayout.getTabAt(currentPosition)?.select()
         }
         viewModel.boardLiveData.observe(viewLifecycleOwner) {
             board = it
