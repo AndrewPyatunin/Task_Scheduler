@@ -37,14 +37,13 @@ class OuterBoardFragment : Fragment() {
     private var viewPager: ViewPager2? = null
     private lateinit var tabLayout: TabLayout
     private var currentPosition = 0
+    private var isInit = false
 
     private val args by navArgs<OuterBoardFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         parseArgs()
-        parentList = MyDatabaseConnection.parentList
-        MyDatabaseConnection.currentPosition = 0
         MyDatabaseConnection.updated = true
     }
 
@@ -53,6 +52,7 @@ class OuterBoardFragment : Fragment() {
         val item = viewPager?.currentItem ?: 0
         requireArguments().putInt("position", item)
         Log.i("USER_SAVED", item.toString())
+        parentList = emptyList()
         MyDatabaseConnection.currentPosition = item
     }
 
@@ -70,10 +70,7 @@ class OuterBoardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[OuterBoardViewModel::class.java]
-
-        if (MyDatabaseConnection.updated) {
-            viewModel.fetchNotesLists(board, parentList)
-        }
+        viewModel.fetchNotesLists(board, parentList)
         currentPosition = MyDatabaseConnection.currentPosition
         observeViewModel()
         binding.imageViewInvite.setOnClickListener {
@@ -108,12 +105,10 @@ class OuterBoardFragment : Fragment() {
                 override fun handleOnBackPressed() {
                     retryToListBoard()
                 }
-
             })
         savedInstanceState?.putInt("position", viewPager?.currentItem ?: 0)
         savedInstanceState?.putBoolean("first_init", false)
     }
-
 
     private fun parseArgs() {
         board = args.board
@@ -135,41 +130,45 @@ class OuterBoardFragment : Fragment() {
 
     private fun initViewPager(list: List<NotesListItem>) {
         Log.i("OUTER_BOARD_LIST", list.toString())
-        parentAdapter =
-            OuterBoardAdapter(
-                lifecycle,
-                childFragmentManager,
-                board,
-                user,
-                list as ArrayList<NotesListItem>
-            )
-        parentList = list //
-        repeat(list.size) {
-            binding.tabLayout.visibility = View.VISIBLE
-        }
-        viewPager = binding.viewPager
-        Glide.with(this).load(board.backgroundUrl).into(object : CustomTarget<Drawable>() {
-            override fun onResourceReady(
-                resource: Drawable,
-                transition: Transition<in Drawable>?
-            ) {
-                fillingLayout(resource)
+        if (list != parentList) {
+            parentAdapter =
+                OuterBoardAdapter(
+                    lifecycle,
+                    childFragmentManager,
+                    board,
+                    user,
+                    list as ArrayList<NotesListItem>
+                )
+            parentList = list
+            if (list.isNotEmpty()) {
+                binding.tabLayout.visibility = View.VISIBLE
             }
+            viewPager = binding.viewPager
+            Glide.with(this).load(board.backgroundUrl).into(object : CustomTarget<Drawable>() {
+                override fun onResourceReady(
+                    resource: Drawable,
+                    transition: Transition<in Drawable>?
+                ) {
+                    fillingLayout(resource)
+                }
 
-            override fun onLoadCleared(placeholder: Drawable?) {
-                fillingLayout(placeholder)
+                override fun onLoadCleared(placeholder: Drawable?) {
+                    fillingLayout(placeholder)
+                }
+            })
+            viewPager?.offscreenPageLimit = list.size + 1
+            tabLayout = binding.tabLayout
+            viewPager?.adapter = parentAdapter
+            viewPager?.let {
+                TabLayoutMediator(tabLayout, it) { tab, position ->
+                    tab.text = list[position].title
+                }.attach()
             }
-        })
-        viewPager?.offscreenPageLimit = list.size + 1
-        tabLayout = binding.tabLayout
-        viewPager?.adapter = parentAdapter
-        viewPager?.let {
-            TabLayoutMediator(tabLayout, it) { tab, position ->
-                tab.text = list[position].title
-            }.attach()
+            viewPager?.currentItem = MyDatabaseConnection.currentPosition
+            tabLayout.getTabAt(currentPosition)?.select()
         }
-        viewPager?.currentItem = MyDatabaseConnection.currentPosition
-        tabLayout.getTabAt(currentPosition)?.select()
+
+        if (list.isNotEmpty()) isInit = true
     }
 
     private fun observeViewModel() {
@@ -180,6 +179,7 @@ class OuterBoardFragment : Fragment() {
         }
 
         viewModel.listLiveData.observe(viewLifecycleOwner) { list ->
+            binding.loadingIndicatorBoard.visibility = View.GONE
             initViewPager(list)
         }
         viewModel.boardLiveData.observe(viewLifecycleOwner) {
@@ -190,7 +190,6 @@ class OuterBoardFragment : Fragment() {
     private fun fillingLayout(draw: Drawable?) {
         with(binding) {
             constraint.background = draw
-            loadingIndicatorBoard.visibility = View.GONE
             cardViewBoard.visibility = View.VISIBLE
             imageViewInvite.visibility = View.VISIBLE
             viewPager.visibility = View.VISIBLE

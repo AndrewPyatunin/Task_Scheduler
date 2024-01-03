@@ -28,7 +28,6 @@ class OuterBoardAdapter(
     override fun getItemCount(): Int = fragmentList.size
 
     override fun createFragment(position: Int): Fragment {
-
         return InnerBoardFragment.newInstance(fragmentList, position, board, user)
     }
 }

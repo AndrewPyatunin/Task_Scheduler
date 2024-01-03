@@ -11,12 +11,6 @@ interface TaskDatabaseDao {
     @Query("SELECT * FROM boards")
     fun getBoardsFlow(): Flow<List<BoardEntity>>
 
-    @Query("SELECT * FROM boards")
-    suspend fun getBoards(): List<BoardEntity>
-
-    @Query("SELECT * FROM boards WHERE id = :id")
-    suspend fun getBoard(id: String): BoardEntity
-
     @Query("SELECT * FROM notes")
     fun getNotesFlow(): Flow<List<NoteEntity>>
 
@@ -25,9 +19,6 @@ interface TaskDatabaseDao {
 
     @Query("SELECT * FROM invites")
     fun getInvitesFlow(): Flow<List<InviteEntity>>
-
-    @Query("SELECT * FROM users WHERE id = :id")
-    suspend fun getUser(id: String): UserEntity
 
     @Query("SELECT * FROM users")
     fun getUsersFlow(): Flow<List<UserEntity>>
@@ -95,4 +86,9 @@ interface TaskDatabaseDao {
     @Query("SELECT * FROM listsOfNotes")
     suspend fun getListsOfNotes(): List<NotesListEntity>
 
+    @Query("SELECT * FROM boards WHERE id = :id")
+    suspend fun getBoard(id: String): BoardEntity
+
+    @Query("SELECT * FROM users WHERE id = :id")
+    suspend fun getUser(id: String): UserEntity
 }

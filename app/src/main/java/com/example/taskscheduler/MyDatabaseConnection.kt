@@ -50,9 +50,7 @@ object MyDatabaseConnection : DatabaseConnection {
             repository = MyApp.userRepository
             addAllUsersUseCase = AddAllUsersUseCase(repository)
         }
-        addAllUsersUseCase?.let {
-            it.execute(scope)
-        }
+        addAllUsersUseCase?.execute(scope)
     }
 
     override fun getBoard() {

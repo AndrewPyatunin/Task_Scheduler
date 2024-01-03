@@ -7,8 +7,6 @@ interface BoardDataSource {
 
     fun getBoardsFlow(): Flow<List<BoardEntity>>
 
-    suspend fun getBoards(): List<BoardEntity>
-
     suspend fun addBoard(boardEntity: BoardEntity)
 
     suspend fun addBoards(boardList: List<BoardEntity>)

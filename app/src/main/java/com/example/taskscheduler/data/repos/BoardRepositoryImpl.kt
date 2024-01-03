@@ -96,7 +96,7 @@ class BoardRepositoryImpl(
         board: Board, notesListItem: NotesListItem
     ) {
         val nodes = board.listsOfNotesIds.filter { it.key != notesListItem.id }
-        databaseBoardsReference.child(board.id).child("listsOfNotesIds").setValue(nodes)
+        databaseBoardsReference.child(board.id).child("listsOfNotesIds").child(notesListItem.id).setValue(null)
         addBoard(board.copy(listsOfNotesIds = nodes))//Добавление в Room
     }
 
