@@ -2,7 +2,9 @@ package com.example.taskscheduler.data.repos
 
 import com.example.taskscheduler.data.FirebaseConstants.BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
-import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST_IDS
+import com.example.taskscheduler.data.FirebaseConstants.PATH_TITLE
+import com.example.taskscheduler.data.database.TaskDatabaseDao
 import com.example.taskscheduler.data.datasources.BoardDataSourceImpl
 import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
 import com.example.taskscheduler.data.mappers.BoardToBoardEntityMapper
@@ -36,7 +38,7 @@ class NotesListRepositoryImpl(
 
     override suspend fun renameList(notesListItem: NotesListItem, board: Board, title: String) {
         databaseNotesListReference.child(board.id).child(notesListItem.id)
-            .child("title").setValue(title)
+            .child(PATH_TITLE).setValue(title)
         addListOfNote(notesListItem.copy(title = title))
     }
 
@@ -46,7 +48,7 @@ class NotesListRepositoryImpl(
         val item = NotesListItem(listId, title, user.id, emptyMap())
         ref.setValue(item)
         databaseBoardsReference.child(board.id)
-            .child("listsOfNotesIds").updateChildren(mapOf(Pair(listId, true)))
+            .child(PATH_NOTES_LIST_IDS).updateChildren(mapOf(Pair(listId, true)))
         addListOfNote(item)
         val nodes = board.listsOfNotesIds as MutableMap
         nodes[listId] = true
@@ -54,8 +56,8 @@ class NotesListRepositoryImpl(
     }
 
     override fun getNotesListsFlow(board: Board): Flow<List<NotesListItem>> {
-        return notesListDataSource.getListsOfNotesFlow(board.id).map {
-            it.filter {
+        return notesListDataSource.getListsOfNotesFlow(board.id).map { list ->
+            list.filter {
                 it.id in board.listsOfNotesIds
             }.map {
                 notesListEntityToNotesListItemMapper.map(it)

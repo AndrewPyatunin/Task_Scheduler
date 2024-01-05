@@ -45,7 +45,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentNewNoteBinding.inflate(inflater, container, false)
         binding.calendarView.visibility = View.GONE
         return binding.root
@@ -142,7 +142,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
             calculateProgress()
             imageViewCalendarEdit.setOnClickListener {
                 switchVisibilityForCalendar()
-                calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
+                calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
                     textViewDate.text = String.format(
                         getString(R.string.date),
                         dateIntToString(dayOfMonth, 0), dateIntToString(month, 1), year
@@ -302,7 +302,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 builder.setTitle(getString(R.string.choose_note_priority))
                 builder.setItems(
                     array
-                ) { dialog, which ->
+                ) { _, which ->
                     val priority = when (array[which]) {
                         "High" -> UrgencyOfNote.HIGH
                         "Medium" -> UrgencyOfNote.MIDDLE
@@ -320,6 +320,6 @@ class NewNoteFragment : Fragment(), MenuProvider {
     }
 
     fun moveNote(listItem: NotesListItem) {
-        viewModel.moveNote(note, listItem, board, user)
+        viewModel.moveNote(note, notesListItem, listItem, board, user)
     }
 }

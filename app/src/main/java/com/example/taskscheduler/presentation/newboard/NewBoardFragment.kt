@@ -42,7 +42,7 @@ class NewBoardFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentNewBoardBinding.inflate(inflater, container, false)
         return binding.root
     }

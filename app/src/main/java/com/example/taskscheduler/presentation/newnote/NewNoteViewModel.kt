@@ -65,9 +65,9 @@ class NewNoteViewModel : ViewModel() {
         }
     }
 
-    fun moveNote(note: Note, notesListItem: NotesListItem, board: Board, user: User) {
+    fun moveNote(note: Note, fromNotesListItem: NotesListItem, notesListItem: NotesListItem, board: Board, user: User) {
         viewModelScope.launch(Dispatchers.IO) {
-            moveNoteUseCase.execute(notesListItem, note, board, user)
+            moveNoteUseCase.execute(fromNotesListItem, notesListItem, note, board, user)
         }
     }
 }

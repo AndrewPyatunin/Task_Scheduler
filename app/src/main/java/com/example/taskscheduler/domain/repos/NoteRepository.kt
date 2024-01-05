@@ -27,10 +27,11 @@ interface NoteRepository {
 
     suspend fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem)
 
-    suspend fun moveNote(notesListItem: NotesListItem, note: Note, board: Board, user: User)
+    suspend fun moveNote(fromNotesListItem: NotesListItem, notesListItem: NotesListItem, note: Note, board: Board, user: User)
 
     suspend fun addNote(note: Note)
 
-    suspend fun clearAllNotes()
     suspend fun addNotes(notes: List<Note>)
+
+    suspend fun clearAllNotes()
 }

@@ -3,7 +3,8 @@ package com.example.taskscheduler.data.repos
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.FirebaseConstants.NOTES
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
-import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST
+import com.example.taskscheduler.data.database.TaskDatabaseDao
 import com.example.taskscheduler.data.datasources.NoteDataSourceImpl
 import com.example.taskscheduler.data.mappers.CheckNoteEntityToCheckNoteItemMapper
 import com.example.taskscheduler.data.mappers.CheckNoteItemToCheckNoteEntityMapper
@@ -81,13 +82,12 @@ class NoteRepositoryImpl(
         checkList: List<CheckNoteItem>
     ) {
         val childListNotesRef = databaseNotesListsReference
-            .child(board.id).child(notesListItem.id).child("listNotes")
+            .child(board.id).child(notesListItem.id).child(PATH_NOTES_LIST)
         val url = childListNotesRef.push()
         val idNote = url.key ?: ""
 
         val note = Note(idNote, title, user.id, emptyList(), description, "", checkList)
         databaseNotesReference.child(idNote).setValue(note)
-
         addNote(note)
         notesListRepository.addListOfNote(notesListItem.copy(listNotes = (notesListItem.listNotes as MutableMap).apply {
             this[idNote] = true
@@ -104,22 +104,25 @@ class NoteRepositoryImpl(
     override suspend fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem) {
         MyDatabaseConnection.updated = true
         databaseNotesReference.child(note.id).removeValue()
-        databaseNotesListsReference.child(board.id).child(notesListItem.id)
-            .child("listNotes").child(note.id).removeValue()
+        notesListItem.listNotes.filter {
+            it.key == note.id
+        }.let {
+            notesListRepository.addListOfNote(notesListItem.copy(listNotes = it))
+            databaseNotesListsReference.child(board.id).child(notesListItem.id)
+                .child(NOTES_LIST).setValue(it)
+        }
         noteDataSource.removeNote(noteToNoteEntityMapper.map(note))
-        val listNotes: HashMap<String, Boolean> = notesListItem.listNotes as HashMap
-        listNotes.remove(note.id)
-        notesListRepository.addListOfNote(notesListItem.copy(listNotes = listNotes))
     }
 
     override suspend fun moveNote(
+        fromNotesListItem: NotesListItem,
         notesListItem: NotesListItem,
         note: Note,
         board: Board,
         user: User
     ) {
         MyDatabaseConnection.updated = true
-        deleteNote(note, board, notesListItem)
+        deleteNote(note, board, fromNotesListItem)
         createNewNote(note.title, note.description, board, notesListItem, user, note.listOfTasks)
     }
 

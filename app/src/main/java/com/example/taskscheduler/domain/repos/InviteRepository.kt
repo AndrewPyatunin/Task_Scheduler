@@ -16,7 +16,7 @@ interface InviteRepository {
 
     suspend fun clearInviteInDatabase(user: User, invite: Invite)
 
-    suspend fun inviteUser(userForInvite: User, currentUser: User, board: Board): String
+    suspend fun inviteUser(userForInvite: User, currentUser: User, board: Board, scope: CoroutineScope)
 
     suspend fun addInvite(invite: Invite)
 

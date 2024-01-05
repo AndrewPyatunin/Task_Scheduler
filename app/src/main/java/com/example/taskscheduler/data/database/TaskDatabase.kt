@@ -1,4 +1,4 @@
-package com.example.taskscheduler.data
+package com.example.taskscheduler.data.database
 
 import android.app.Application
 import androidx.room.Database

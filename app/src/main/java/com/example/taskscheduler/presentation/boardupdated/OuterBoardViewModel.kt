@@ -21,10 +21,6 @@ class OuterBoardViewModel : ViewModel() {
     private val getNotesListsUseCase = GetNotesListsUseCase(notesListRepository)
     private val fetchNotesListUseCase = FetchNotesListUseCase(notesListRepository)
 
-    private val _liveData = MutableLiveData<NotesListItem>()
-    val livedata: LiveData<NotesListItem>
-        get() = _liveData
-
     private val _boardLiveData = MutableLiveData<Board>()
     val boardLiveData: LiveData<Board>
         get() = _boardLiveData

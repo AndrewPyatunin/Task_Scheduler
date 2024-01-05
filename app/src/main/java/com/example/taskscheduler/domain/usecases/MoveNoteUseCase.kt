@@ -10,7 +10,7 @@ class MoveNoteUseCase(
     private val repository: NoteRepository
 ) {
 
-    suspend fun execute(notesListItem: NotesListItem, note: Note, board: Board, user: User) {
-        repository.moveNote(notesListItem, note, board, user)
+    suspend fun execute(fromNotesListItem: NotesListItem, notesListItem: NotesListItem, note: Note, board: Board, user: User) {
+        repository.moveNote(fromNotesListItem, notesListItem, note, board, user)
     }
 }

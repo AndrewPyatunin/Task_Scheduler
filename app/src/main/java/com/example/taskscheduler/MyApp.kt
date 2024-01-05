@@ -1,8 +1,8 @@
 package com.example.taskscheduler
 
 import android.app.Application
-import com.example.taskscheduler.data.TaskDatabase
-import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.database.TaskDatabase
+import com.example.taskscheduler.data.database.TaskDatabaseDao
 import com.example.taskscheduler.data.repos.*
 
 class MyApp : Application() {

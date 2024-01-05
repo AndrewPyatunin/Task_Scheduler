@@ -1,4 +1,4 @@
-package com.example.taskscheduler.data
+package com.example.taskscheduler.data.database
 
 import androidx.room.*
 import com.example.taskscheduler.data.entities.*

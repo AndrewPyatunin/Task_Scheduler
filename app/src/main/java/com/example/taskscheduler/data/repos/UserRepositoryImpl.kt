@@ -3,8 +3,12 @@ package com.example.taskscheduler.data.repos
 import android.net.Uri
 import android.util.Log
 import com.example.taskscheduler.data.FirebaseConstants.IMAGES
+import com.example.taskscheduler.data.FirebaseConstants.PATH_DESCRIPTION
+import com.example.taskscheduler.data.FirebaseConstants.PATH_EMAIL
+import com.example.taskscheduler.data.FirebaseConstants.PATH_ONLINE_STATUS
+import com.example.taskscheduler.data.FirebaseConstants.PATH_URI
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.database.TaskDatabaseDao
 import com.example.taskscheduler.data.datasources.UserDataSourceImpl
 import com.example.taskscheduler.data.mappers.UserEntityToUserMapper
 import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
@@ -19,12 +23,9 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -57,7 +58,7 @@ class UserRepositoryImpl(
             databaseUsersReference.child(it.uid)
         }
         if (description != "") {
-            ref?.child("description")?.setValue(description)
+            ref?.child(PATH_DESCRIPTION)?.setValue(description)
             scope.launch(Dispatchers.IO) {
                 if (it.isActive) {
                     it.resumeWith(Result.success(addUser(user.copy(description = description))))
@@ -78,7 +79,7 @@ class UserRepositoryImpl(
                 scope.launch(Dispatchers.IO) {
                     uploadUserAvatar(uri, name).onSuccess {
                         auth.currentUser?.uid?.let { userId ->
-                            databaseUsersReference.child(userId).child("uri").setValue(it)
+                            databaseUsersReference.child(userId).child(PATH_URI).setValue(it)
                             if (continuation.isActive) {
                                 continuation.resumeWith(Result.success(addUser(user.copy(uri = it))))
                             }
@@ -119,16 +120,16 @@ class UserRepositoryImpl(
             auth.currentUser?.updateEmail(email)
                 ?.addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        ref.child("email").setValue(email)
+                        ref.child(PATH_EMAIL).setValue(email)
                         it.resumeWith(Result.success(email))
                     }
                 }
         }
 
     override fun updateStatus() {
-        auth.addAuthStateListener {
-            it.currentUser?.let {
-                databaseUsersReference.child(it.uid).child("onlineStatus").setValue(false)
+        auth.addAuthStateListener { auth ->
+            auth.currentUser?.let {
+                databaseUsersReference.child(it.uid).child(PATH_ONLINE_STATUS).setValue(false)
             }
         }
     }
@@ -150,10 +151,11 @@ class UserRepositoryImpl(
                         it.getValue(User::class.java)?.let { it1 -> users.add(it1) }
                     }
                     scope.launch(Dispatchers.IO) {
-                        if (continuation.isActive)
+                        if (continuation.isActive) {
                             continuation.resumeWith(Result.success(userDataSource.addAllUsers(users.map {
                                 userToUserEntityMapper.map(it)
                             })))
+                        }
                     }
                 }
 

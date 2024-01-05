@@ -4,8 +4,9 @@ import android.net.Uri
 import android.util.Log
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.FirebaseConstants.IMAGES
+import com.example.taskscheduler.data.FirebaseConstants.PATH_ONLINE_STATUS
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.database.TaskDatabaseDao
 import com.example.taskscheduler.data.datasources.UserDataSourceImpl
 import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
 import com.example.taskscheduler.domain.UserAuth
@@ -148,7 +149,7 @@ class UserAuthentication(
 
     override fun logout(user: User, scope: CoroutineScope) {
         (auth.currentUser?.uid ?: MyDatabaseConnection.userId)?.let {
-            databaseUsersReference.child(it).child("onlineStatus").setValue(false)
+            databaseUsersReference.child(it).child(PATH_ONLINE_STATUS).setValue(false)
         }
         scope.launch(Dispatchers.IO) {
             userDataSource.addUser(userToUserEntityMapper.map(user.copy(onlineStatus = false)))

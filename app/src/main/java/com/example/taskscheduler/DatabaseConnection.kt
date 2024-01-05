@@ -10,9 +10,5 @@ interface DatabaseConnection {
 
     suspend fun query(application: Application, scope: CoroutineScope)
 
-    fun getBoard()
-
-    fun getBackgroundImages(): List<BackgroundImage>
-
     fun getBackgroundImages(callback: NewCallback)
 }

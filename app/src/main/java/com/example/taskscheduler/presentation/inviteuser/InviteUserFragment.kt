@@ -8,11 +8,11 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.taskscheduler.R
 import com.example.taskscheduler.presentation.inviteuser.InviteUserAdapter
 import com.example.taskscheduler.databinding.FragmentInviteUserBinding
 import com.example.taskscheduler.domain.models.Board
@@ -40,7 +40,7 @@ class InviteUserFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentInviteUserBinding.inflate(layoutInflater, container, false)
         return binding.root
     }
@@ -48,6 +48,7 @@ class InviteUserFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[InviteUserViewModel::class.java]
+        viewModel.getUsersForInvite(board)
         observeViewModel()
         initViews()
         userAdapter?.onItemClick = {
@@ -102,10 +103,10 @@ class InviteUserFragment : Fragment() {
             recyclerViewUser.adapter = userAdapter
         }
 
-        viewModel.getUsersForInvite(board)
 
         viewModel.success.observe(viewLifecycleOwner) {
-            Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            viewModel.getUsersForInvite(board)
+            Toast.makeText(requireContext(), getString(R.string.success_invite), Toast.LENGTH_SHORT).show()
         }
     }
 

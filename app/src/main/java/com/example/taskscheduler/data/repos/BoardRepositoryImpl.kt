@@ -4,8 +4,12 @@ import android.util.Log
 import com.example.taskscheduler.data.FirebaseConstants.BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.NOTES
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
+import com.example.taskscheduler.data.FirebaseConstants.PATH_BACKGROUND_URL
+import com.example.taskscheduler.data.FirebaseConstants.PATH_BOARDS
+import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST_IDS
+import com.example.taskscheduler.data.FirebaseConstants.PATH_TITLE
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.database.TaskDatabaseDao
 import com.example.taskscheduler.data.datasources.BoardDataSourceImpl
 import com.example.taskscheduler.data.datasources.NoteDataSourceImpl
 import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
@@ -96,14 +100,14 @@ class BoardRepositoryImpl(
         board: Board, notesListItem: NotesListItem
     ) {
         val nodes = board.listsOfNotesIds.filter { it.key != notesListItem.id }
-        databaseBoardsReference.child(board.id).child("listsOfNotesIds").child(notesListItem.id).setValue(null)
+        databaseBoardsReference.child(board.id).child(PATH_NOTES_LIST_IDS).child(notesListItem.id).setValue(null)
         addBoard(board.copy(listsOfNotesIds = nodes))//Добавление в Room
     }
 
     override suspend fun deleteBoard(board: Board, user: User) {
         databaseBoardsReference.child(board.id).removeValue()
         board.members.keys.forEach {
-            databaseUsersReference.child(it).child("boards").child(board.id).removeValue()
+            databaseUsersReference.child(it).child(PATH_BOARDS).child(board.id).removeValue()
         }
 
         val listsOfNotes = notesListDataSource.getListsOfNotes().map {
@@ -157,15 +161,15 @@ class BoardRepositoryImpl(
         if (board.id != "") {
             Log.i("USER_CREATE", board.id)
             val ref = databaseBoardsReference.child(board.id)
-            ref.child("backgroundUrl").setValue(urlBackground)
-            ref.child("title").setValue(name)
+            ref.child(PATH_BACKGROUND_URL).setValue(urlBackground)
+            ref.child(PATH_TITLE).setValue(name)
             boardDb = board.copy(title = name, backgroundUrl = urlBackground)
         } else {
             val usersRef = databaseUsersReference.child(user.id)
             val members = mapOf(Pair(user.id, true))
             boardDb = Board(idBoard, name, user.id, urlBackground, members)
             urlForBoard.setValue(boardDb)
-            usersRef.child("boards").updateChildren(mapOf(Pair(idBoard, true)))
+            usersRef.child(PATH_BOARDS).updateChildren(mapOf(Pair(idBoard, true)))
         }
         addBoard(boardDb)
         userDataSource.addUser(userToUserEntityMapper.map(user.copy(boards = (user.boards as MutableMap).apply {

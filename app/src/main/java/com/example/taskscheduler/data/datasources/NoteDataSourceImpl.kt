@@ -1,6 +1,6 @@
 package com.example.taskscheduler.data.datasources
 
-import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.database.TaskDatabaseDao
 import com.example.taskscheduler.data.entities.NoteEntity
 import kotlinx.coroutines.flow.Flow
 

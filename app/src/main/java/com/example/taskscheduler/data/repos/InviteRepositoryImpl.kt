@@ -2,8 +2,11 @@ package com.example.taskscheduler.data.repos
 
 import com.example.taskscheduler.data.FirebaseConstants.BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.INVITES
+import com.example.taskscheduler.data.FirebaseConstants.PATH_BOARDS
+import com.example.taskscheduler.data.FirebaseConstants.PATH_INVITES
+import com.example.taskscheduler.data.FirebaseConstants.PATH_MEMBERS
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.TaskDatabaseDao
+import com.example.taskscheduler.data.database.TaskDatabaseDao
 import com.example.taskscheduler.data.datasources.InviteDataSourceImpl
 import com.example.taskscheduler.data.datasources.UserDataSourceImpl
 import com.example.taskscheduler.data.mappers.InviteEntityToInviteMapper
@@ -22,7 +25,6 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class InviteRepositoryImpl(
@@ -63,9 +65,9 @@ class InviteRepositoryImpl(
 
     override suspend fun acceptInvite(user: User, invite: Invite) {
         val inviteBoardId = invite.boardId
-        databaseUsersReference.child(user.id).child("boards")
+        databaseUsersReference.child(user.id).child(PATH_BOARDS)
             .updateChildren(mapOf(Pair(inviteBoardId, true)))
-        databaseBoardsReference.child(inviteBoardId).child("members")
+        databaseBoardsReference.child(inviteBoardId).child(PATH_MEMBERS)
             .updateChildren(mapOf(Pair(user.id, true)))
         clearInviteInDatabase(user.copy(boards = (user.boards as MutableMap).apply {
             this[inviteBoardId] = true
@@ -81,7 +83,7 @@ class InviteRepositoryImpl(
 
     override suspend fun clearInviteInDatabase(user: User, invite: Invite) {
         databaseInvitesReference.child(user.id).child(invite.boardId).removeValue()
-        databaseUsersReference.child(user.id).child("invites").child(invite.boardId).removeValue()
+        databaseUsersReference.child(user.id).child(PATH_INVITES).child(invite.boardId).removeValue()
         inviteDataSource.removeInvite(inviteToInviteEntityMapper.map(invite))
         userDataSource.addUser(userToUserEntityMapper.map(user))
     }
@@ -89,11 +91,12 @@ class InviteRepositoryImpl(
     override suspend fun inviteUser(
         userForInvite: User,
         currentUser: User,
-        board: Board
-    ): String = suspendCoroutine { continuation ->
+        board: Board,
+        scope: CoroutineScope
+    ) = suspendCancellableCoroutine { continuation ->
         databaseInvitesReference.child(userForInvite.id)
             .child(board.id)//можно избавиться от получения данных из базы и брать их из room
-            .addListenerForSingleValueEvent(object : ValueEventListener {
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (!snapshot.hasChildren()) {
                         val pushInvite =
@@ -109,16 +112,25 @@ class InviteRepositoryImpl(
                                 board.title
                             )
                         )
-                        val ref = databaseUsersReference.child(userForInvite.id).child("invites")
+                        val ref = databaseUsersReference.child(userForInvite.id).child(PATH_INVITES)
                         ref.updateChildren(mapOf(Pair(board.id, true)))
-                        continuation.resumeWith(Result.success("Приглашение успешно отправлено"))
+                        scope.launch(Dispatchers.IO) {
+                            if (continuation.isActive) {
+                                continuation.resumeWith(
+                                    Result.success(
+                                        userDataSource.addUser(
+                                            userToUserEntityMapper.map(userForInvite.copy(invites = (userForInvite.invites as MutableMap).apply {
+                                                put(board.id, true)
+                                            }))
+                                        )
+                                    )
+                                )
+                            }
+                        }
                     }
-
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-                    continuation.resumeWith(Result.failure(error.toException()))
-                }
+                override fun onCancelled(error: DatabaseError) = Unit
             })
     }
 

@@ -64,7 +64,7 @@
     <string name="accept_invite">Принять приглашение?</string>
     <string name="to_accept">Принять</string>
     <string name="to_decline">Отклонить</string>
-    <string name="success_invite">Приглашение успешно отправлено</string>
+    <string name="success_invite">Приглашение успешно отправлено!</string>
     <string name="cannot_enter_an_empty_name">Нельзя задать пустое название!</string>
     <string name="from_where_pick_photo">Откуда возьмем фото?</string>
     <string name="gallery">Галлерея</string>

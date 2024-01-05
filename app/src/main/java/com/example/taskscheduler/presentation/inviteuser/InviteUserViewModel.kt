@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskscheduler.MyApp
-import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.GetUsersFlowUseCase
@@ -14,10 +13,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class InviteUserViewModel : ViewModel() {
@@ -36,8 +32,8 @@ class InviteUserViewModel : ViewModel() {
     val listUsers: LiveData<List<User>>
         get() = _listUsers
 
-    private val _success = MutableLiveData<String>()
-    val success: LiveData<String>
+    private val _success = MutableLiveData<Unit>()
+    val success: LiveData<Unit>
         get() = _success
 
     init {
@@ -50,7 +46,7 @@ class InviteUserViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             getUsersUseCase.execute().map { list ->
                 list.filter {
-                    it.id != auth.currentUser?.uid && it.id !in board.members && board.id !in it.invites
+                    it.id != auth.currentUser?.uid && it.id !in board.members && board.id !in it.invites.keys
                 }
             }.collect {
                 _listUsers.postValue(it)
@@ -60,7 +56,7 @@ class InviteUserViewModel : ViewModel() {
 
     fun inviteUser(userForInvite: User, currentUser: User, board: Board) {
         viewModelScope.launch {
-            _success.postValue(inviteUserUseCase.execute(userForInvite, currentUser, board))
+            _success.postValue(inviteUserUseCase.execute(userForInvite, currentUser, board, viewModelScope))
         }
     }
 }

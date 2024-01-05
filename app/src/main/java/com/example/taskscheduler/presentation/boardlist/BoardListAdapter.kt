@@ -64,7 +64,9 @@ class BoardListAdapter : Adapter<BoardListAdapter.BoardListViewHolder>() {
                         holder.linearLayout.background = resource
                     }
 
-                    override fun onLoadCleared(placeholder: Drawable?) = Unit
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                        holder.linearLayout.background = placeholder
+                    }
 
                 })
         } else {
