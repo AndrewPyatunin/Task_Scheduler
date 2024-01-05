@@ -165,7 +165,7 @@ class OuterBoardFragment : Fragment() {
                 }.attach()
             }
             viewPager?.currentItem = MyDatabaseConnection.currentPosition
-            tabLayout.getTabAt(currentPosition)?.select()
+            tabLayout.getTabAt(MyDatabaseConnection.currentPosition)?.select()
         }
 
         if (list.isNotEmpty()) isInit = true

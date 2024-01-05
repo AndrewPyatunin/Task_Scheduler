@@ -13,6 +13,7 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.MyDatabaseConnection.boardList
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentBoardListBinding
@@ -121,6 +122,7 @@ class BoardListFragment : Fragment(), MenuProvider {
     }
 
     private fun launchBoardFragment(board: Board) {
+        MyDatabaseConnection.currentPosition = 0 // Обнуляем позицию для списка во viewPager
         findNavController().navigate(
             BoardListFragmentDirections.actionBoardListFragmentToOuterBoardFragment(
                 user,
