@@ -4,7 +4,8 @@ import com.example.taskscheduler.data.FirebaseConstants.BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
 import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST_IDS
 import com.example.taskscheduler.data.FirebaseConstants.PATH_TITLE
-import com.example.taskscheduler.data.database.TaskDatabaseDao
+import com.example.taskscheduler.data.database.BoardDao
+import com.example.taskscheduler.data.database.NotesListDao
 import com.example.taskscheduler.data.datasources.BoardDataSourceImpl
 import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
 import com.example.taskscheduler.data.mappers.BoardToBoardEntityMapper
@@ -24,11 +25,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class NotesListRepositoryImpl(
-    dao: TaskDatabaseDao
+    notesListDao: NotesListDao,
+    boardDao: BoardDao,
 ) : NotesListRepository {
 
-    private val notesListDataSource = NotesListDataSourceImpl(dao)
-    private val boardDataSource = BoardDataSourceImpl(dao)
+    private val notesListDataSource = NotesListDataSourceImpl(notesListDao)
+    private val boardDataSource = BoardDataSourceImpl(boardDao)
 
     private val boardToBoardEntityMapper = BoardToBoardEntityMapper()
     private val notesListEntityToNotesListItemMapper = NotesListEntityToNotesListItemMapper()
@@ -75,31 +77,35 @@ class NotesListRepositoryImpl(
         })
     }
 
-    override suspend fun fetchNotesLists(boardId: String, scope: CoroutineScope, list: List<NotesListItem>) = suspendCancellableCoroutine { continuation ->
-            databaseNotesListReference.child(boardId).addValueEventListener(object :
-                ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val listOfLists = ArrayList<NotesListItem>()
-                    snapshot.children.forEach {
-                        val listItem = it.getValue(NotesListItem::class.java)
-                        if (listItem != null && listItem !in listOfLists) {
-                            listOfLists.add(listItem)
-                        }
-                    }
-                    scope.launch(Dispatchers.IO) {
-                        val result =
-                            withContext(Dispatchers.IO) {
-                                addAllListsOfNoteListItem(listOfLists)
-                            }
-                        if (continuation.isActive) {
-                            continuation.resumeWith(Result.success(result))
-                        }
+    override suspend fun fetchNotesLists(
+        boardId: String,
+        scope: CoroutineScope,
+        list: List<NotesListItem>
+    ) = suspendCancellableCoroutine { continuation ->
+        databaseNotesListReference.child(boardId).addValueEventListener(object :
+            ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val listOfLists = ArrayList<NotesListItem>()
+                snapshot.children.forEach {
+                    val listItem = it.getValue(NotesListItem::class.java)
+                    if (listItem != null && listItem !in listOfLists) {
+                        listOfLists.add(listItem)
                     }
                 }
+                scope.launch(Dispatchers.IO) {
+                    val result =
+                        withContext(Dispatchers.IO) {
+                            addAllListsOfNoteListItem(listOfLists)
+                        }
+                    if (continuation.isActive) {
+                        continuation.resumeWith(Result.success(result))
+                    }
+                }
+            }
 
-                override fun onCancelled(error: DatabaseError) = Unit
+            override fun onCancelled(error: DatabaseError) = Unit
 
-            })
+        })
     }
 
     override suspend fun clearAllNotesLists() {

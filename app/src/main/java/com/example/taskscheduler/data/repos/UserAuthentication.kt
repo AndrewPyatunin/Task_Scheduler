@@ -6,7 +6,7 @@ import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.FirebaseConstants.IMAGES
 import com.example.taskscheduler.data.FirebaseConstants.PATH_ONLINE_STATUS
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.database.TaskDatabaseDao
+import com.example.taskscheduler.data.database.UserDao
 import com.example.taskscheduler.data.datasources.UserDataSourceImpl
 import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
 import com.example.taskscheduler.domain.UserAuth
@@ -28,7 +28,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class UserAuthentication(
-    dao: TaskDatabaseDao
+    dao: UserDao
 ) : UserAuth {
 
     private val userDataSource = UserDataSourceImpl(dao)

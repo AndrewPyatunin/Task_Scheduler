@@ -1,11 +1,11 @@
 package com.example.taskscheduler.data.datasources
 
-import com.example.taskscheduler.data.database.TaskDatabaseDao
+import com.example.taskscheduler.data.database.UserDao
 import com.example.taskscheduler.data.entities.UserEntity
 import kotlinx.coroutines.flow.Flow
 
 class UserDataSourceImpl(
-    private val taskDatabaseDao: TaskDatabaseDao
+    private val taskDatabaseDao: UserDao
 ) : UserDataSource {
 
     override fun getUsers(): Flow<List<UserEntity>> {

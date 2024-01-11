@@ -1,11 +1,11 @@
 package com.example.taskscheduler.data.datasources
 
-import com.example.taskscheduler.data.database.TaskDatabaseDao
+import com.example.taskscheduler.data.database.NotesListDao
 import com.example.taskscheduler.data.entities.NotesListEntity
 import kotlinx.coroutines.flow.Flow
 
 class NotesListDataSourceImpl(
-    private val taskDatabaseDao: TaskDatabaseDao
+    private val taskDatabaseDao: NotesListDao
 ) : NotesListDataSource {
 
     override fun getListsOfNotesFlow(boardId: String): Flow<List<NotesListEntity>> {

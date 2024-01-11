@@ -9,7 +9,10 @@ import com.example.taskscheduler.data.FirebaseConstants.PATH_BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST_IDS
 import com.example.taskscheduler.data.FirebaseConstants.PATH_TITLE
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.database.TaskDatabaseDao
+import com.example.taskscheduler.data.database.BoardDao
+import com.example.taskscheduler.data.database.NoteDao
+import com.example.taskscheduler.data.database.NotesListDao
+import com.example.taskscheduler.data.database.UserDao
 import com.example.taskscheduler.data.datasources.BoardDataSourceImpl
 import com.example.taskscheduler.data.datasources.NoteDataSourceImpl
 import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
@@ -33,17 +36,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class BoardRepositoryImpl(
-    dao: TaskDatabaseDao
+    userDao: UserDao,
+    boardDao: BoardDao,
+    notesListDao: NotesListDao,
+    noteDao: NoteDao
 ) : BoardRepository {
 
-    private val boardDataSource = BoardDataSourceImpl(dao)
-    private val noteDataSource = NoteDataSourceImpl(dao)
-    private val userDataSource = UserDataSourceImpl(dao)
+    private val boardDataSource = BoardDataSourceImpl(boardDao)
+    private val noteDataSource = NoteDataSourceImpl(noteDao)
+    private val userDataSource = UserDataSourceImpl(userDao)
     private val boardToBoardEntityMapper = BoardToBoardEntityMapper()
     private val boardEntityToBoardMapper = BoardEntityToBoardMapper()
     private val userToUserEntityMapper = UserToUserEntityMapper()
     private val notesListEntityToNotesListItemMapper = NotesListEntityToNotesListItemMapper()
-    private val notesListDataSource = NotesListDataSourceImpl(dao)
+    private val notesListDataSource = NotesListDataSourceImpl(notesListDao)
 
     private val auth = Firebase.auth
     private val databaseNotesListReference = Firebase.database.getReference(NOTES_LIST)
@@ -100,7 +106,8 @@ class BoardRepositoryImpl(
         board: Board, notesListItem: NotesListItem
     ) {
         val nodes = board.listsOfNotesIds.filter { it.key != notesListItem.id }
-        databaseBoardsReference.child(board.id).child(PATH_NOTES_LIST_IDS).child(notesListItem.id).setValue(null)
+        databaseBoardsReference.child(board.id).child(PATH_NOTES_LIST_IDS).child(notesListItem.id)
+            .setValue(null)
         addBoard(board.copy(listsOfNotesIds = nodes))//Добавление в Room
     }
 

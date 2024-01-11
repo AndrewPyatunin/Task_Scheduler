@@ -37,4 +37,14 @@ abstract class TaskDatabase : RoomDatabase() {
     }
 
     abstract fun taskDatabaseDao(): TaskDatabaseDao
+
+    abstract fun userDao(): UserDao
+
+    abstract fun boardDao(): BoardDao
+
+    abstract fun notesListDao(): NotesListDao
+
+    abstract fun noteDao(): NoteDao
+
+    abstract fun inviteDao(): InviteDao
 }

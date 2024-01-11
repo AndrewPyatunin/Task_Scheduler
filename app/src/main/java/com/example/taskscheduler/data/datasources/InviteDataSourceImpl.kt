@@ -1,11 +1,11 @@
 package com.example.taskscheduler.data.datasources
 
-import com.example.taskscheduler.data.database.TaskDatabaseDao
+import com.example.taskscheduler.data.database.InviteDao
 import com.example.taskscheduler.data.entities.InviteEntity
 import kotlinx.coroutines.flow.Flow
 
 class InviteDataSourceImpl(
-    private val taskDatabaseDao: TaskDatabaseDao
+    private val taskDatabaseDao: InviteDao
 ) : InviteDataSource {
 
     override fun getInvitesFlow(): Flow<List<InviteEntity>> {

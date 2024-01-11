@@ -4,12 +4,11 @@ import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.FirebaseConstants.NOTES
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
 import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST
-import com.example.taskscheduler.data.database.TaskDatabaseDao
+import com.example.taskscheduler.data.database.NoteDao
+import com.example.taskscheduler.data.database.NotesListDao
 import com.example.taskscheduler.data.datasources.NoteDataSourceImpl
-import com.example.taskscheduler.data.mappers.CheckNoteEntityToCheckNoteItemMapper
-import com.example.taskscheduler.data.mappers.CheckNoteItemToCheckNoteEntityMapper
-import com.example.taskscheduler.data.mappers.NoteEntityToNoteMapper
-import com.example.taskscheduler.data.mappers.NoteToNoteEntityMapper
+import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
+import com.example.taskscheduler.data.mappers.*
 import com.example.taskscheduler.domain.CheckNoteItem
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Note
@@ -27,18 +26,25 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class NoteRepositoryImpl(
-    dao: TaskDatabaseDao
+    noteDao: NoteDao,
+    notesListDao: NotesListDao
 ) : NoteRepository {
 
     private val database: FirebaseDatabase = Firebase.database
-    private val noteDataSource = NoteDataSourceImpl(dao)
-    private val notesListRepository = NotesListRepositoryImpl(dao)
+    private val noteDataSource = NoteDataSourceImpl(noteDao)
+    private val notesListDataSource = NotesListDataSourceImpl(notesListDao)
     private val noteToNoteEntityMapper =
         NoteToNoteEntityMapper(CheckNoteItemToCheckNoteEntityMapper())
     private val noteEntityToNoteMapper =
         NoteEntityToNoteMapper(CheckNoteEntityToCheckNoteItemMapper())
+    private val notesListItemToNotesListEntityMapper = NotesListItemToNotesListEntityMapper()
     private val databaseNotesListsReference = database.getReference(NOTES_LIST)
     private val databaseNotesReference = database.getReference(NOTES)
+
+
+    private suspend fun addListOfNote(notesListItem: NotesListItem) {
+        notesListDataSource.addListOfNotes(notesListItemToNotesListEntityMapper.map(notesListItem))
+    }
 
     override fun getNotesFlow(): Flow<List<Note>> {
         return noteDataSource.getNotesFlow().map {
@@ -48,7 +54,11 @@ class NoteRepositoryImpl(
         }
     }
 
-    override suspend fun fetchNotes(notesListItem: NotesListItem, listNotes: List<Note>, scope: CoroutineScope) = suspendCancellableCoroutine { continuation ->
+    override suspend fun fetchNotes(
+        notesListItem: NotesListItem,
+        listNotes: List<Note>,
+        scope: CoroutineScope
+    ) = suspendCancellableCoroutine { continuation ->
         databaseNotesReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val notes = ArrayList<Note>()
@@ -89,7 +99,7 @@ class NoteRepositoryImpl(
         val note = Note(idNote, title, user.id, emptyList(), description, "", checkList)
         databaseNotesReference.child(idNote).setValue(note)
         addNote(note)
-        notesListRepository.addListOfNote(notesListItem.copy(listNotes = (notesListItem.listNotes as MutableMap).apply {
+        addListOfNote(notesListItem.copy(listNotes = (notesListItem.listNotes as MutableMap).apply {
             this[idNote] = true
         }))
         url.setValue(true)
@@ -107,7 +117,7 @@ class NoteRepositoryImpl(
         notesListItem.listNotes.filter {
             it.key == note.id
         }.let {
-            notesListRepository.addListOfNote(notesListItem.copy(listNotes = it))
+            addListOfNote(notesListItem.copy(listNotes = it))
             databaseNotesListsReference.child(board.id).child(notesListItem.id)
                 .child(NOTES_LIST).setValue(it)
         }

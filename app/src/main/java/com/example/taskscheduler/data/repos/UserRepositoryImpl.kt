@@ -8,7 +8,7 @@ import com.example.taskscheduler.data.FirebaseConstants.PATH_EMAIL
 import com.example.taskscheduler.data.FirebaseConstants.PATH_ONLINE_STATUS
 import com.example.taskscheduler.data.FirebaseConstants.PATH_URI
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.database.TaskDatabaseDao
+import com.example.taskscheduler.data.database.UserDao
 import com.example.taskscheduler.data.datasources.UserDataSourceImpl
 import com.example.taskscheduler.data.mappers.UserEntityToUserMapper
 import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
@@ -23,14 +23,17 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class UserRepositoryImpl(
-    dao: TaskDatabaseDao
+    dao: UserDao
 ) : UserRepository {
 
     private val userDataSource = UserDataSourceImpl(dao)

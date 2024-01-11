@@ -6,7 +6,8 @@ import com.example.taskscheduler.data.FirebaseConstants.PATH_BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.PATH_INVITES
 import com.example.taskscheduler.data.FirebaseConstants.PATH_MEMBERS
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.database.TaskDatabaseDao
+import com.example.taskscheduler.data.database.InviteDao
+import com.example.taskscheduler.data.database.UserDao
 import com.example.taskscheduler.data.datasources.InviteDataSourceImpl
 import com.example.taskscheduler.data.datasources.UserDataSourceImpl
 import com.example.taskscheduler.data.mappers.InviteEntityToInviteMapper
@@ -22,17 +23,20 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 class InviteRepositoryImpl(
-    dao: TaskDatabaseDao
+    inviteDao: InviteDao,
+    userDao: UserDao
 ) : InviteRepository {
 
-    private val inviteDataSource = InviteDataSourceImpl(dao)
-    private val userDataSource = UserDataSourceImpl(dao)
+    private val inviteDataSource = InviteDataSourceImpl(inviteDao)
+    private val userDataSource = UserDataSourceImpl(userDao)
     private val inviteEntityToInviteMapper = InviteEntityToInviteMapper()
     private val inviteToInviteEntityMapper = InviteToInviteEntityMapper()
     private val userToUserEntityMapper = UserToUserEntityMapper()
