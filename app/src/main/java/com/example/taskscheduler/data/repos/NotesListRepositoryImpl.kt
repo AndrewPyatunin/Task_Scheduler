@@ -20,9 +20,12 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 class NotesListRepositoryImpl(
     notesListDao: NotesListDao,
@@ -52,9 +55,15 @@ class NotesListRepositoryImpl(
         databaseBoardsReference.child(board.id)
             .child(PATH_NOTES_LIST_IDS).updateChildren(mapOf(Pair(listId, true)))
         addListOfNote(item)
-        val nodes = board.listsOfNotesIds as MutableMap
-        nodes[listId] = true
-        boardDataSource.addBoard(boardToBoardEntityMapper.map(board.copy(listsOfNotesIds = nodes)))
+        boardDataSource.addBoard(
+            boardToBoardEntityMapper.map(
+                board.copy(
+                    listsOfNotesIds = board.listsOfNotesIds.plus(
+                        listId to true
+                    )
+                )
+            )
+        )
     }
 
     override fun getNotesListsFlow(board: Board): Flow<List<NotesListItem>> {
@@ -93,10 +102,7 @@ class NotesListRepositoryImpl(
                     }
                 }
                 scope.launch(Dispatchers.IO) {
-                    val result =
-                        withContext(Dispatchers.IO) {
-                            addAllListsOfNoteListItem(listOfLists)
-                        }
+                    val result = addAllListsOfNoteListItem(listOfLists)
                     if (continuation.isActive) {
                         continuation.resumeWith(Result.success(result))
                     }

@@ -12,8 +12,6 @@ interface InviteRepository {
 
     suspend fun acceptInvite(user: User, invite: Invite)
 
-    suspend fun declineInvite(user: User, invite: Invite)
-
     suspend fun clearInviteInDatabase(user: User, invite: Invite)
 
     suspend fun inviteUser(userForInvite: User, currentUser: User, board: Board, scope: CoroutineScope)

@@ -73,16 +73,11 @@ class InviteRepositoryImpl(
             .updateChildren(mapOf(Pair(inviteBoardId, true)))
         databaseBoardsReference.child(inviteBoardId).child(PATH_MEMBERS)
             .updateChildren(mapOf(Pair(user.id, true)))
-        clearInviteInDatabase(user.copy(boards = (user.boards as MutableMap).apply {
-            this[inviteBoardId] = true
-        }, invites = user.invites.filter {
+        clearInviteInDatabase(user.copy(boards = user.boards.plus(inviteBoardId to true),
+            invites = user.invites.filter {
             it.key != invite.id
         }), invite)
         // possible to update board
-    }
-
-    override suspend fun declineInvite(user: User, invite: Invite) {
-        clearInviteInDatabase(user, invite)
     }
 
     override suspend fun clearInviteInDatabase(user: User, invite: Invite) {
@@ -123,9 +118,7 @@ class InviteRepositoryImpl(
                                 continuation.resumeWith(
                                     Result.success(
                                         userDataSource.addUser(
-                                            userToUserEntityMapper.map(userForInvite.copy(invites = (userForInvite.invites as MutableMap).apply {
-                                                put(board.id, true)
-                                            }))
+                                            userToUserEntityMapper.map(userForInvite.copy(invites = (userForInvite.invites.plus(board.id to true))))
                                         )
                                     )
                                 )
@@ -143,9 +136,7 @@ class InviteRepositoryImpl(
     }
 
     override suspend fun addInvites(inviteList: List<Invite>) {
-        inviteDataSource.addInvites(inviteList.map { invite ->
-            inviteToInviteEntityMapper.map(invite)
-        })
+        inviteDataSource.addInvites(inviteList.map(inviteToInviteEntityMapper::map))
     }
 
 
@@ -154,12 +145,8 @@ class InviteRepositoryImpl(
     }
 
     override fun getInvitesFromRoom(): Flow<List<Invite>> {
-        return inviteDataSource.getInvitesFlow().map { list ->
-            list.map {
-                inviteEntityToInviteMapper.map(it)
-            }
+        return inviteDataSource.getInvitesFlow().map {
+            it.map(inviteEntityToInviteMapper::map)
         }
     }
-
-
 }

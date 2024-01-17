@@ -1,7 +1,6 @@
 package com.example.taskscheduler.data.repos
 
 import android.net.Uri
-import android.util.Log
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.FirebaseConstants.IMAGES
 import com.example.taskscheduler.data.FirebaseConstants.PATH_ONLINE_STATUS
@@ -78,11 +77,7 @@ class UserAuthentication(
         }
 
         user?.updateProfile(profileUpdates)
-            ?.addOnCompleteListener {
-                if (it.isSuccessful) {
-                    Log.i("USER_FIREBASE_SUCCESS", auth.currentUser.toString())
-                }
-            }?.addOnFailureListener {
+            ?.addOnFailureListener {
                 throw RuntimeException(it.message)
             }
     }
@@ -101,7 +96,6 @@ class UserAuthentication(
             }
             imageRef.downloadUrl
         }.addOnCompleteListener {
-            Log.i("USER_URL", it.result.toString())
             if (it.isSuccessful) {
                 updateUserAvatar(it.result, name)
                 val urlToFile = it.result.toString()
@@ -138,13 +132,36 @@ class UserAuthentication(
         }
 
 
-    fun login(email: String, password: String, auth: FirebaseAuth) {
-        auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+    override suspend fun login(email: String, password: String, auth: FirebaseAuth, scope: CoroutineScope) =
+        suspendCoroutine { continuation ->
+            auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+                auth.currentUser?.let {
+                    databaseUsersReference.child(it.uid)
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val user = snapshot.getValue(User::class.java)
+                                scope.launch(Dispatchers.IO) {
+                                    user?.let {
+                                        continuation.resumeWith(
+                                            Result.success(
+                                                userDataSource.addUser(
+                                                    userToUserEntityMapper.map(user)
+                                                )
+                                            )
+                                        )
+                                    }
+                                }
+                            }
 
-        }.addOnFailureListener {
-
+                            override fun onCancelled(error: DatabaseError) {
+                                continuation.resumeWith(Result.failure(error.toException()))
+                            }
+                        })
+                }
+            }.addOnFailureListener {
+                continuation.resumeWith(Result.failure(it))
+            }
         }
-    }
 
 
     override fun logout(user: User, scope: CoroutineScope) {

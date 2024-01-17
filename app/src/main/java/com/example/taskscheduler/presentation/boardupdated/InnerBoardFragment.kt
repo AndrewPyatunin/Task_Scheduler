@@ -1,7 +1,6 @@
 package com.example.taskscheduler.presentation.boardupdated
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.core.view.MenuHost
@@ -47,7 +46,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         list = listOfLists[position]
         user = requireArguments().getParcelable(USER)!!
         board = requireArguments().getParcelable(BOARD)!!
-        Log.i("INNER_BOARD_FROM_OUTER", board.title)
     }
 
 
@@ -72,7 +70,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         binding.textViewAddCard.setOnClickListener {
             launchNewNoteFragment(Note())
         }
-
     }
 
 
@@ -89,10 +86,8 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     }
 
     private fun dateToInt(date: String): Int {
-        Log.i("INNER_BOARD", date)
         var dateForm = ""
         date.forEach { if (it != '.') dateForm += it }
-        Log.i("USER_NOTE_DATE", dateForm)
         val num = dateForm.toIntOrNull()
         var newDate: Int = Int.MAX_VALUE
         if (num != null) {
@@ -101,7 +96,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
             val day = num / 1000000
             newDate = year * 10000 + month * 100 + day
         }
-        Log.i("USER_NEWDATE", newDate.toString())
         return newDate
     }
 
@@ -115,8 +109,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
                             dateToInt(ln.date) < dateToInt(rn.date))
                 ) -1 else if (ln.priority > rn.priority) 1 else 0
             }
-            newList.forEach { Log.i("INNER_BOARD_TITLE", it.title) }
-
             innerAdapter = InnerBoardAdapter(newList)
             recyclerView.layoutManager = GridLayoutManager(
                 requireContext(), 1,
@@ -126,9 +118,8 @@ class InnerBoardFragment : Fragment(), MenuProvider {
             recyclerView.setHasFixedSize(true)
 
             binding.loadingIndicatorList.visibility = View.GONE
-            recyclerView.visibility = View.VISIBLE
+//            recyclerView.visibility = View.VISIBLE
         }
-
 
         innerAdapter.onItemClick = {
             launchNewNoteFragment(it)
@@ -139,7 +130,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     private fun observeViewModel() {
         viewModel.listNotesLiveData.observe(viewLifecycleOwner) {
             listNotes = it
-            Log.i("INNER_BOARD_SIZE", it.size.toString())
             initViews(it)
         }
         viewModel.fetchNotes(list, listNotes)
@@ -175,8 +165,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
                     listTitleEdit.visibility = View.VISIBLE
                     buttonSaveListTitle.visibility = View.VISIBLE
                     buttonSaveListTitle.setOnClickListener {
-                        if (listTitleEdit.text.toString().trim() != "") {
-                            Log.i("USER_BOARD_NAME", board.title)
+                        if (listTitleEdit.text.toString().trim().isNotEmpty()) {
                             viewModel.renameList(list, board, listTitleEdit.text.toString().trim())
                             buttonSaveListTitle.visibility = View.GONE
                             listTitleEdit.visibility = View.GONE
@@ -189,7 +178,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
                         }
                     }
                 }
-
             }
             R.id.item_change_board -> {
                 findNavController().navigate(

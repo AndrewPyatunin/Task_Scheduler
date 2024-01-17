@@ -3,7 +3,6 @@ package com.example.taskscheduler.presentation.myinvites
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.DialogFragment
 import com.example.taskscheduler.R
 import com.example.taskscheduler.domain.models.Invite
@@ -14,7 +13,6 @@ class ReplyToInviteDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         parseArgs()
-        Log.i("USER_INVITE_SHOW", invite.boardName)
         return requireActivity().let {
             val builder = AlertDialog.Builder(it)
             builder.setTitle(getString(R.string.accept_invite))

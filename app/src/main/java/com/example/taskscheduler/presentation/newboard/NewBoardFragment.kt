@@ -1,7 +1,6 @@
 package com.example.taskscheduler.presentation.newboard
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -51,7 +50,7 @@ class NewBoardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initViews()
         observeViewModel()
-        if (board.id != "") {
+        if (board.id.isNotEmpty()) {
             binding.editNameBoard.setText(board.title)
             urlBackground = board.backgroundUrl
             newBoardAdapter.urlBackground = urlBackground
@@ -60,7 +59,7 @@ class NewBoardFragment : Fragment() {
 
             val name = binding.editNameBoard.text.toString().trim()
 
-            if (name != "" && urlBackground != "")
+            if (name.isNotEmpty() && urlBackground.isNotEmpty())
                 viewModel.createNewBoard(name, user, urlBackground, board)
             else
                 Toast.makeText(
@@ -99,19 +98,14 @@ class NewBoardFragment : Fragment() {
             pleaseWaitTextViewNewBoard.visibility = View.GONE
             recyclerViewNewBoard.visibility = View.VISIBLE
             saveNewBoard.visibility = View.VISIBLE
-
         }
     }
 
     private fun observeViewModel() {
         viewModel.boardLiveData.observe(viewLifecycleOwner) {
-            if (it != null) {
-                Log.i("USER_NEW_BOARD", user.name)
-                launchBoardFragment(it, user)
-            }
+            launchBoardFragment(it, user)
         }
         viewModel.urlImage.observe(viewLifecycleOwner) {
-            Log.i("USER_OBSERVE", Thread.currentThread().name)
             newBoardAdapter.backgroundImageUrls = it as ArrayList<BackgroundImage>
             with(binding) {
                 loadingIndicatorNewBoard.visibility = View.GONE

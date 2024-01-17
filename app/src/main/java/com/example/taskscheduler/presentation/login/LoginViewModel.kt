@@ -8,7 +8,7 @@ import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.GetUserFromRoomUseCase
-import com.example.taskscheduler.domain.usecases.GetUserUseCase
+import com.example.taskscheduler.domain.usecases.LogInUseCase
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
 
-    private val getUserUseCase: GetUserUseCase = GetUserUseCase(MyApp.userAuthentication)
     private val getUserFromRoomUseCase = GetUserFromRoomUseCase(MyApp.userRepository)
+    private val loginUseCase = LogInUseCase(MyApp.userAuthentication)
     private val auth = Firebase.auth
 
     private val _error = MutableLiveData<String>()
@@ -37,7 +37,7 @@ class LoginViewModel : ViewModel() {
             _userLiveData.postValue(
                 getUserFromRoomUseCase.execute(
                     auth.currentUser?.uid ?: MyDatabaseConnection.userId
-                    ?: throw RuntimeException("User with that id is not found in room")
+                    ?: throw RuntimeException("User with that id is not found in Room")
                 )
             )
         }
@@ -45,25 +45,10 @@ class LoginViewModel : ViewModel() {
     }
 
     fun login(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
-            if (auth.currentUser != null) {
-                viewModelScope.launch(Dispatchers.IO) {
-                    it.user?.uid?.let { it1 ->
-                        _success.postValue(
-                            getUserUseCase.execute(
-                                it1,
-                                viewModelScope
-                            )
-                        )
-                    }
-                }
-            }
-        }.addOnFailureListener {
-            _error.value = it.message
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                _success.postValue(loginUseCase.execute(email, password, auth, viewModelScope))
+            } catch (ex: Exception) { _error.postValue(ex.message) }
         }
-    }
-
-    fun logout() {
-        auth.signOut()
     }
 }

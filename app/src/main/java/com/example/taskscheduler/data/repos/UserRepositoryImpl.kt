@@ -1,7 +1,6 @@
 package com.example.taskscheduler.data.repos
 
 import android.net.Uri
-import android.util.Log
 import com.example.taskscheduler.data.FirebaseConstants.IMAGES
 import com.example.taskscheduler.data.FirebaseConstants.PATH_DESCRIPTION
 import com.example.taskscheduler.data.FirebaseConstants.PATH_EMAIL
@@ -32,9 +31,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class UserRepositoryImpl(
-    dao: UserDao
-) : UserRepository {
+class UserRepositoryImpl(dao: UserDao) : UserRepository {
 
     private val userDataSource = UserDataSourceImpl(dao)
     private val userToUserEntityMapper = UserToUserEntityMapper()
@@ -60,7 +57,7 @@ class UserRepositoryImpl(
         val ref = auth.currentUser?.let {
             databaseUsersReference.child(it.uid)
         }
-        if (description != "") {
+        if (description.isEmpty()) {
             ref?.child(PATH_DESCRIPTION)?.setValue(description)
             scope.launch(Dispatchers.IO) {
                 if (it.isActive) {
@@ -68,7 +65,7 @@ class UserRepositoryImpl(
                 }
             }
         }
-        if (email != "" && ref != null) {
+        if (email.isNotEmpty() && ref != null) {
             scope.launch(Dispatchers.IO) {
                 updateUserEmail(email, ref)
                 if (it.isActive) it.resumeWith(Result.success(addUser(user.copy(email = email))))
@@ -106,7 +103,6 @@ class UserRepositoryImpl(
             }
             imageRef.downloadUrl
         }.addOnCompleteListener {
-            Log.i("USER_URL", it.result.toString())
             if (it.isSuccessful) {
                 updateUserAvatar(it.result, name)
                 val urlToFile = it.result.toString()
@@ -163,7 +159,6 @@ class UserRepositoryImpl(
                 }
 
                 override fun onCancelled(error: DatabaseError) = Unit
-
             })
         }
 
@@ -176,11 +171,7 @@ class UserRepositoryImpl(
         }
 
         user?.updateProfile(profileUpdates)
-            ?.addOnCompleteListener {
-                if (it.isSuccessful) {
-                    Log.i("USER_FIREBASE_SUCCESS", auth.currentUser.toString())
-                }
-            }?.addOnFailureListener {
+            ?.addOnFailureListener {
                 throw RuntimeException(it.message)
             }
     }

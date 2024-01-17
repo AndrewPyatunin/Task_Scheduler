@@ -71,9 +71,7 @@ class NoteRepositoryImpl(
                     }
                 }
                 scope.launch(Dispatchers.IO) {
-                    val result = withContext(Dispatchers.IO) {
-                        addNotes(notes)
-                    }
+                    val result = addNotes(notes)
                     if (continuation.isActive) continuation.resumeWith(Result.success(result))
                 }
             }
@@ -99,9 +97,7 @@ class NoteRepositoryImpl(
         val note = Note(idNote, title, user.id, emptyList(), description, "", checkList)
         databaseNotesReference.child(idNote).setValue(note)
         addNote(note)
-        addListOfNote(notesListItem.copy(listNotes = (notesListItem.listNotes as MutableMap).apply {
-            this[idNote] = true
-        }))
+        addListOfNote(notesListItem.copy(listNotes = (notesListItem.listNotes.plus(idNote to true))))
         url.setValue(true)
         MyDatabaseConnection.updated = true
     }

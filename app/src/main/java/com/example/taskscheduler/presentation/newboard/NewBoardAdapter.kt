@@ -1,7 +1,6 @@
 package com.example.taskscheduler.presentation.newboard
 
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,8 +59,6 @@ class NewBoardAdapter :
 
     override fun onBindViewHolder(holder: NewBoardViewHolder, position: Int) {
         val backgroundImage = backgroundImageUrls[position]
-        Log.i("USER_WORKKKKKing", "$position")
-        Log.i("USER_IMAGE_BOARD", backgroundImage.imageUrl)
         Glide.with(holder.itemView.context).load(backgroundImage.imageUrl).override(
             SIZE_ORIGINAL, SIZE_ORIGINAL
         ).into(object : CustomTarget<Drawable>() {

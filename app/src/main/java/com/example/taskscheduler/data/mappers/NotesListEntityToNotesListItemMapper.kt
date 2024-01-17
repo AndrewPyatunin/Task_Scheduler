@@ -13,5 +13,4 @@ class NotesListEntityToNotesListItemMapper : Mapper<NotesListEntity?, NotesListI
             listNotes = from?.listNotes ?: emptyMap()
         )
     }
-
 }

@@ -7,7 +7,6 @@ import com.example.taskscheduler.domain.models.Note
 
 class NoteToNoteEntityMapper(private val mapper: Mapper<CheckNoteItem, CheckNoteEntity>) : Mapper<Note, NoteEntity> {
 
-
     override fun map(from: Note): NoteEntity {
         return NoteEntity(
             id = from.id,

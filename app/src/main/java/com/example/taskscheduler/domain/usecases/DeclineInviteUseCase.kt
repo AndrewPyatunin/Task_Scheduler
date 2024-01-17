@@ -8,5 +8,5 @@ class DeclineInviteUseCase(
     private val repository: InviteRepository
 ) {
 
-    suspend fun execute(user: User, invite: Invite) = repository.declineInvite(user, invite)
+    suspend fun execute(user: User, invite: Invite) = repository.clearInviteInDatabase(user, invite)
 }

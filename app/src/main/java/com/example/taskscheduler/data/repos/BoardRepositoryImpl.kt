@@ -1,6 +1,5 @@
 package com.example.taskscheduler.data.repos
 
-import android.util.Log
 import com.example.taskscheduler.data.FirebaseConstants.BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.NOTES
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
@@ -70,17 +69,11 @@ class BoardRepositoryImpl(
                                 if (board != null && dataSnapshot.key in user.boards) { //&& board !in boardList) {
                                     boards.add(board)
                                 }
-                                Log.d("DataUpdate_list", boards.size.toString())
                             }
                             scope.launch(Dispatchers.IO) {
-                                val result =
-                                    withContext(Dispatchers.IO) {
-                                        addBoards(boards)
-                                    }
-                                Log.d("DataUpdate_list_scope", boards.size.toString())
+                                val result = addBoards(boards)
                                 if (continuation.isActive)
                                     continuation.resumeWith(Result.success(result))//add to room database
-
                             }
                         }
 
@@ -92,9 +85,7 @@ class BoardRepositoryImpl(
 
     override fun getBoardsFlowFromRoom(user: User): Flow<List<Board>> {
         return boardDataSource.getBoardsFlow().map { list ->
-            list.map {
-                boardEntityToBoardMapper.map(it)
-            }
+            list.map(boardEntityToBoardMapper::map)
         }
     }
 
@@ -125,7 +116,11 @@ class BoardRepositoryImpl(
         listsOfNotes.filter {
             it.id in board.listsOfNotesIds
         }.forEach {
-            deleteList(it, board, false)
+            deleteList(
+                notesListItem =  it,
+                board =  board,
+                isList = false
+            )
         }
     }
 
@@ -138,10 +133,7 @@ class BoardRepositoryImpl(
             databaseNoteReference.child(it.id).removeValue()
             noteDataSource.removeNote(it)
         }
-        if (isList) updateBoard(
-            board,
-            notesListItem
-        )
+        if (isList) updateBoard(board, notesListItem)
     }
 
     override suspend fun clearAllBoards() {
@@ -153,9 +145,7 @@ class BoardRepositoryImpl(
     }
 
     override suspend fun addBoards(boardList: List<Board>) {
-        boardDataSource.addBoards(boardList.map {
-            boardToBoardEntityMapper.map(it)
-        })
+        boardDataSource.addBoards(boardList.map(boardToBoardEntityMapper::map))
     }
 
     override suspend fun createNewBoard(
@@ -165,23 +155,18 @@ class BoardRepositoryImpl(
         val urlForBoard = databaseBoardsReference.push()
         val idBoard =
             urlForBoard.key ?: return Result.failure(RuntimeException("No Internet connection!"))
-        if (board.id != "") {
-            Log.i("USER_CREATE", board.id)
+        if (board.id.isNotEmpty()) {
             val ref = databaseBoardsReference.child(board.id)
             ref.child(PATH_BACKGROUND_URL).setValue(urlBackground)
             ref.child(PATH_TITLE).setValue(name)
             boardDb = board.copy(title = name, backgroundUrl = urlBackground)
         } else {
-            val usersRef = databaseUsersReference.child(user.id)
-            val members = mapOf(Pair(user.id, true))
-            boardDb = Board(idBoard, name, user.id, urlBackground, members)
+            boardDb = Board(idBoard, name, user.id, urlBackground, mapOf(Pair(user.id, true)))
             urlForBoard.setValue(boardDb)
-            usersRef.child(PATH_BOARDS).updateChildren(mapOf(Pair(idBoard, true)))
+            databaseUsersReference.child(user.id).child(PATH_BOARDS).updateChildren(mapOf(Pair(idBoard, true)))
         }
         addBoard(boardDb)
-        userDataSource.addUser(userToUserEntityMapper.map(user.copy(boards = (user.boards as MutableMap).apply {
-            put(idBoard, true)
-        })))
+        userDataSource.addUser(userToUserEntityMapper.map(user.copy(boards = (user.boards.plus(idBoard to true)))))
         return Result.success(idBoard)
     }
 }

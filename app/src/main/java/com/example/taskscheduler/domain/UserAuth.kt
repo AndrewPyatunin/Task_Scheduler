@@ -2,6 +2,7 @@ package com.example.taskscheduler.domain
 
 import android.net.Uri
 import com.example.taskscheduler.domain.models.User
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -27,4 +28,5 @@ interface UserAuth {
 
     suspend fun getUser(userId: String, scope: CoroutineScope)
 
+    suspend fun login(email: String, password: String, auth: FirebaseAuth, scope: CoroutineScope)
 }
