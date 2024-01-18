@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentInnerBoardBinding
+import com.example.taskscheduler.domain.NoteComparator
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.Note
@@ -42,7 +43,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         position = requireArguments().getInt(POSITION)
         isFirst = false
         listOfLists =
-            requireArguments().getParcelableArrayList(LIST) ?: ArrayList<NotesListItem>()
+            requireArguments().getParcelableArrayList(LIST) ?: arrayListOf<NotesListItem>()
         list = listOfLists[position]
         user = requireArguments().getParcelable(USER)!!
         board = requireArguments().getParcelable(BOARD)!!
@@ -85,46 +86,28 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         )
     }
 
-    private fun dateToInt(date: String): Int {
-        var dateForm = ""
-        date.forEach { if (it != '.') dateForm += it }
-        val num = dateForm.toIntOrNull()
-        var newDate: Int = Int.MAX_VALUE
-        if (num != null) {
-            val year = num % 10000
-            val month = num / 10000 % 100
-            val day = num / 1000000
-            newDate = year * 10000 + month * 100 + day
+    private fun initList(list: List<Note>) {
+        val newList = list.sortedWith(NoteComparator())
+        innerAdapter = InnerBoardAdapter(newList)
+        recyclerView.adapter = innerAdapter
+        innerAdapter.onItemClick = {
+            launchNewNoteFragment(it)
         }
-        return newDate
     }
-
 
     private fun initViews(list: List<Note>) {
         if (!isFirst) {
             recyclerView = binding.childRecyclerViewBoard
-            var newList = list
-            newList = newList.sortedWith { ln, rn ->
-                if (ln.priority < rn.priority || (ln.priority == rn.priority &&
-                            dateToInt(ln.date) < dateToInt(rn.date))
-                ) -1 else if (ln.priority > rn.priority) 1 else 0
-            }
-            innerAdapter = InnerBoardAdapter(newList)
+            initList(list)
             recyclerView.layoutManager = GridLayoutManager(
                 requireContext(), 1,
                 GridLayoutManager.VERTICAL, false
             )
-            recyclerView.adapter = innerAdapter
             recyclerView.setHasFixedSize(true)
 
             binding.loadingIndicatorList.visibility = View.GONE
-//            recyclerView.visibility = View.VISIBLE
+            recyclerView.visibility = View.VISIBLE
         }
-
-        innerAdapter.onItemClick = {
-            launchNewNoteFragment(it)
-        }
-
     }
 
     private fun observeViewModel() {

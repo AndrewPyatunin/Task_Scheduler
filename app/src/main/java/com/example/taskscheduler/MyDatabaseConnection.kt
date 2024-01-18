@@ -21,6 +21,7 @@ object MyDatabaseConnection : DatabaseConnection {
     var list = emptyList<BackgroundImage>()
     var updated = true
     var userId: String? = null
+    var isFromBackStack = false
 
     fun onCallbackReady() {
         getBackgroundImages(object : NewCallback {

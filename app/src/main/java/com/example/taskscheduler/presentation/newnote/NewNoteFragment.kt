@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.MyDatabaseConnection.updated
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewNoteBinding
@@ -53,6 +54,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MyDatabaseConnection.isFromBackStack = true
         parseArgs()
     }
 

@@ -9,6 +9,8 @@ import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.domain.models.*
 import com.example.taskscheduler.domain.usecases.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class InnerBoardViewModel : ViewModel() {
@@ -31,11 +33,12 @@ class InnerBoardViewModel : ViewModel() {
 
     fun getNotes(listNotesIds: Map<String, Boolean>) {
         viewModelScope.launch(Dispatchers.IO) {
-            getNotesUseCase.execute().collect {
-                _listNotesLiveData.postValue(it.filter {
-                    Log.d("INNER_BOARD", "get_notes")
+            getNotesUseCase.execute().map {
+                it.filter {
                     it.id in listNotesIds
-                })
+                }
+            }.collect {
+                _listNotesLiveData.postValue(it)
             }
         }
     }

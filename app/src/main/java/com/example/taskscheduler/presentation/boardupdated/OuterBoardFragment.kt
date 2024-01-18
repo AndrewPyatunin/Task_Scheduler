@@ -1,6 +1,7 @@
 package com.example.taskscheduler.presentation.boardupdated
 
 import android.graphics.drawable.Drawable
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -56,6 +57,15 @@ class OuterBoardFragment : Fragment() {
         MyDatabaseConnection.currentPosition = item
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (MyDatabaseConnection.isFromBackStack) {
+            binding.loadingIndicatorBoard.visibility = View.VISIBLE
+            binding.viewPager.visibility = View.INVISIBLE
+            MyDatabaseConnection.isFromBackStack = false
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -66,7 +76,6 @@ class OuterBoardFragment : Fragment() {
         return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[OuterBoardViewModel::class.java]
@@ -75,9 +84,6 @@ class OuterBoardFragment : Fragment() {
         observeViewModel()
         binding.imageViewInvite.setOnClickListener {
             launchInviteUserFragment()
-        }
-        binding.buttonInvite.setOnClickListener {
-
         }
         val textView = binding.textViewAddList
         val editText = binding.editTextAddList
@@ -124,7 +130,7 @@ class OuterBoardFragment : Fragment() {
         )
     }
 
-    fun retryToListBoard() {
+    private fun retryToListBoard() {
         findTopNavController().popBackStack(R.id.boardListFragment, false)
     }
 
@@ -168,7 +174,10 @@ class OuterBoardFragment : Fragment() {
             tabLayout.getTabAt(MyDatabaseConnection.currentPosition)?.select()
         }
 
-        if (list.isNotEmpty()) isInit = true
+        if (list.isNotEmpty()) {
+            isInit = true
+            binding.viewPager.visibility = View.VISIBLE
+        }
     }
 
     private fun observeViewModel() {
