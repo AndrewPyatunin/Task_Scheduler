@@ -13,9 +13,9 @@ import com.example.taskscheduler.domain.models.User
 class OuterBoardAdapter(
     lifecycle: Lifecycle,
     fragmentManager: FragmentManager,
-    val board: Board,
-    val user: User,
-    val list: ArrayList<NotesListItem> = ArrayList()
+    list: ArrayList<NotesListItem> = ArrayList(),
+    private val board: Board,
+    private val user: User,
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
     var fragmentList = list//not empty
         set(value) {

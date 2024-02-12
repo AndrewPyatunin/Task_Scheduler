@@ -1,11 +1,9 @@
 package com.example.taskscheduler.presentation.inviteuser
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -13,23 +11,23 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taskscheduler.R
-import com.example.taskscheduler.presentation.inviteuser.InviteUserAdapter
 import com.example.taskscheduler.databinding.FragmentInviteUserBinding
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 
 class InviteUserFragment : Fragment() {
 
-    lateinit var binding: FragmentInviteUserBinding
-    lateinit var recyclerViewUser: RecyclerView
+    private lateinit var binding: FragmentInviteUserBinding
+    private lateinit var recyclerViewUser: RecyclerView
+    private lateinit var board: Board
+    private lateinit var user: User
     private var userAdapter: InviteUserAdapter? = null
     private val listForInvite = ArrayList<User>()
-    lateinit var viewModel: InviteUserViewModel
-    lateinit var board: Board
-    lateinit var user: User
-
     private val args by navArgs<InviteUserFragmentArgs>()
 
+    private val viewModel by lazy {
+        ViewModelProvider(this)[InviteUserViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +45,6 @@ class InviteUserFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[InviteUserViewModel::class.java]
         viewModel.getUsersForInvite(board)
         observeViewModel()
         initViews()
@@ -57,7 +54,6 @@ class InviteUserFragment : Fragment() {
             } else if (it in listForInvite) {
                 listForInvite.remove(it)
             }
-            Log.i("USER_INVITE_LIST", listForInvite.joinToString { it.toString() })
         }
         binding.buttonInviteUser.setOnClickListener {
             listForInvite.forEach {
@@ -78,19 +74,6 @@ class InviteUserFragment : Fragment() {
         user = args.user
     }
 
-    inline fun <T : View> T.afterMeasured(crossinline f: T.() -> Unit) {
-        viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                if (measuredWidth > 0 && measuredHeight > 0) {
-                    viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    f()
-                }
-            }
-        })
-    }
-
-
     private fun observeViewModel() {
         viewModel.listUsers.observe(viewLifecycleOwner) {
             userAdapter?.users = it as ArrayList<User>
@@ -106,7 +89,8 @@ class InviteUserFragment : Fragment() {
 
         viewModel.success.observe(viewLifecycleOwner) {
             viewModel.getUsersForInvite(board)
-            Toast.makeText(requireContext(), getString(R.string.success_invite), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.success_invite), Toast.LENGTH_SHORT)
+                .show()
         }
     }
 

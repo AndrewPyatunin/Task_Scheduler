@@ -27,20 +27,20 @@ import kotlin.math.roundToInt
 
 class NewNoteFragment : Fragment(), MenuProvider {
 
-    lateinit var binding: FragmentNewNoteBinding
-    lateinit var notesListItem: NotesListItem
-    lateinit var board: Board
-    lateinit var user: User
-    lateinit var note: Note
-    lateinit var newNoteAdapter: NewNoteCheckItemAdapter
-    lateinit var recyclerView: RecyclerView
-    lateinit var listOfLists: Array<NotesListItem>
-    var list = ArrayList<String>()
+    private lateinit var binding: FragmentNewNoteBinding
+    private lateinit var notesListItem: NotesListItem
+    private lateinit var board: Board
+    private lateinit var user: User
+    private lateinit var note: Note
+    private lateinit var newNoteAdapter: NewNoteCheckItemAdapter
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var listOfLists: Array<NotesListItem>
+    private var list = ArrayList<String>()
+    private val args by navArgs<NewNoteFragmentArgs>()
+
     private val viewModel by lazy {
         ViewModelProvider(this)[NewNoteViewModel::class.java]
     }
-
-    private val args by navArgs<NewNoteFragmentArgs>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -234,7 +234,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
 
     private fun observeViewModel() {
         viewModel.success.observe(viewLifecycleOwner) {
-            launchBoardFragment(it, user)
+            launchBoardFragment()
         }
         viewModel.noteData.observe(viewLifecycleOwner) {
             newNoteAdapter.checkItemsList = it
@@ -244,7 +244,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun launchBoardFragment(board: Board, user: User) {
+    private fun launchBoardFragment() {
         findNavController().popBackStack()
     }
 

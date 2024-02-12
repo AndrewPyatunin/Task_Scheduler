@@ -17,18 +17,18 @@ import com.example.taskscheduler.domain.models.User
 
 class NewBoardFragment : Fragment() {
 
+    private lateinit var user: User
+    private lateinit var board: Board
+    private lateinit var newBoardAdapter: NewBoardAdapter
+    private var urlBackground = ""
     private var _binding: FragmentNewBoardBinding? = null
+    private val args by navArgs<NewBoardFragmentArgs>()
     private val binding: FragmentNewBoardBinding
         get() = _binding ?: throw RuntimeException("FragmentNewBoardBinding==null")
+
     private val viewModel by lazy {
         ViewModelProvider(this)[NewBoardViewModel::class.java]
     }
-    lateinit var user: User
-    lateinit var board: Board
-    lateinit var newBoardAdapter: NewBoardAdapter
-    var urlBackground = ""
-
-    private val args by navArgs<NewBoardFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

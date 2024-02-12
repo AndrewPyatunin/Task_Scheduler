@@ -31,7 +31,7 @@ import java.io.File
 
 class RegistrationFragment : Fragment() {
 
-    lateinit var directory: File
+    private lateinit var directory: File
     private lateinit var binding: FragmentRegistrationBinding
     private lateinit var user: User
     private var uri: Uri? = null
@@ -45,7 +45,7 @@ class RegistrationFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentRegistrationBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -77,8 +77,7 @@ class RegistrationFragment : Fragment() {
         val builder = VmPolicy.Builder()
         StrictMode.setVmPolicy(builder.build())
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, generateFileUri());
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, generateFileUri())
         takePhotoForResult.launch(intent)
 //        startActivityForResult(intent, CAMERA)
     }

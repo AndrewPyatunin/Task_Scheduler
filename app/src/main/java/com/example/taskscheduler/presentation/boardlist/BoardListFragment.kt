@@ -23,12 +23,13 @@ import com.example.taskscheduler.findTopNavController
 
 class BoardListFragment : Fragment(), MenuProvider {
 
-    private var _binding: FragmentBoardListBinding? = null
-    private val binding: FragmentBoardListBinding
-        get() = _binding ?: throw RuntimeException("FragmentBoardListBinding==null")
     private lateinit var user: User
     private lateinit var recyclerViewBoardList: RecyclerView
     private lateinit var boardsAdapter: BoardListAdapter
+    private var _binding: FragmentBoardListBinding? = null
+    private val binding: FragmentBoardListBinding
+        get() = _binding ?: throw RuntimeException("FragmentBoardListBinding==null")
+
     private val viewModel by lazy {
         ViewModelProvider(this)[BoardListViewModel::class.java]
     }

@@ -15,10 +15,11 @@ import com.example.taskscheduler.domain.models.User
 
 class MyInvitesFragment : Fragment() {
 
-    lateinit var binding: FragmentMyInvitesBinding
-    lateinit var recyclerView: RecyclerView
-    lateinit var adapter: MyInvitesAdapter
-    lateinit var user: User
+    private lateinit var binding: FragmentMyInvitesBinding
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: MyInvitesAdapter
+    private lateinit var user: User
+
     private val viewModel by lazy {
         ViewModelProvider(this)[MyInvitesViewModel::class.java]
     }

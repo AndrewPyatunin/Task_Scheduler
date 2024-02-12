@@ -27,14 +27,14 @@ import com.google.android.material.tabs.TabLayoutMediator
 
 class OuterBoardFragment : Fragment() {
 
-    lateinit var binding: FragmentOuterBoardBinding
-    lateinit var board: Board
-    lateinit var user: User
+    private lateinit var tabLayout: TabLayout
+    private lateinit var viewModel: OuterBoardViewModel
+    private lateinit var binding: FragmentOuterBoardBinding
+    private lateinit var board: Board
+    private lateinit var user: User
     private var parentAdapter: OuterBoardAdapter? = null
-    lateinit var viewModel: OuterBoardViewModel
     private var parentList = emptyList<NotesListItem>()
     private var viewPager: ViewPager2? = null
-    private lateinit var tabLayout: TabLayout
     private var currentPosition = 0
     private var isInit = false
 
@@ -124,11 +124,11 @@ class OuterBoardFragment : Fragment() {
         if (list != parentList || list.isEmpty()) {
             parentAdapter =
                 OuterBoardAdapter(
-                    lifecycle,
-                    childFragmentManager,
-                    board,
-                    user,
-                    list as ArrayList<NotesListItem>
+                    lifecycle =  lifecycle,
+                    fragmentManager =  childFragmentManager,
+                    list = list as ArrayList<NotesListItem>,
+                    board =  board,
+                    user = user,
                 )
             parentList = list
             if (list.isNotEmpty()) {

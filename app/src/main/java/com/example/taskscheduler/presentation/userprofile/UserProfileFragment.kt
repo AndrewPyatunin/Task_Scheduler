@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.navOptions
@@ -30,11 +29,12 @@ import com.google.firebase.ktx.Firebase
 
 class UserProfileFragment : Fragment() {
 
-    lateinit var binding: FragmentUserProfileBinding
-    val auth = Firebase.auth
+    private lateinit var binding: FragmentUserProfileBinding
     private var uri: Uri? = null
-    var userInfo = ""
-    var user: User? = null
+    private var userInfo = ""
+    private var user: User? = null
+    private val auth = Firebase.auth
+
     private val viewModel by lazy {
         ViewModelProvider(this)[UserProfileViewModel::class.java]
     }
@@ -43,7 +43,7 @@ class UserProfileFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentUserProfileBinding.inflate(inflater, container, false)
         return binding.root
     }

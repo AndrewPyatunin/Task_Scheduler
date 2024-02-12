@@ -59,7 +59,7 @@ class InviteUserAdapter : Adapter<InviteUserAdapter.InviteUserViewHolder>() {
         holder.checkBoxInvited.setOnClickListener {
             onItemClick?.invoke(user)
         }
-        if (user.uri != "") {
+        if (user.uri.isNotEmpty()) {
             Glide.with(holder.itemView.context).load(user.uri).into(holder.imageViewUserAvatar)
         }
     }

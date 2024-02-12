@@ -14,9 +14,9 @@ import com.example.taskscheduler.domain.models.User
 
 class LoginFragment : Fragment() {
 
-    lateinit var binding: FragmentLoginBinding
-    lateinit var user: User
+    private lateinit var binding: FragmentLoginBinding
     private var email = ""
+
     private val viewModel by lazy {
         ViewModelProvider(this)[LoginViewModel::class.java]
     }
