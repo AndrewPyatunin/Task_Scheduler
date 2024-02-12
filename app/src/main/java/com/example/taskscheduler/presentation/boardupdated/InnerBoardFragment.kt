@@ -24,26 +24,26 @@ import com.google.android.material.tabs.TabLayout
 
 class InnerBoardFragment : Fragment(), MenuProvider {
 
-    lateinit var binding: FragmentInnerBoardBinding
-    lateinit var list: NotesListItem
-    lateinit var user: User
-    lateinit var board: Board
-    lateinit var recyclerView: RecyclerView
-    lateinit var innerAdapter: InnerBoardAdapter
-    lateinit var viewModel: InnerBoardViewModel
-    lateinit var listOfLists: ArrayList<NotesListItem>
-    var position: Int = 0
-    var tabLayout: TabLayout? = null
-    var viewPager: ViewPager2? = null
-    var listNotes: List<Note> = emptyList()
-    var isFirst = true
+    private lateinit var binding: FragmentInnerBoardBinding
+    private lateinit var list: NotesListItem
+    private lateinit var user: User
+    private lateinit var board: Board
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var innerAdapter: InnerBoardAdapter
+    private lateinit var viewModel: InnerBoardViewModel
+    private lateinit var listOfLists: ArrayList<NotesListItem>
+    private var position: Int = 0
+    private var tabLayout: TabLayout? = null
+    private var viewPager: ViewPager2? = null
+    private var listNotes: List<Note> = emptyList()
+    private var isFirst = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         position = requireArguments().getInt(POSITION)
         isFirst = false
         listOfLists =
-            requireArguments().getParcelableArrayList(LIST) ?: arrayListOf<NotesListItem>()
+            requireArguments().getParcelableArrayList(LIST) ?: arrayListOf()
         list = listOfLists[position]
         user = requireArguments().getParcelable(USER)!!
         board = requireArguments().getParcelable(BOARD)!!
@@ -117,8 +117,9 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         }
         viewModel.fetchNotes(list, listNotes)
 
+        viewModel.getNotes(list.listNotes)
+
         viewModel.readyLiveData.observe(viewLifecycleOwner) {
-            viewModel.getNotes(list.listNotes)
         }
     }
 

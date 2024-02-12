@@ -6,16 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taskscheduler.databinding.FragmentMyInvitesBinding
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
-import kotlinx.coroutines.launch
 
 class MyInvitesFragment : Fragment() {
 
@@ -61,10 +57,10 @@ class MyInvitesFragment : Fragment() {
 
         viewModel.user.observe(viewLifecycleOwner) {
             user = it
+            viewModel.getInvitesFromRoom()
         }
 
         viewModel.invitesReady.observe(viewLifecycleOwner) {
-            viewModel.getInvitesFromRoom()
         }
     }
 

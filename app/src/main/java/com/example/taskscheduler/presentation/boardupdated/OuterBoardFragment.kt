@@ -1,13 +1,11 @@
 package com.example.taskscheduler.presentation.boardupdated
 
 import android.graphics.drawable.Drawable
-import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -86,25 +84,8 @@ class OuterBoardFragment : Fragment() {
             launchInviteUserFragment()
         }
         val textView = binding.textViewAddList
-        val editText = binding.editTextAddList
-
-        val buttonAddNewList = binding.buttonAddNewList
         textView.setOnClickListener {
-            binding.cardViewBoard.visibility = View.VISIBLE
-            textView.visibility = View.GONE
-            editText.visibility = View.VISIBLE
-            buttonAddNewList.visibility = View.VISIBLE
-        }
-        buttonAddNewList.setOnClickListener {
-
-            val textTitle = editText.text.toString().trim()
-            if (textTitle.isNotEmpty()) {
-                val item = viewModel.createNewList(textTitle, board, user)
-                textView.visibility = View.VISIBLE
-                editText.visibility = View.INVISIBLE
-                buttonAddNewList.visibility = View.INVISIBLE
-            } else
-                Toast.makeText(requireContext(), "Заполните поле ввода", Toast.LENGTH_SHORT).show()
+            CreateNewListDialogFragment().show(childFragmentManager, "CreateNewListDialogFragment")
         }
         requireActivity().onBackPressedDispatcher
             .addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -114,6 +95,10 @@ class OuterBoardFragment : Fragment() {
             })
         savedInstanceState?.putInt("position", viewPager?.currentItem ?: 0)
         savedInstanceState?.putBoolean("first_init", false)
+    }
+
+    fun createNewList(listTitle: String) {
+        viewModel.createNewList(listTitle, board, user)
     }
 
     private fun parseArgs() {
@@ -193,6 +178,7 @@ class OuterBoardFragment : Fragment() {
         }
         viewModel.boardLiveData.observe(viewLifecycleOwner) {
             board = it
+            viewModel.fetchNotesLists(board, parentList)
         }
     }
 

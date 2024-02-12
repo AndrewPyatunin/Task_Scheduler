@@ -24,15 +24,17 @@ import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.BoardRepository
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 class BoardRepositoryImpl(
     userDao: UserDao,
@@ -50,7 +52,6 @@ class BoardRepositoryImpl(
     private val notesListEntityToNotesListItemMapper = NotesListEntityToNotesListItemMapper()
     private val notesListDataSource = NotesListDataSourceImpl(notesListDao)
 
-    private val auth = Firebase.auth
     private val databaseNotesListReference = Firebase.database.getReference(NOTES_LIST)
     private val databaseNoteReference = Firebase.database.getReference(NOTES)
     private val databaseBoardsReference = Firebase.database.getReference(BOARDS)
@@ -58,29 +59,25 @@ class BoardRepositoryImpl(
 
     override suspend fun getBoardsFlow(user: User, scope: CoroutineScope, boardList: List<Board>) =
         suspendCancellableCoroutine { continuation ->
-            auth.addAuthStateListener {
-                it.currentUser?.let {
-                    databaseBoardsReference.addValueEventListener(object : ValueEventListener {
+            databaseBoardsReference.addValueEventListener(object : ValueEventListener {
 
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val boards = ArrayList<Board>()
-                            snapshot.children.forEach { dataSnapshot ->
-                                val board = dataSnapshot.getValue(Board::class.java)
-                                if (board != null && dataSnapshot.key in user.boards) { //&& board !in boardList) {
-                                    boards.add(board)
-                                }
-                            }
-                            scope.launch(Dispatchers.IO) {
-                                val result = addBoards(boards)
-                                if (continuation.isActive)
-                                    continuation.resumeWith(Result.success(result))//add to room database
-                            }
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val boards = ArrayList<Board>()
+                    snapshot.children.forEach { dataSnapshot ->
+                        val board = dataSnapshot.getValue(Board::class.java)
+                        if (board != null && dataSnapshot.key in user.boards) { //&& board !in boardList) {
+                            boards.add(board)
                         }
-
-                        override fun onCancelled(error: DatabaseError) = Unit
-                    })
+                    }
+                    scope.launch(Dispatchers.IO) {
+                        val result = addBoards(boards)
+                        if (continuation.isActive)
+                            continuation.resumeWith(Result.success(result))//add to room database
+                    }
                 }
-            }
+
+                override fun onCancelled(error: DatabaseError) = Unit
+            })
         }
 
     override fun getBoardsFlowFromRoom(user: User): Flow<List<Board>> {
@@ -117,8 +114,8 @@ class BoardRepositoryImpl(
             it.id in board.listsOfNotesIds
         }.forEach {
             deleteList(
-                notesListItem =  it,
-                board =  board,
+                notesListItem = it,
+                board = board,
                 isList = false
             )
         }
@@ -163,10 +160,19 @@ class BoardRepositoryImpl(
         } else {
             boardDb = Board(idBoard, name, user.id, urlBackground, mapOf(Pair(user.id, true)))
             urlForBoard.setValue(boardDb)
-            databaseUsersReference.child(user.id).child(PATH_BOARDS).updateChildren(mapOf(Pair(idBoard, true)))
+            databaseUsersReference.child(user.id).child(PATH_BOARDS)
+                .updateChildren(mapOf(Pair(idBoard, true)))
         }
         addBoard(boardDb)
-        userDataSource.addUser(userToUserEntityMapper.map(user.copy(boards = (user.boards.plus(idBoard to true)))))
+        userDataSource.addUser(
+            userToUserEntityMapper.map(
+                user.copy(
+                    boards = (user.boards.plus(
+                        idBoard to true
+                    ))
+                )
+            )
+        )
         return Result.success(idBoard)
     }
 }

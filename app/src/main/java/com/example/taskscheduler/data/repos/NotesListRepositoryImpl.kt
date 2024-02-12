@@ -54,16 +54,14 @@ class NotesListRepositoryImpl(
         ref.setValue(item)
         databaseBoardsReference.child(board.id)
             .child(PATH_NOTES_LIST_IDS).updateChildren(mapOf(Pair(listId, true)))
-        addListOfNote(item)
         boardDataSource.addBoard(
             boardToBoardEntityMapper.map(
                 board.copy(
-                    listsOfNotesIds = board.listsOfNotesIds.plus(
-                        listId to true
-                    )
+                    listsOfNotesIds = board.listsOfNotesIds.plus(listId to true)
                 )
             )
         )
+        addListOfNote(item)
     }
 
     override fun getNotesListsFlow(board: Board): Flow<List<NotesListItem>> {

@@ -10,8 +10,7 @@ import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.AddBoardUseCase
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.example.taskscheduler.domain.usecases.GetBoardUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -19,6 +18,7 @@ class NewBoardViewModel : ViewModel() {
 
     private val boardRepository = MyApp.boardRepository
     private val addBoardUseCase = AddBoardUseCase(boardRepository)
+    private val getBoardUseCase = GetBoardUseCase(boardRepository)
 
     private val _boardLiveData = MutableLiveData<Board>()
     val boardLiveData: LiveData<Board>
@@ -33,7 +33,7 @@ class NewBoardViewModel : ViewModel() {
         get() = _urlImage
 
     init {
-        _urlImage.value = MyDatabaseConnection.list
+        _urlImage.value = MyDatabaseConnection.backgroundImages
     }
 
     fun createNewBoard(
@@ -45,7 +45,7 @@ class NewBoardViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val result = addBoardUseCase.execute(name, user, urlBackground, board)
             if (result.isSuccess) {
-                _boardLiveData.postValue(boardRepository.getBoard(result.getOrThrow()))
+                _boardLiveData.postValue(getBoardUseCase.execute(result.getOrThrow()))
             }
         }
     }

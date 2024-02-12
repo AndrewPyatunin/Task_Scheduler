@@ -12,7 +12,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewBoardBinding
-import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 
@@ -106,7 +105,7 @@ class NewBoardFragment : Fragment() {
             launchBoardFragment(it, user)
         }
         viewModel.urlImage.observe(viewLifecycleOwner) {
-            newBoardAdapter.backgroundImageUrls = it as ArrayList<BackgroundImage>
+            newBoardAdapter.backgroundImageUrls = ArrayList(it)
             with(binding) {
                 loadingIndicatorNewBoard.visibility = View.GONE
                 pleaseWaitTextViewNewBoard.visibility = View.GONE

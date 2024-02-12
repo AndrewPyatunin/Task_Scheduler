@@ -18,7 +18,7 @@ object MyDatabaseConnection : DatabaseConnection {
     private var addAllUsersUseCase: AddAllUsersUseCase? = null
     @Volatile var boardList = emptyList<Board>()
     var currentPosition = 0
-    var list = emptyList<BackgroundImage>()
+    var backgroundImages = emptyList<BackgroundImage>()
     var updated = true
     var userId: String? = null
     var isFromBackStack = false
@@ -26,7 +26,7 @@ object MyDatabaseConnection : DatabaseConnection {
     fun onCallbackReady() {
         getBackgroundImages(object : NewCallback {
             override fun callbackNew(list: List<BackgroundImage>) {
-                this@MyDatabaseConnection.list = list
+                this@MyDatabaseConnection.backgroundImages = list
             }
 
         })

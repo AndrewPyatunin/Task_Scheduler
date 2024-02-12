@@ -69,4 +69,6 @@
     <string name="from_where_pick_photo">Where will we get the photo from?</string>
     <string name="gallery">Gallery</string>
     <string name="camera">Camera</string>
+    <string name="cancel">Cancel</string>
+    <string name="fill_in_the_input_field">Fill in the input field!</string>
 </resources>

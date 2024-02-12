@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val USER_ID_KEY = "user_id"
+        const val BACKGROUND_IMAGES_KEY = "background_images"
     }
 
     private val fragmentListener = object : FragmentManager.FragmentLifecycleCallbacks() {
@@ -57,6 +58,8 @@ class MainActivity : AppCompatActivity() {
         MyApp.initialize(application)
         pref = getSharedPreferences("Id", MODE_PRIVATE)
         MyDatabaseConnection.userId = pref?.getString(USER_ID_KEY, "")
+        MyDatabaseConnection.backgroundImages = Converter.fromStringToList(pref?.getString(
+            BACKGROUND_IMAGES_KEY, null))
         val navController = getRootNavController()
         prepareRootNavController(user != null, navController)
         onNavControllerActivated(navController)
@@ -168,6 +171,8 @@ class MainActivity : AppCompatActivity() {
         auth.currentUser?.let {
             databaseUsersRef.child(it.uid).child("onlineStatus").setValue(isOnline)
             val edit = pref?.edit()
+            val convertedBackgroundImage = Converter.fromListToString(MyDatabaseConnection.backgroundImages)
+            edit?.putString(BACKGROUND_IMAGES_KEY, convertedBackgroundImage)
             edit?.putString(USER_ID_KEY, it.uid)
             edit?.apply()
         }
@@ -182,7 +187,6 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onBackPressed() {
-
         if (isStartDestination(navController?.currentDestination)) {
             super.getOnBackPressedDispatcher().onBackPressed()
         } else {

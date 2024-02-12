@@ -250,10 +250,14 @@ class NewNoteFragment : Fragment(), MenuProvider {
 
     companion object {
 
-        const val KEY_LIST_NOTE = "list"
-        const val KEY_BOARD = "board"
-        const val KEY_USER = "user"
-        const val KEY_NOTE = "note"
+        private const val KEY_LIST_NOTE = "list"
+        private const val KEY_BOARD = "board"
+        private const val KEY_USER = "user"
+        private const val KEY_NOTE = "note"
+
+        private const val LOW = "Low"
+        private const val MEDIUM = "Medium"
+        private const val HIGH = "High"
 
         fun newInstance(
             list: NotesListItem,
@@ -296,9 +300,9 @@ class NewNoteFragment : Fragment(), MenuProvider {
             }
             R.id.item_change_priority -> {
                 val array = arrayOf(
-                    "High",
-                    "Medium",
-                    "Low"
+                    HIGH,
+                    MEDIUM,
+                    LOW
                 )
                 val builder = AlertDialog.Builder(requireActivity())
                 builder.setTitle(getString(R.string.choose_note_priority))
@@ -306,9 +310,9 @@ class NewNoteFragment : Fragment(), MenuProvider {
                     array
                 ) { _, which ->
                     val priority = when (array[which]) {
-                        "High" -> UrgencyOfNote.HIGH
-                        "Medium" -> UrgencyOfNote.MIDDLE
-                        "Low" -> UrgencyOfNote.LOW
+                        HIGH -> UrgencyOfNote.HIGH
+                        MEDIUM -> UrgencyOfNote.MIDDLE
+                        LOW -> UrgencyOfNote.LOW
                         else -> UrgencyOfNote.LOW
                     }
                     updated = true
@@ -324,4 +328,5 @@ class NewNoteFragment : Fragment(), MenuProvider {
     fun moveNote(listItem: NotesListItem) {
         viewModel.moveNote(note, notesListItem, listItem, board, user)
     }
+
 }

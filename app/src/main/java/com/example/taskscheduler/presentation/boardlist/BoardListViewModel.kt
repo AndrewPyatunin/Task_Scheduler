@@ -86,7 +86,7 @@ class BoardListViewModel : ViewModel() {
     }
 
     private suspend fun getUser() =
-        getUserFromRoomUseCase.execute(auth.currentUser?.uid ?: MyDatabaseConnection.userId!!)
+        getUserFromRoomUseCase.execute(auth.currentUser?.uid ?: MyDatabaseConnection.userId ?: throw RuntimeException("User is not found!"))
 
     fun logout(user: User) {
         logOutUseCase.execute(user, viewModelScope)

@@ -76,13 +76,13 @@ class BoardListFragment : Fragment(), MenuProvider {
 
         viewModel.dataReady.observe(viewLifecycleOwner) {
             Log.d("DataUpdate", "Start_getting_boards")
-            viewModel.getBoardsFlow(user)
         }
 
         viewModel.fetchUser()
 
         viewModel.userLiveData.observe(viewLifecycleOwner) {
             user = it
+            viewModel.getBoardsFlow(user)
             Log.d("BOARD_LIST_ADAPTER", boardsAdapter.boards.size.toString())
             viewModel.fetchBoards(it, boardList)
             drawAvatar()
