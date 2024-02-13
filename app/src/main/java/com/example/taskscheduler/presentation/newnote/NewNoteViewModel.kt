@@ -5,16 +5,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskscheduler.MyApp
-import com.example.taskscheduler.domain.CheckNoteItem
+import com.example.taskscheduler.domain.models.CheckNoteItem
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
-import com.example.taskscheduler.domain.usecases.AddNoteUseCase
-import com.example.taskscheduler.domain.usecases.MoveNoteUseCase
-import com.example.taskscheduler.domain.usecases.RemoveNoteUseCase
-import com.example.taskscheduler.domain.usecases.UpdateNoteUseCase
+import com.example.taskscheduler.domain.usecases.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class NewNoteViewModel : ViewModel() {
@@ -24,6 +22,10 @@ class NewNoteViewModel : ViewModel() {
     private val removeNoteUseCase = RemoveNoteUseCase(noteRepository)
     private val updateNoteUseCase = UpdateNoteUseCase(noteRepository)
     private val moveNoteUseCase = MoveNoteUseCase(noteRepository)
+    private val getNoteUseCase = GetNoteUseCase(noteRepository)
+
+    private val _noteLiveData = MutableLiveData<Note>()
+    val noteLiveData: LiveData<Note> = _noteLiveData
 
     private val _noteData = MutableLiveData<List<CheckNoteItem>>()
     val noteData: LiveData<List<CheckNoteItem>>
@@ -33,10 +35,6 @@ class NewNoteViewModel : ViewModel() {
     val success: LiveData<Board>
         get() = _success
 
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String>
-        get() = _error
-
     fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem) {
         viewModelScope.launch(Dispatchers.IO) {
             removeNoteUseCase.execute(board, note, notesListItem)
@@ -44,9 +42,18 @@ class NewNoteViewModel : ViewModel() {
     }
 
     fun updateNote(note: Note) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             updateNoteUseCase.execute(note)
-            _noteData.postValue(note.listOfTasks)
+            getNote(note.id)
+        }
+    }
+
+    fun getNote(noteId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getNoteUseCase.execute(noteId).collectLatest {
+                _noteLiveData.postValue(it)
+                _noteData.postValue(it.listOfTasks)
+            }
         }
 
     }

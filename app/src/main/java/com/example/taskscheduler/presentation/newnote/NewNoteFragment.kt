@@ -17,7 +17,7 @@ import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.MyDatabaseConnection.updated
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewNoteBinding
-import com.example.taskscheduler.domain.CheckNoteItem
+import com.example.taskscheduler.domain.models.CheckNoteItem
 import com.example.taskscheduler.domain.UrgencyOfNote
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Note
@@ -35,7 +35,6 @@ class NewNoteFragment : Fragment(), MenuProvider {
     private lateinit var newNoteAdapter: NewNoteCheckItemAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var listOfLists: Array<NotesListItem>
-    private var list = ArrayList<String>()
     private val args by navArgs<NewNoteFragmentArgs>()
 
     private val viewModel by lazy {
@@ -65,7 +64,8 @@ class NewNoteFragment : Fragment(), MenuProvider {
         binding.cardNewNoteDescription.background.alpha = 0
         binding.newNoteCard.background.alpha = 0
         initRecyclerView()
-        if (note.id != "") {
+        if (note.id.isNotEmpty()) {
+            viewModel.getNote(note.id)
             initViews()
         } else {
             switchVisibility(binding.buttonAddCheckListItem)
@@ -79,39 +79,45 @@ class NewNoteFragment : Fragment(), MenuProvider {
             with(binding) {
                 val title: String = newNoteTitle.text.toString().trim()
                 val description: String = editTextDescription.text.toString().trim()
-                if (note.title == "") {
+                if (note.title.isEmpty()) {
                     if (title.isNotEmpty()) {
                         viewModel.createNewNote(title, description, board, notesListItem, user)
                     }
                 } else {
-                    switchVisibility(buttonNewNote)
-                    textViewDescription.text = description.trim()
-                    switchVisibility(textViewDescription)
-                    switchVisibility(editTextDescription)
-                    viewModel.updateNote(note.copy(description = description))
+//                    switchVisibility(buttonNewNote)
+//                    textViewDescription.text = description.trim()
+//                    switchVisibility(textViewDescription)
+//                    switchVisibility(editTextDescription)
+//                    viewModel.updateNote(note.copy(description = description))
                 }
             }
         }
         binding.textInList.text =
             String.format(getString(R.string.note_in_list), notesListItem.title)
+    }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.getNote(note.id)
     }
 
     private fun checkListItemClick() {
         with(binding) {
             buttonAddCheckListItem.visibility = View.GONE
-            buttonAddItemToCheckList.visibility = View.VISIBLE
+            buttonAddItemToCheckList.includedImageSave.visibility = View.VISIBLE
+            buttonCancelItem.includedImageCancel.visibility = View.VISIBLE
             editTextCheckTitle.visibility = View.VISIBLE
-            buttonAddItemToCheckList.setOnClickListener {
+            buttonAddItemToCheckList.includedImageSave.setOnClickListener {
                 val title = editTextCheckTitle.text.toString()
                 val id = System.currentTimeMillis()
-                if (title != "") {
-                    (note.listOfTasks as ArrayList).add(CheckNoteItem(title, false, "$id"))
-                    calculateProgress()
+                if (title.isNotEmpty()) {
+                    note = note.copy(listOfTasks = note.listOfTasks.plus(CheckNoteItem(title, false, "$id")))
+                    calculateProgress(note)
                     viewModel.updateNote(note)
 
                     buttonAddCheckListItem.visibility = View.VISIBLE
-                    buttonAddItemToCheckList.visibility = View.GONE
+                    it.visibility = View.GONE
+                    buttonCancelItem.includedImageCancel.visibility = View.GONE
                     editTextCheckTitle.visibility = View.GONE
                 } else
                     Toast.makeText(
@@ -119,6 +125,12 @@ class NewNoteFragment : Fragment(), MenuProvider {
                         getString(R.string.select_check_list_title),
                         Toast.LENGTH_SHORT
                     ).show()
+            }
+            buttonCancelItem.includedImageCancel.setOnClickListener {
+                it.visibility = View.GONE
+                buttonAddItemToCheckList.includedImageSave.visibility = View.GONE
+                buttonAddCheckListItem.visibility = View.VISIBLE
+                editTextCheckTitle.visibility = View.GONE
             }
         }
     }
@@ -137,11 +149,8 @@ class NewNoteFragment : Fragment(), MenuProvider {
             switchVisibility(textViewNewNoteTitle)
             switchVisibility(imageViewCalendarEdit)
             switchVisibility(textViewDate)
-            note.listOfTasks.forEach {
-                if (it.isChecked) list.add(it.id)
-            }
 
-            calculateProgress()
+            calculateProgress(note)
             imageViewCalendarEdit.setOnClickListener {
                 switchVisibilityForCalendar()
                 calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
@@ -157,10 +166,19 @@ class NewNoteFragment : Fragment(), MenuProvider {
 
             imageViewEditDescription.visibility = View.VISIBLE
             imageViewEditDescription.setOnClickListener {
+                switchVisibility(imageViewSaveDescription.includedImageSave)
                 switchVisibility(textViewDescription)
                 switchVisibility(editTextDescription)
-                switchVisibility(buttonNewNote)
+//                switchVisibility(buttonNewNote)
                 editTextDescription.setText(note.description)
+            }
+            imageViewSaveDescription.includedImageSave.setOnClickListener {
+                val description: String = editTextDescription.text.toString().trim()
+                textViewDescription.text = description.trim()
+                switchVisibility(it)
+                switchVisibility(textViewDescription)
+                switchVisibility(editTextDescription)
+                viewModel.updateNote(note.copy(description = description))
             }
         }
     }
@@ -170,11 +188,12 @@ class NewNoteFragment : Fragment(), MenuProvider {
         else "${item + predicate}"
     }
 
-    private fun calculateProgress() {
+    private fun calculateProgress(note: Note) {
         with(binding) {
-            var size: Double = note.listOfTasks.size.toDouble()
+            val list = note.listOfTasks
+            var size: Double = list.size.toDouble()
             if (size != 0.0) size = 1 / size
-            val progressPercent = (list.size * 100 * size).roundToInt()
+            val progressPercent = (list.filter { it.isChecked }.size * 100 * size).roundToInt()
             progressBar.progress = progressPercent
             textViewCheckPercent.text =
                 String.format(getString(R.string.check_percent), progressPercent, "%")
@@ -208,18 +227,16 @@ class NewNoteFragment : Fragment(), MenuProvider {
         newNoteAdapter = NewNoteCheckItemAdapter()
         newNoteAdapter.checkItemsList = ArrayList(note.listOfTasks)
         recyclerView.adapter = newNoteAdapter
-        (recyclerView.adapter as NewNoteCheckItemAdapter).onItemClick = {
-            if (list.contains(it.id)) list.remove(it.id)
-            else list.add(it.id)
-            calculateProgress()
-            viewModel.updateNote(note.copy(listOfTasks = note.listOfTasks.map { item ->
-                if (item == it) {
-                    item.copy(isChecked = !it.isChecked)
+        newNoteAdapter.onItemClick = {
+            val newNote = note.copy(listOfTasks = note.listOfTasks.map { item ->
+                if (item.id == it.id) {
+                    item.copy(isChecked = !item.isChecked)
                 } else {
                     item
                 }
-            }))
-
+            })
+            calculateProgress(newNote)
+            viewModel.updateNote(newNote)
         }
     }
 
@@ -239,8 +256,10 @@ class NewNoteFragment : Fragment(), MenuProvider {
         viewModel.noteData.observe(viewLifecycleOwner) {
             newNoteAdapter.checkItemsList = it
         }
-        viewModel.error.observe(viewLifecycleOwner) {
 
+        viewModel.noteLiveData.observe(viewLifecycleOwner) {
+            note = it
+            binding.textViewDescription.text = note.description
         }
     }
 

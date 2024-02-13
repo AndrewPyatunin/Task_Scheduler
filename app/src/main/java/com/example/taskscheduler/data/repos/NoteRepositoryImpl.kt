@@ -9,7 +9,7 @@ import com.example.taskscheduler.data.database.NotesListDao
 import com.example.taskscheduler.data.datasources.NoteDataSourceImpl
 import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
 import com.example.taskscheduler.data.mappers.*
-import com.example.taskscheduler.domain.CheckNoteItem
+import com.example.taskscheduler.domain.models.CheckNoteItem
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
@@ -33,10 +33,12 @@ class NoteRepositoryImpl(
     private val database: FirebaseDatabase = Firebase.database
     private val noteDataSource = NoteDataSourceImpl(noteDao)
     private val notesListDataSource = NotesListDataSourceImpl(notesListDao)
+    private val checkNoteEntityToCheckNoteItemMapper = CheckNoteEntityToCheckNoteItemMapper()
+    private val checkNoteItemToCheckNoteEntityMapper = CheckNoteItemToCheckNoteEntityMapper()
     private val noteToNoteEntityMapper =
-        NoteToNoteEntityMapper(CheckNoteItemToCheckNoteEntityMapper())
+        NoteToNoteEntityMapper(checkNoteItemToCheckNoteEntityMapper)
     private val noteEntityToNoteMapper =
-        NoteEntityToNoteMapper(CheckNoteEntityToCheckNoteItemMapper())
+        NoteEntityToNoteMapper(checkNoteEntityToCheckNoteItemMapper)
     private val notesListItemToNotesListEntityMapper = NotesListItemToNotesListEntityMapper()
     private val databaseNotesListsReference = database.getReference(NOTES_LIST)
     private val databaseNotesReference = database.getReference(NOTES)
@@ -64,6 +66,7 @@ class NoteRepositoryImpl(
                 val notes = ArrayList<Note>()
                 snapshot.children.forEach {
                     if (it.key in notesListItem.listNotes) {
+//                        notes.add(it.getValue(Note::class.java) ?: Note())
                         it.getValue(Note::class.java)?.let { note ->
                             if (note !in listNotes)
                                 notes.add(note)
@@ -100,6 +103,10 @@ class NoteRepositoryImpl(
         addListOfNote(notesListItem.copy(listNotes = (notesListItem.listNotes.plus(idNote to true))))
         url.setValue(true)
         MyDatabaseConnection.updated = true
+    }
+
+    override fun getNote(noteId: String): Flow<Note> {
+        return noteDataSource.getNote(noteId).map { noteEntityToNoteMapper.map(it) }
     }
 
     override suspend fun updateNote(note: Note) {

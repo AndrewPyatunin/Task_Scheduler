@@ -2,7 +2,7 @@ package com.example.taskscheduler.data.mappers
 
 import com.example.taskscheduler.data.entities.CheckNoteEntity
 import com.example.taskscheduler.data.entities.NoteEntity
-import com.example.taskscheduler.domain.CheckNoteItem
+import com.example.taskscheduler.domain.models.CheckNoteItem
 import com.example.taskscheduler.domain.models.Note
 
 class NoteToNoteEntityMapper(private val mapper: Mapper<CheckNoteItem, CheckNoteEntity>) : Mapper<Note, NoteEntity> {

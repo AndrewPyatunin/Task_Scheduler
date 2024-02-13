@@ -1,7 +1,6 @@
 package com.example.taskscheduler.domain.models
 
 import android.os.Parcelable
-import com.example.taskscheduler.domain.CheckNoteItem
 import com.example.taskscheduler.domain.UrgencyOfNote
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize

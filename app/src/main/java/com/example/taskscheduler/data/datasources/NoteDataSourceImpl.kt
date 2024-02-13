@@ -5,31 +5,35 @@ import com.example.taskscheduler.data.entities.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 class NoteDataSourceImpl(
-    private val taskDatabaseDao: NoteDao
+    private val noteDao: NoteDao
 ) : NoteDataSource {
 
     override fun getNotesFlow(): Flow<List<NoteEntity>> {
-        return taskDatabaseDao.getNotesFlow()
+        return noteDao.getNotesFlow()
     }
 
     override suspend fun addNote(noteEntity: NoteEntity) {
-        taskDatabaseDao.addNote(noteEntity)
+        noteDao.addNote(noteEntity)
     }
 
     override suspend fun addNotes(notes: List<NoteEntity>) {
-        taskDatabaseDao.addNotes(notes)
+        noteDao.addNotes(notes)
     }
 
     override suspend fun removeNote(noteEntity: NoteEntity) {
-        taskDatabaseDao.removeNote(noteEntity.id)
+        noteDao.removeNote(noteEntity.id)
+    }
+
+    override fun getNote(noteId: String): Flow<NoteEntity> {
+        return noteDao.getNote(noteId)
     }
 
     override suspend fun getNotes(): List<NoteEntity> {
-        return taskDatabaseDao.getNotes()
+        return noteDao.getNotes()
     }
 
     override suspend fun clearAllNotesInRoom() {
-        taskDatabaseDao.clearAllNotes()
+        noteDao.clearAllNotes()
     }
 
 

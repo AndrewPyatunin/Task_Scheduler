@@ -121,7 +121,7 @@ class OuterBoardFragment : Fragment() {
 
     private fun initViewPager(list: List<NotesListItem>) {
         Log.i("OUTER_BOARD_LIST", list.toString())
-        if (list != parentList || list.isEmpty()) {
+        if (list.size != parentList.size && list != parentList || list.isEmpty()) {
             parentAdapter =
                 OuterBoardAdapter(
                     lifecycle =  lifecycle,

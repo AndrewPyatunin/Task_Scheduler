@@ -7,6 +7,8 @@ interface NoteDataSource {
 
     fun getNotesFlow(): Flow<List<NoteEntity>>
 
+    fun getNote(noteId: String): Flow<NoteEntity>
+
     suspend fun addNote(noteEntity: NoteEntity)
 
     suspend fun addNotes(notes: List<NoteEntity>)

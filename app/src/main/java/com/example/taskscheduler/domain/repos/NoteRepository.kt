@@ -1,6 +1,6 @@
 package com.example.taskscheduler.domain.repos
 
-import com.example.taskscheduler.domain.CheckNoteItem
+import com.example.taskscheduler.domain.models.CheckNoteItem
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.Flow
 interface NoteRepository {
 
     fun getNotesFlow(): Flow<List<Note>>
+
+    fun getNote(noteId: String): Flow<Note>
 
     suspend fun fetchNotes(notesListItem: NotesListItem, listNotes: List<Note>, scope: CoroutineScope)
 

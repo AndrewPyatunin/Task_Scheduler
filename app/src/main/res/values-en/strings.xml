@@ -71,4 +71,5 @@
     <string name="camera">Camera</string>
     <string name="cancel">Cancel</string>
     <string name="fill_in_the_input_field">Fill in the input field!</string>
+    <string name="new_item">New item</string>
 </resources>

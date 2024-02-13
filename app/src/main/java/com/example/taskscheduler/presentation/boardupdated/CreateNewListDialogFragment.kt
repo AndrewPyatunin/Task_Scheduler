@@ -26,9 +26,7 @@ class CreateNewListDialogFragment : DialogFragment() {
             val listTitle = editText.text.toString().trim()
             if (listTitle.isNotEmpty()) {
                 (parentFragment as OuterBoardFragment).createNewList(listTitle)
-                Handler(Looper.getMainLooper()).postDelayed({
-                    dismiss()
-                },1000)
+                dismiss()
             } else {
                 Toast.makeText(context, String.format(getString(R.string.fill_in_the_input_field)), Toast.LENGTH_SHORT).show()
             }

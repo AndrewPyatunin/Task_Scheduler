@@ -197,6 +197,16 @@
             app:layout_constraintStart_toEndOf="@+id/textDescription"
             app:layout_constraintTop_toBottomOf="@+id/textInList" />
 
+        <include
+            android:id="@+id/imageViewSaveDescription"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginHorizontal="8dp"
+            app:layout_constraintStart_toEndOf="@id/imageViewEditDescription"
+            app:layout_constraintTop_toBottomOf="@id/textInList"
+            app:layout_constraintBottom_toBottomOf="@id/textDescription"
+            layout="@layout/image_view_save" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewCheckList"
             android:layout_width="0dp"
@@ -222,21 +232,30 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
             android:ems="10"
-            android:text="@string/name_name"
+            android:paddingHorizontal="8dp"
+            android:hint="@string/new_item"
             android:visibility="gone"
-            app:layout_constraintStart_toStartOf="@+id/buttonAddCheckListItem"
+            app:layout_constraintStart_toStartOf="@+id/imageViewChecklist"
             app:layout_constraintTop_toTopOf="@+id/buttonAddCheckListItem" />
 
-        <Button
+        <include
             android:id="@+id/buttonAddItemToCheckList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add"
-            android:textSize="11sp"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/editTextCheckTitle"
-            app:layout_constraintStart_toStartOf="@+id/buttonAddCheckListItem"
-            app:layout_constraintTop_toBottomOf="@+id/editTextCheckTitle" />
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginHorizontal="8dp"
+            app:layout_constraintStart_toEndOf="@+id/editTextCheckTitle"
+            app:layout_constraintTop_toTopOf="@+id/editTextCheckTitle"
+            app:layout_constraintBottom_toBottomOf="@+id/editTextCheckTitle"
+            layout="@layout/image_view_save"/>
+
+        <include
+            android:id="@+id/buttonCancelItem"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            app:layout_constraintStart_toEndOf="@+id/buttonAddItemToCheckList"
+            app:layout_constraintTop_toTopOf="@+id/editTextCheckTitle"
+            app:layout_constraintBottom_toBottomOf="@+id/editTextCheckTitle"
+            layout="@layout/image_view_cancel"/>
 
         <ProgressBar
             android:id="@+id/progressBar"

@@ -62,22 +62,22 @@ class UserProfileFragment : Fragment() {
             imageViewEditUserDescription.setOnClickListener {
                 editTextPersonDescription.setText(textViewDescriptionUser.text.trim())
                 changeVisibilityForAllDescriptionElements()
-                imageViewSaveDescription.setOnClickListener {
+                imageViewSaveDescription.includedImageSave.setOnClickListener {
                     viewModel.updateUserProfile(editTextPersonDescription.text.toString(), "", user!!)
                     changeVisibilityForAllDescriptionElements()
                 }
-                imageViewDescriptionClose.setOnClickListener {
+                imageViewDescriptionClose.includedImageCancel.setOnClickListener {
                     changeVisibilityForAllDescriptionElements()
                 }
             }
             imageViewEditUserEmail.setOnClickListener {
                 editTextPersonEmail.setText(textViewEmail.text)
                 changeVisibilityForAllEmailElements()
-                imageViewSaveEmail.setOnClickListener {
+                imageViewSaveEmail.includedImageSave.setOnClickListener {
                     viewModel.updateUserProfile("", editTextPersonEmail.text.toString(), user!!)
                     changeVisibilityForAllEmailElements()
                 }
-                imageViewEmailClose.setOnClickListener {
+                imageViewEmailClose.includedImageCancel.setOnClickListener {
                     changeVisibilityForAllEmailElements()
                 }
             }
@@ -92,8 +92,8 @@ class UserProfileFragment : Fragment() {
             changeVisibility(textViewEmail)
             changeVisibility(imageViewEditUserEmail)
             changeVisibility(editTextPersonEmail)
-            changeVisibility(imageViewSaveEmail)
-            changeVisibility(imageViewEmailClose)
+            changeVisibility(imageViewSaveEmail.includedImageSave)
+            changeVisibility(imageViewEmailClose.includedImageCancel)
         }
     }
 
@@ -102,8 +102,8 @@ class UserProfileFragment : Fragment() {
             changeVisibility(textViewDescriptionUser)
             changeVisibility(imageViewEditUserDescription)
             changeVisibility(editTextPersonDescription)
-            changeVisibility(imageViewSaveDescription)
-            changeVisibility(imageViewDescriptionClose)
+            changeVisibility(imageViewSaveDescription.includedImageSave)
+            changeVisibility(imageViewDescriptionClose.includedImageCancel)
         }
     }
 
