@@ -1,56 +1,52 @@
 package com.example.taskscheduler.presentation.boardupdated
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentInnerBoardBinding
-import com.example.taskscheduler.domain.*
-import com.example.taskscheduler.findTopNavController
+import com.example.taskscheduler.domain.NoteComparator
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.NotesListItem
+import com.example.taskscheduler.domain.models.Note
+import com.example.taskscheduler.domain.models.User
 import com.google.android.material.tabs.TabLayout
 
 
 class InnerBoardFragment : Fragment(), MenuProvider {
 
-    lateinit var binding: FragmentInnerBoardBinding
-    lateinit var list: ListOfNotesItem
-    lateinit var notesItem: NotesItem
-    lateinit var user: User
-    lateinit var board: Board
-    lateinit var listNotes: List<Note>
-    lateinit var recyclerView: RecyclerView
-    lateinit var innerAdapter: InnerBoardAdapter
-    lateinit var viewModel: InnerBoardViewModel
-    lateinit var listOfLists: ArrayList<ListOfNotesItem>
-    var position: Int = 0
-    private var recyclerViewReadyCallback: RecyclerViewReadyCallback? = null
-    var currentPosition = 0
-    var tabLayout: TabLayout? = null
-    var viewPager: ViewPager2? = null
-//    private val args by navArgs<InnerBoardFragmentArgs>()
+    private lateinit var binding: FragmentInnerBoardBinding
+    private lateinit var list: NotesListItem
+    private lateinit var user: User
+    private lateinit var board: Board
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var innerAdapter: InnerBoardAdapter
+    private lateinit var viewModel: InnerBoardViewModel
+    private lateinit var listOfLists: ArrayList<NotesListItem>
+    private var position: Int = 0
+    private var tabLayout: TabLayout? = null
+    private var viewPager: ViewPager2? = null
+    private var listNotes: List<Note> = emptyList()
+    private var isFirst = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         position = requireArguments().getInt(POSITION)
+        isFirst = false
         listOfLists =
-            requireArguments().getParcelableArrayList(LIST) ?: ArrayList<ListOfNotesItem>()
+            requireArguments().getParcelableArrayList(LIST) ?: arrayListOf()
         list = listOfLists[position]
         user = requireArguments().getParcelable(USER)!!
         board = requireArguments().getParcelable(BOARD)!!
-        Log.i("USER_BOARD_FROM_OUTER", board.title)
-//        notesItem = requireArguments().getParcelable(NOTES) ?: NotesItem()
     }
 
 
@@ -58,13 +54,11 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentInnerBoardBinding.inflate(inflater, container, false)
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         viewModel = ViewModelProvider(this)[InnerBoardViewModel::class.java]
-        viewModel.getNotes(list.listNotes.keys.toList())
-//        registerForContextMenu()
         observeViewModel()
         viewPager = requireActivity().findViewById(R.id.view_pager)
         tabLayout = requireActivity().findViewById(R.id.tab_layout)
@@ -73,12 +67,10 @@ class InnerBoardFragment : Fragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        list = arguments?.getParcelable<ListOfNotesItem>(LIST) ?: ListOfNotesItem()
         binding.listOfNotesTitle.text = list.title
         binding.textViewAddCard.setOnClickListener {
             launchNewNoteFragment(Note())
         }
-
     }
 
 
@@ -94,90 +86,42 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         )
     }
 
-    private fun dateToInt(date: String): Int {
-        Log.i("USER_note_date", date)
-        var dateForm = ""
-        date.forEach { if (it!='.') dateForm += it }
-        Log.i("USER_NOTE_DATE", dateForm)
-//        val a = date.length
-//        val fromDate = "${date[a-4]}${date[a-3]}${date[a-2]}${date[a-1]}"
-        val num = dateForm.toIntOrNull()
-        var newDate: Int = Int.MAX_VALUE
-        if (num != null) {
-            val year = num % 10000
-            val month = num / 10000 % 100
-            val day = num / 1000000
-            newDate = year * 10000 + month * 100 + day
-        }
-        Log.i("USER_NEWDATE", newDate.toString())
-        return newDate
-    }
-
-
-    private fun initViews(list: List<Note>) {
-//        Log.i("USER_LIST_INNER_BOARD", list.title)
-        recyclerView = binding.childRecyclerViewBoard
-//        recyclerView.visibility = View.GONE
-        var newList = list
-        newList = newList.sortedWith(Comparator { ln, rn ->
-            if (ln.priority < rn.priority || (ln.priority == rn.priority &&
-                        dateToInt(ln.date) < dateToInt(rn.date))
-            ) -1 else if (ln.priority > rn.priority) 1 else 0
-        })
-//        newList = newList.sortedWith(Comparator { ln, rn ->
-//            if (ln.priority < rn.priority || (ln.priority == rn.priority &&
-//                        dateToInt(ln.date) < dateToInt(rn.date))
-//            ) 1 else if (ln.priority > rn.priority) -1 else 0
-//        })
-        newList.forEach { Log.i("USER_NEW_LIST", it.title)}
-
+    private fun initList(list: List<Note>) {
+        val newList = list.sortedWith(NoteComparator())
         innerAdapter = InnerBoardAdapter(newList)
-        recyclerView.layoutManager = GridLayoutManager(
-            requireContext(), 1,
-            GridLayoutManager.VERTICAL, false
-        )
         recyclerView.adapter = innerAdapter
-        recyclerView.setHasFixedSize(true)
-
-        binding.loadingIndicatorList.visibility = View.GONE
-        recyclerView.visibility = View.VISIBLE
-
         innerAdapter.onItemClick = {
             launchNewNoteFragment(it)
         }
-
     }
 
-    private fun observeViewModel() {
-        viewModel.listNotesLiveData.observe(viewLifecycleOwner, Observer {
-            initViews(it)
-        })
-    }
+    private fun initViews(list: List<Note>) {
+        if (!isFirst) {
+            recyclerView = binding.childRecyclerViewBoard
+            initList(list)
+            recyclerView.layoutManager = GridLayoutManager(
+                requireContext(), 1,
+                GridLayoutManager.VERTICAL, false
+            )
+            recyclerView.setHasFixedSize(true)
 
-
-    companion object {
-        const val USER = "user"
-        const val LIST = "list"
-        const val BOARD = "board"
-        const val POSITION = "position"
-
-        fun newInstance(
-            listOfNotesItems: ArrayList<ListOfNotesItem>,
-            position: Int,
-            board: Board,
-            user: User
-        ): InnerBoardFragment {
-            return InnerBoardFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelableArrayList(LIST, listOfNotesItems)
-                    putInt(POSITION, position)
-                    putParcelable(BOARD, board)
-                    putParcelable(USER, user)
-                }
-            }
+            binding.loadingIndicatorList.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
         }
     }
 
+    private fun observeViewModel() {
+        viewModel.listNotesLiveData.observe(viewLifecycleOwner) {
+            listNotes = it
+            initViews(it)
+        }
+        viewModel.fetchNotes(list, listNotes)
+
+        viewModel.getNotes(list.listNotes)
+
+        viewModel.readyLiveData.observe(viewLifecycleOwner) {
+        }
+    }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menu.clear()
@@ -205,30 +149,33 @@ class InnerBoardFragment : Fragment(), MenuProvider {
                     listTitleEdit.visibility = View.VISIBLE
                     buttonSaveListTitle.visibility = View.VISIBLE
                     buttonSaveListTitle.setOnClickListener {
-                        if (listTitleEdit.text.toString().trim() != "") {
-                            Log.i("USER_BOARD_NAME", board.title)
+                        if (listTitleEdit.text.toString().trim().isNotEmpty()) {
                             viewModel.renameList(list, board, listTitleEdit.text.toString().trim())
                             buttonSaveListTitle.visibility = View.GONE
                             listTitleEdit.visibility = View.GONE
                             listOfNotesTitle.visibility = View.VISIBLE
                         } else {
                             Toast.makeText(
-                                requireContext(), "Нельзя задать пустое название!",
+                                requireContext(), getString(R.string.cannot_enter_an_empty_name),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
                 }
-
             }
             R.id.item_change_board -> {
-                findNavController().navigate(InnerBoardFragmentDirections.actionGlobalNewBoardFragment(user, board))
+                findNavController().navigate(
+                    InnerBoardFragmentDirections.actionGlobalNewBoardFragment(
+                        user,
+                        board
+                    )
+                )
             }
             R.id.item_delete_list -> {
                 if (board.listsOfNotesIds.size < 2) {
                     tabLayout?.visibility = View.GONE
                 }
-                viewModel.deleteList(list.id, board, true)
+                viewModel.deleteList(list, board, true)
 
             }
             R.id.item_delete_board -> {
@@ -238,5 +185,29 @@ class InnerBoardFragment : Fragment(), MenuProvider {
             android.R.id.home -> findNavController().popBackStack()
         }
         return true
+    }
+
+    companion object {
+
+        const val USER = "user"
+        const val LIST = "list"
+        const val BOARD = "board"
+        const val POSITION = "position"
+
+        fun newInstance(
+            notesListItems: ArrayList<NotesListItem>,
+            position: Int,
+            board: Board,
+            user: User
+        ): InnerBoardFragment {
+            return InnerBoardFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelableArrayList(LIST, notesListItems)
+                    putInt(POSITION, position)
+                    putParcelable(BOARD, board)
+                    putParcelable(USER, user)
+                }
+            }
+        }
     }
 }

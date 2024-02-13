@@ -6,68 +6,64 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.taskscheduler.MyInvitesAdapter
 import com.example.taskscheduler.databinding.FragmentMyInvitesBinding
-import com.example.taskscheduler.domain.Invite
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.Invite
+import com.example.taskscheduler.domain.models.User
 
 class MyInvitesFragment : Fragment() {
-    lateinit var binding: FragmentMyInvitesBinding
-    lateinit var recyclerView: RecyclerView
-    lateinit var adapter: MyInvitesAdapter
-    lateinit var viewModel: MyInvitesViewModel
-    lateinit var user: User
 
-//    private val args by navArgs<MyInvitesFragmentArgs>()
+    private lateinit var binding: FragmentMyInvitesBinding
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: MyInvitesAdapter
+    private lateinit var user: User
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        user = args.user
+    private val viewModel by lazy {
+        ViewModelProvider(this)[MyInvitesViewModel::class.java]
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentMyInvitesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[MyInvitesViewModel::class.java]
         observeViewModel()
         initViews()
         adapter.onItemClick = {
-//            findNavController().navigate(MyInvitesFragmentDirections.actionMyInvitesFragmentToReplyToInviteDialogFragment(it))
             ReplyToInviteDialogFragment.newInstance(it).show(childFragmentManager, "ReplyDialog")
         }
     }
 
     private fun initViews() {
         recyclerView = binding.recyclerViewMyInvites
-        recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        recyclerView.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         adapter = MyInvitesAdapter()
         recyclerView.adapter = adapter
     }
 
     private fun observeViewModel() {
-        viewModel.inviteList.observe(viewLifecycleOwner, Observer {
+        viewModel.invitesLiveData.observe(viewLifecycleOwner) {
             adapter.invitesList = it
-        })
-        viewModel.user.observe(viewLifecycleOwner, Observer {
-            user = it
-        })
-    }
+            binding.progressBarInvites.visibility = View.GONE
+        }
 
-//    private fun parseArgs(): User {
-//        return requireArguments().getParcelable<User>(KEY_USER)!!
-//    }
+        viewModel.user.observe(viewLifecycleOwner) {
+            user = it
+            viewModel.getInvitesFromRoom()
+        }
+
+        viewModel.invitesReady.observe(viewLifecycleOwner) {
+        }
+    }
 
     fun okClicked(invite: Invite) {
         Log.i("USER_AFTER_INVITE_CLICK", user.name)
@@ -80,6 +76,7 @@ class MyInvitesFragment : Fragment() {
 
 
     companion object {
+
         const val KEY_USER = "user"
 
         fun newInstance(user: User): MyInvitesFragment {
@@ -87,7 +84,6 @@ class MyInvitesFragment : Fragment() {
             return MyInvitesFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(KEY_USER, user)
-//                    putParcelable()
                 }
             }
         }

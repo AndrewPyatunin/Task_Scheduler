@@ -1,44 +1,32 @@
 package com.example.taskscheduler
 
-import android.net.Uri
-import androidx.lifecycle.LiveData
+import android.app.Application
 import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.NewCallback
-import com.example.taskscheduler.domain.User
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.repos.UserRepository
+import com.example.taskscheduler.domain.usecases.AddAllUsersUseCase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
 
 object MyDatabaseConnection : DatabaseConnection {
+
     val database = Firebase.database
-    private val databaseUsersRef = database.getReference("Users")
-    val databaseBoardsRef = database.getReference("Boards")
     private val databaseImagesReference = database.getReference("ImageUrls")
-    var userFrom = User()
-    var uri: Uri? = null
+    lateinit var repository: UserRepository
+    private var addAllUsersUseCase: AddAllUsersUseCase? = null
+    @Volatile var boardList = emptyList<Board>()
     var currentPosition = 0
-    var list = emptyList<BackgroundImage>()
+    var backgroundImages = emptyList<BackgroundImage>()
     var updated = true
-//    override fun <T>queryUser(ref: DatabaseReference, liveData: LiveData<T>) {
-//        ref.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                snapshot.getValue()
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//
-//            }
-//
-//        })
-//    }
+    var userId: String? = null
+    var isFromBackStack = false
+
     fun onCallbackReady() {
         getBackgroundImages(object : NewCallback {
             override fun callbackNew(list: List<BackgroundImage>) {
-                this@MyDatabaseConnection.list = list
+                this@MyDatabaseConnection.backgroundImages = list
             }
 
         })
@@ -52,25 +40,11 @@ object MyDatabaseConnection : DatabaseConnection {
         }
     }
 
-    override fun query(user: FirebaseUser) {
-        databaseUsersRef.child(user.uid).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                userFrom = snapshot.getValue(User::class.java) ?: User()
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-
-            }
-
-        })
+    override suspend fun query(application: Application, scope: CoroutineScope) {
+        if (addAllUsersUseCase == null) {
+            repository = MyApp.userRepository
+            addAllUsersUseCase = AddAllUsersUseCase(repository)
+        }
+        addAllUsersUseCase?.execute(scope)
     }
-
-    override fun getBoard() {
-        TODO("Not yet implemented")
-    }
-
-    override fun getBackgroundImages(): List<BackgroundImage> {
-        TODO("Not yet implemented")
-    }
-
 }

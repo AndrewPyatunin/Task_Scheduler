@@ -1,99 +1,97 @@
 package com.example.taskscheduler.presentation.boardlist
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.domain.Board
-import com.example.taskscheduler.domain.User
-import com.google.firebase.auth.FirebaseUser
+import com.example.taskscheduler.MyApp
+import com.example.taskscheduler.MyDatabaseConnection
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.domain.usecases.*
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-class BoardListViewModel(user: User) : ViewModel() {
-    private val auth = Firebase.auth
-    private val firebaseDatabase = Firebase.database
-    private val databaseBoardsReference = firebaseDatabase.getReference("Boards")
-    private val databaseUsersReference = firebaseDatabase.getReference("Users")
+class BoardListViewModel : ViewModel() {
 
-    private val _firebaseUser = MutableLiveData<FirebaseUser>()
-    val firebaseUser: LiveData<FirebaseUser>
-        get() = _firebaseUser
+    private val boardRepository = MyApp.boardRepository
+    private val userRepository = MyApp.userRepository
+    private val getBoardsFlowUseCase: GetBoardsFlowUseCase = GetBoardsFlowUseCase(boardRepository)
+    private val logOutUseCase: LogOutUseCase = LogOutUseCase(MyApp.userAuthentication)
+    private val getUserFromRoomUseCase: GetUserFromRoomUseCase =
+        GetUserFromRoomUseCase(MyApp.userRepository)
+    private val addAllUsersUseCase = AddAllUsersUseCase(userRepository)
+    private val fetchBoardsUseCase: FetchBoardsUseCase = FetchBoardsUseCase(boardRepository)
+    private val clearAllDataInRoomUseCase = ClearAllDataInRoomUseCase(
+        MyApp.inviteRepository,
+        boardRepository,
+        MyApp.notesListRepository,
+        MyApp.noteRepository,
+        userRepository
+    )
+    private val auth: FirebaseAuth = Firebase.auth
 
-    private val _boardList = MutableLiveData<List<Board>>()
-    val boardList: LiveData<List<Board>>
-        get() = _boardList
+    private val _userLiveData = MutableLiveData<User>()
+    val userLiveData: LiveData<User> = _userLiveData
 
-    private val _user = MutableLiveData<User>()
-    val user: LiveData<User>
-        get() = _user
+    private val _boardsLiveData = MutableLiveData<List<Board>>()
+    val boardsLiveData: LiveData<List<Board>> = _boardsLiveData
+
+    private val _dataReady = MutableLiveData<Unit>()
+    val dataReady: LiveData<Unit> = _dataReady
 
     init {
-        auth.addAuthStateListener {
-            if (it.currentUser == null) {
-                _firebaseUser.value = auth.currentUser
-            }
-        }
-        auth.addAuthStateListener {
-            if (it.currentUser != null) {
-                databaseBoardsReference.addValueEventListener(
-                    object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            readData(object : MyCallback {
-                                override fun onCallback(user: User) {
-                                    val boardsId = user.boards
-                                    val boardsFromDb = ArrayList<Board>()
-                                    for (dataSnapshot in snapshot.children) {
-                                        val board = dataSnapshot.getValue(Board::class.java)
-                                        if (board != null && dataSnapshot.key in boardsId) {
-                                            boardsFromDb.add(board)
-                                        }
-                                    }
-                                    _boardList.value = boardsFromDb
-                                }
-                            })
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            logout()
-                        }
-                    })
-
-            }
-        }
+        addAllUsers()
     }
 
-    fun readData(callback: MyCallback) {
+    private fun addAllUsers() {
         viewModelScope.launch(Dispatchers.IO) {
-            val queryForUser = databaseUsersReference.child(auth.currentUser?.uid ?: "")
-            queryForUser.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val userFromDb = snapshot.getValue(User::class.java)
-                    _user.postValue(userFromDb as User)
-                    callback.onCallback(userFromDb)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    logout()
-                }
-            })
+            addAllUsersUseCase.execute(viewModelScope)
         }
-
     }
 
-    interface MyCallback {
-        fun onCallback(user: User)
+    fun fetchUser() {
+        viewModelScope.launch(Dispatchers.IO) {
+            getUser().let {
+                _userLiveData.postValue(it)
+            }
+        }
     }
 
-    fun logout() {
-        if (user.value != null) {
-            databaseUsersReference.child(user.value!!.id).child("onlineStatus").setValue(false)
+    fun fetchBoards(user: User, listBoards: List<Board>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _dataReady.postValue(fetchBoardsUseCase.execute(user, viewModelScope, listBoards))
+        }
+    }
+
+
+    fun getBoardsFlow(user: User) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getBoardsFlowUseCase.execute(user).onEach { Log.d("DataUpdate", "Flow emission: $it") }.map { list ->
+                list.filter {
+                    it.id in user.boards
+                }
+            }.collectLatest {
+                Log.d("DataUpdate", "New data collected: $it") // Log the new data
+                _boardsLiveData.postValue(it)
+            }
+        }
+    }
+
+    private suspend fun getUser() =
+        getUserFromRoomUseCase.execute(auth.currentUser?.uid ?: MyDatabaseConnection.userId ?: throw RuntimeException("User is not found!"))
+
+    fun logout(user: User) {
+        logOutUseCase.execute(user, viewModelScope)
+        viewModelScope.launch(Dispatchers.IO) {
+            clearAllDataInRoomUseCase.execute()
         }
         auth.signOut()
     }

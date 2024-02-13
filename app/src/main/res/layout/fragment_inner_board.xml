@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--<com.google.android.material.card.MaterialCardView-->
-<!--    android:id="@+id/inner_fragment"-->
-<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
-<!--    xmlns:tools="http://schemas.android.com/tools"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:layout_marginHorizontal="8dp"-->
-<!--    app:cardCornerRadius="8dp"-->
-<!--    app:cardElevation="4dp"-->
-<!--    app:cardUseCompatPadding="true"-->
-<!--    tools:context="com.example.taskscheduler.presentation.boardupdated.InnerBoardFragment">-->
-
-
 <androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/inner_fragment"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -76,9 +62,6 @@
 
     </androidx.cardview.widget.CardView>
 
-
-
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/child_recyclerViewBoard"
         android:layout_width="match_parent"
@@ -88,10 +71,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardAddNewCard">
-
     </androidx.recyclerview.widget.RecyclerView>
-
-
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardAddNewCard"
@@ -113,6 +93,3 @@
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-<!--</com.google.android.material.card.MaterialCardView>-->

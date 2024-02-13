@@ -1,12 +1,13 @@
 package com.example.taskscheduler.presentation.boardlist
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.User
 
-class BoardListViewModelFactory(val user: User): ViewModelProvider.Factory {
+class BoardListViewModelFactory(val application: Application): ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return BoardListViewModel(user) as T
+        return BoardListViewModel() as T
     }
 }

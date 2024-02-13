@@ -2,7 +2,6 @@ package com.example.taskscheduler
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.example.taskscheduler.presentation.registration.RegistrationFragment
@@ -13,24 +12,23 @@ class ChooseAvatarOptionFragment : DialogFragment() {
 
         return requireActivity().let {
             val builder = AlertDialog.Builder(it)
-            builder.setTitle("Откуда возьмем фото?")
+            builder.setTitle(getString(R.string.from_where_pick_photo))
                 .setCancelable(true)
-                .setPositiveButton("Галлерея", object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface?, which: Int) {
-                        (parentFragment as RegistrationFragment).galleryClicked()
-                    }
-
-                }).setNegativeButton("Камера", object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface?, which: Int) {
-                        (parentFragment as RegistrationFragment).cameraClicked()
-                    }
-
-                }).create()
+                .setPositiveButton(
+                    getString(R.string.gallery)
+                ) { _, _ -> (parentFragment as RegistrationFragment).pickImageFromGallery() }
+                .setNegativeButton(
+                    getString(R.string.camera)
+                ) { _, _ -> (parentFragment as RegistrationFragment).takePhotoFromCamera() }
+                .create()
         }
     }
 
-    fun newInstance(): ChooseAvatarOptionFragment {
+    companion object {
 
-        return ChooseAvatarOptionFragment()
+        fun newInstance(): ChooseAvatarOptionFragment {
+
+            return ChooseAvatarOptionFragment()
+        }
     }
 }

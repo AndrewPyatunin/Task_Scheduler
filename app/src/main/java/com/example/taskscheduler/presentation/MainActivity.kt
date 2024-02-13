@@ -1,6 +1,7 @@
 package com.example.taskscheduler.presentation
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.MotionEvent
@@ -14,6 +15,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
+import com.example.taskscheduler.MyApp
+import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
@@ -21,32 +24,46 @@ import com.google.firebase.ktx.Firebase
 import java.util.regex.Pattern
 
 class MainActivity : AppCompatActivity() {
+
     val auth = Firebase.auth
     var user = auth.currentUser
     private val databaseUsersRef = Firebase.database.getReference("Users")
-//}
     private var navController: NavController? = null
     private val topLevelDestinations = setOf(getWelcomeDestination(), getLoginDestination())
+    private var pref: SharedPreferences? = null
+
+    companion object {
+        const val USER_ID_KEY = "user_id"
+        const val BACKGROUND_IMAGES_KEY = "background_images"
+    }
 
     private val fragmentListener = object : FragmentManager.FragmentLifecycleCallbacks() {
-        override fun onFragmentViewCreated(fm: FragmentManager, f: Fragment, v: View, savedInstanceState: Bundle?) {
+        override fun onFragmentViewCreated(
+            fm: FragmentManager,
+            f: Fragment,
+            v: View,
+            savedInstanceState: Bundle?
+        ) {
             super.onFragmentViewCreated(fm, f, v, savedInstanceState)
             if (f is TabsFragment || f is NavHostFragment) return
             onNavControllerActivated(f.findNavController())
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.Theme_AppCompat_Main)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
-
+        MyApp.initialize(application)
+        pref = getSharedPreferences("Id", MODE_PRIVATE)
+        MyDatabaseConnection.userId = pref?.getString(USER_ID_KEY, "")
+        MyDatabaseConnection.backgroundImages = Converter.fromStringToList(pref?.getString(
+            BACKGROUND_IMAGES_KEY, null))
         val navController = getRootNavController()
-        prepareRootNavController(isSignedIn(), navController)
+        prepareRootNavController(user != null, navController)
         onNavControllerActivated(navController)
-
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, true)
-
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
@@ -64,12 +81,6 @@ class MainActivity : AppCompatActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
-    private fun hideKeyboard(editText: EditText) {
-        val imm: InputMethodManager =
-            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(editText.windowToken, 0)
-    }
-
     override fun onDestroy() {
         supportFragmentManager.unregisterFragmentLifecycleCallbacks(fragmentListener)
         navController = null
@@ -81,8 +92,15 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun hideKeyboard(editText: EditText) {
+        val imm: InputMethodManager =
+            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(editText.windowToken, 0)
+    }
+
     private fun getRootNavController(): NavController {
-        val navHost = supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
+        val navHost =
+            supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
         return navHost.navController
     }
 
@@ -104,12 +122,6 @@ class MainActivity : AppCompatActivity() {
         navController.graph = graph
     }
 
-    private fun isSignedIn(): Boolean {
-//        val bundle = intent.extras ?: throw IllegalStateException("No required arguments")
-//        val args = MainActivityArgs.fromBundle(bundle)
-        return user != null
-    }
-
     private fun isStartDestination(destination: NavDestination?): Boolean {
         if (destination == null) return false
         val graph = destination.parent ?: return false
@@ -117,15 +129,14 @@ class MainActivity : AppCompatActivity() {
         return startDestinations.contains(destination.id)
     }
 
-    private val destinationListener = NavController.OnDestinationChangedListener { _, destination, arguments ->
-        supportActionBar?.setDisplayHomeAsUpEnabled(!isStartDestination(destination))
-        supportActionBar?.title = prepareTitle(destination.label, arguments)
-    }
+    private val destinationListener =
+        NavController.OnDestinationChangedListener { _, destination, arguments ->
+            supportActionBar?.setDisplayHomeAsUpEnabled(!isStartDestination(destination))
+            supportActionBar?.title = prepareTitle(destination.label, arguments)
+        }
 
 
     private fun prepareTitle(label: CharSequence?, arguments: Bundle?): String {
-
-        // code for this method has been copied from Google sources :)
 
         if (label == null) return ""
         val title = StringBuffer()
@@ -157,15 +168,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUserOnline(isOnline: Boolean) {
-        user = auth.currentUser
-        if (user != null) {
-            databaseUsersRef.child(user!!.uid).child("onlineStatus").setValue(isOnline)
+        auth.currentUser?.let {
+            databaseUsersRef.child(it.uid).child("onlineStatus").setValue(isOnline)
+            val edit = pref?.edit()
+            val convertedBackgroundImage = Converter.fromListToString(MyDatabaseConnection.backgroundImages)
+            edit?.putString(BACKGROUND_IMAGES_KEY, convertedBackgroundImage)
+            edit?.putString(USER_ID_KEY, it.uid)
+            edit?.apply()
         }
+
     }
 
     private fun getMainNavigationGraphId() = R.navigation.main_navigation
-
-    private fun getTabsDestination() = R.id.tabsFragment
 
     private fun getLoginDestination() = R.id.loginFragment
 
@@ -173,7 +187,6 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onBackPressed() {
-
         if (isStartDestination(navController?.currentDestination)) {
             super.getOnBackPressedDispatcher().onBackPressed()
         } else {

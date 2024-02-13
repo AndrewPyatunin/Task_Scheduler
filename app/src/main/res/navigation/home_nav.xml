@@ -31,10 +31,10 @@
         tools:layout="@layout/fragment_invite_user">
         <argument
             android:name="board"
-            app:argType="com.example.taskscheduler.domain.Board" />
+            app:argType="com.example.taskscheduler.domain.models.Board" />
         <argument
             android:name="user"
-            app:argType="com.example.taskscheduler.domain.User" />
+            app:argType="com.example.taskscheduler.domain.models.User" />
     </fragment>
     <fragment
         android:id="@+id/newNoteFragment"
@@ -43,16 +43,16 @@
         tools:layout="@layout/fragment_new_note">
         <argument
             android:name="listOfNotesItem"
-            app:argType="com.example.taskscheduler.domain.ListOfNotesItem" />
+            app:argType="com.example.taskscheduler.domain.models.NotesListItem" />
         <argument
             android:name="board"
-            app:argType="com.example.taskscheduler.domain.Board" />
+            app:argType="com.example.taskscheduler.domain.models.Board" />
         <argument
             android:name="user"
-            app:argType="com.example.taskscheduler.domain.User" />
+            app:argType="com.example.taskscheduler.domain.models.User" />
         <argument
             android:name="note"
-            app:argType="com.example.taskscheduler.domain.Note" />
+            app:argType="com.example.taskscheduler.domain.models.Note" />
         <action
             android:id="@+id/action_newNoteFragment_to_outerBoardFragment"
             app:destination="@id/outerBoardFragment"
@@ -62,7 +62,7 @@
             app:popUpToInclusive="false" />
         <argument
             android:name="listOfLists"
-            app:argType="com.example.taskscheduler.domain.ListOfNotesItem[]" />
+            app:argType="com.example.taskscheduler.domain.models.NotesListItem[]" />
         <action
             android:id="@+id/action_newNoteFragment_to_innerBoardFragment"
             app:destination="@id/innerBoardFragment"
@@ -75,7 +75,7 @@
         tools:layout="@layout/fragment_new_board">
         <argument
             android:name="user"
-            app:argType="com.example.taskscheduler.domain.User" />
+            app:argType="com.example.taskscheduler.domain.models.User" />
         <action
             android:id="@+id/action_newBoardFragment_to_outerBoardFragment"
             app:destination="@id/outerBoardFragment"
@@ -85,7 +85,7 @@
             app:popUpToInclusive="true" />
         <argument
             android:name="board"
-            app:argType="com.example.taskscheduler.domain.Board" />
+            app:argType="com.example.taskscheduler.domain.models.Board" />
     </fragment>
     <action
         android:id="@+id/logout"
@@ -98,10 +98,10 @@
         tools:layout="@layout/fragment_outer_board">
         <argument
             android:name="user"
-            app:argType="com.example.taskscheduler.domain.User" />
+            app:argType="com.example.taskscheduler.domain.models.User" />
         <argument
             android:name="board"
-            app:argType="com.example.taskscheduler.domain.Board" />
+            app:argType="com.example.taskscheduler.domain.models.Board" />
         <action
             android:id="@+id/action_outerBoardFragment_to_innerBoardFragment"
             app:destination="@id/innerBoardFragment"
@@ -120,7 +120,7 @@
         tools:layout="@layout/fragment_inner_board">
         <argument
             android:name="listOfNotesItem"
-            app:argType="com.example.taskscheduler.domain.ListOfNotesItem" />
+            app:argType="com.example.taskscheduler.domain.models.NotesListItem" />
     </fragment>
     <action
         android:id="@+id/action_global_newNoteFragment"

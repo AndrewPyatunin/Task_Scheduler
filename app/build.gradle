@@ -5,6 +5,7 @@ plugins {
     id 'kotlin-parcelize'
     id 'androidx.navigation.safeargs.kotlin'
     id 'kotlin-kapt'
+    id("io.gitlab.arturbosch.detekt") version "1.19.0"
 }
 
 android {
@@ -13,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.taskscheduler"
-        minSdk 24
+        minSdk 26
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -53,7 +54,7 @@ dependencies {
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
@@ -65,5 +66,21 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.6.2"
+
+
+    implementation("androidx.room:room-runtime:2.5.2")
+
+    // To use Kotlin annotation processing tool (kapt)
+    kapt("androidx.room:room-compiler:2.5.2")
+
+    implementation("androidx.room:room-ktx:2.5.2")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
+    implementation 'com.google.code.gson:gson:2.9.0'
+
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
 
 }

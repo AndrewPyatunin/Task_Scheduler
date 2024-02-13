@@ -15,30 +15,37 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.example.taskscheduler.ChooseAvatarOptionFragment
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentRegistrationBinding
-import com.example.taskscheduler.domain.User
+import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.TakePhotoActivity
-import com.google.firebase.auth.FirebaseAuth
+import com.example.taskscheduler.presentation.UserAuthState
+import kotlinx.coroutines.launch
 import java.io.File
 
+class RegistrationFragment : Fragment() {
 
-class RegistrationFragment: Fragment() {
-    lateinit var directory: File
-    private lateinit var auth: FirebaseAuth
+    private lateinit var directory: File
     private lateinit var binding: FragmentRegistrationBinding
-    private lateinit var viewModel: RegistrationViewModel
     private lateinit var user: User
     private var uri: Uri? = null
+
+    private val viewModel by lazy {
+        ViewModelProvider(this)[RegistrationViewModel::class.java]
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentRegistrationBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -61,24 +68,28 @@ class RegistrationFragment: Fragment() {
             }
         }
 
-    private fun startTakePhotoActivity() {
-        takePhotoForResult.launch(Intent(requireActivity(), TakePhotoActivity::class.java))
+    fun pickImageFromGallery() {
+        val pickIntent = Intent(Intent.ACTION_PICK)
+        pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
+        pickImageFromGalleryForResult.launch(pickIntent)
     }
-
-    private fun takePhotoFromCamera() {
+    fun takePhotoFromCamera() {
         val builder = VmPolicy.Builder()
         StrictMode.setVmPolicy(builder.build())
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, generateFileUri());
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, generateFileUri())
         takePhotoForResult.launch(intent)
 //        startActivityForResult(intent, CAMERA)
     }
 
-    private fun generateFileUri(): Uri? {
-        var file: File? = null
+    private fun startTakePhotoActivity() {
+        takePhotoForResult.launch(Intent(requireActivity(), TakePhotoActivity::class.java))
+    }
 
-        file = File(
+    private fun generateFileUri(): Uri? {
+//        var file: File? = null
+
+        val file = File(
             directory.path + "/" + "photo_"
                     + System.currentTimeMillis() + ".jpg"
         )
@@ -100,82 +111,74 @@ class RegistrationFragment: Fragment() {
         if (!directory.exists()) directory.mkdirs()
     }
 
-    private fun pickImageFromGallery() {
-        val pickIntent = Intent(Intent.ACTION_PICK)
-        pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
-        pickImageFromGalleryForResult.launch(pickIntent)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[RegistrationViewModel::class.java]
         createDirectory()
         with(binding) {
             imageViewAvatar.setOnClickListener {
-//            ChooseAvatarOptionFragment().newInstance().show(childFragmentManager, "ChooseAvatarDialog")
-                pickImageFromGallery()
-            }
-            buttonSignUp.setOnClickListener {
+                ChooseAvatarOptionFragment.newInstance()
+                    .show(childFragmentManager, "ChooseAvatarDialog")
+//                pickImageFromGallery()
                 val email = editTextEmailAddressRegistration.text.toString().trim()
                 val password = editTextPasswordRegistration.text.toString().trim()
                 val name = editTextPersonName.text.toString().trim()
                 val lastName = editTextPersonLastName.text.toString().trim()
                 if (email == "" || password == "" || name == "" || lastName == "") {
-                    Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.fill_in_login_parameters),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
                 } else {
-                    viewModel.signUp(email, password, name, lastName, uri)
-                    buttonSignUp.isClickable = false
+                    buttonSignUp.setOnClickListener {
+                        observeViewModel(email, password, name, lastName)
+                    }
                 }
-
             }
         }
-        observeViewModel()
-
     }
 
-    private fun observeViewModel() {
-        viewModel.error.observe(viewLifecycleOwner, Observer {
-            if (it != null) Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-        })
-        viewModel.success.observe(viewLifecycleOwner, Observer {
-            if (it != null) {
-                Log.i("USER_FIREBASE", it.displayName.toString())
-                launchWelcomeFragment()
-//                launchBoardListFragment(viewModel.user.value)
+    private fun observeViewModel(email: String, password: String, name: String, lastName: String) {
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.signUp(email, password, name, lastName, uri).collect {
+                    when (it) {
+                        is UserAuthState.Error -> Toast.makeText(
+                            this@RegistrationFragment.requireContext(),
+                            it.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        UserAuthState.Loading -> {
+                        }
+                        is UserAuthState.Success -> {
+                            binding.buttonSignUp.isEnabled = false
+                            user = it.user
+                            Toast.makeText(
+                                requireContext(),
+                                String.format(
+                                    getString(R.string.user_registration_success),
+                                    user.name,
+                                    user.lastName
+                                ),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            launchWelcomeFragment(user)
+                        }
+                    }
+                }
             }
-        })
-        viewModel.user.observe(viewLifecycleOwner, Observer {
-            if (it != null) {
-                user = it
-//                launchBoardListFragment(it)
-
-            }
-
-        })
+        }
     }
 
-    private fun launchWelcomeFragment() {
-        val userName = String.format(getString(R.string.full_name), user.name, user.lastName)
-        findNavController().navigate(RegistrationFragmentDirections.actionRegistrationFragmentToWelcomeFragment(userName))
-    }
-
-    private fun launchBoardListFragment(user: User) {
-        findNavController().navigate(RegistrationFragmentDirections.actionRegistrationFragmentToTabsFragment())
-//        requireActivity().supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, BoardListFragment.newInstance(user, ArrayList()))
-//            .addToBackStack(BoardListFragment.NAME_BOARD_LIST)
-//            .commit()
-    }
-
-    fun galleryClicked() {
-        pickImageFromGallery()
-    }
-
-    fun cameraClicked() {
-        takePhotoFromCamera()
+    private fun launchWelcomeFragment(user: User) {
+        findNavController().navigate(
+            RegistrationFragmentDirections.actionRegistrationFragmentToWelcomeFragment(user)
+        )
     }
 
     companion object {
+
         const val NAME_LAUNCH = "launchBoardListFragment"
         fun newInstance(): RegistrationFragment {
             return RegistrationFragment()

@@ -8,12 +8,13 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentForgotPasswordBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
-class ForgotPasswordFragment: Fragment() {
+class ForgotPasswordFragment : Fragment() {
 
     private lateinit var binding: FragmentForgotPasswordBinding
     lateinit var auth: FirebaseAuth
@@ -25,7 +26,7 @@ class ForgotPasswordFragment: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentForgotPasswordBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -38,11 +39,10 @@ class ForgotPasswordFragment: Fragment() {
             auth = Firebase.auth
             auth.sendPasswordResetEmail(email).addOnCompleteListener {
                 if (it.isSuccessful) {
-                    Toast.makeText(context, "На ваш электронный адрес было отправлено письмо" +
-                            " с ссылкой для восстановления пароля", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        requireContext(), getString(R.string.forgot_password_email_send_letter), Toast.LENGTH_LONG
+                    ).show()
                     findNavController().popBackStack()
-                } else {
-
                 }
             }
         }
@@ -50,13 +50,6 @@ class ForgotPasswordFragment: Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        parseArgs()
-    }
-
-    private fun parseArgs() {
-//        requireArguments().getString(EMAIL_KEY)?.let {
-//            email = it
-//        }
         email = args.email
     }
 
