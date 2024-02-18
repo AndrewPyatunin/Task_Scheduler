@@ -8,18 +8,11 @@ import com.example.taskscheduler.data.FirebaseConstants.PATH_BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST_IDS
 import com.example.taskscheduler.data.FirebaseConstants.PATH_TITLE
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.database.BoardDao
-import com.example.taskscheduler.data.database.NoteDao
-import com.example.taskscheduler.data.database.NotesListDao
-import com.example.taskscheduler.data.database.UserDao
-import com.example.taskscheduler.data.datasources.BoardDataSourceImpl
-import com.example.taskscheduler.data.datasources.NoteDataSourceImpl
-import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
-import com.example.taskscheduler.data.datasources.UserDataSourceImpl
-import com.example.taskscheduler.data.mappers.BoardEntityToBoardMapper
-import com.example.taskscheduler.data.mappers.BoardToBoardEntityMapper
-import com.example.taskscheduler.data.mappers.NotesListEntityToNotesListItemMapper
-import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
+import com.example.taskscheduler.data.datasources.*
+import com.example.taskscheduler.data.entities.BoardEntity
+import com.example.taskscheduler.data.entities.NotesListEntity
+import com.example.taskscheduler.data.entities.UserEntity
+import com.example.taskscheduler.data.mappers.*
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
@@ -35,22 +28,18 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import javax.inject.Inject
 
-class BoardRepositoryImpl(
-    userDao: UserDao,
-    boardDao: BoardDao,
-    notesListDao: NotesListDao,
-    noteDao: NoteDao
+class BoardRepositoryImpl @Inject constructor(
+    private val boardDataSource: BoardDataSource,
+    private val noteDataSource: NoteDataSource,
+    private val userDataSource: UserDataSource,
+    private val notesListDataSource: NotesListDataSource,
+    private val boardToBoardEntityMapper: Mapper<Board, BoardEntity>,
+    private val boardEntityToBoardMapper: Mapper<BoardEntity, Board>,
+    private val userToUserEntityMapper: Mapper<User, UserEntity>,
+    private val notesListEntityToNotesListItemMapper: Mapper<NotesListEntity, NotesListItem>,
 ) : BoardRepository {
-
-    private val boardDataSource = BoardDataSourceImpl(boardDao)
-    private val noteDataSource = NoteDataSourceImpl(noteDao)
-    private val userDataSource = UserDataSourceImpl(userDao)
-    private val boardToBoardEntityMapper = BoardToBoardEntityMapper()
-    private val boardEntityToBoardMapper = BoardEntityToBoardMapper()
-    private val userToUserEntityMapper = UserToUserEntityMapper()
-    private val notesListEntityToNotesListItemMapper = NotesListEntityToNotesListItemMapper()
-    private val notesListDataSource = NotesListDataSourceImpl(notesListDao)
 
     private val databaseNotesListReference = Firebase.database.getReference(NOTES_LIST)
     private val databaseNoteReference = Firebase.database.getReference(NOTES)

@@ -4,10 +4,10 @@ import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.FirebaseConstants.NOTES
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
 import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST
-import com.example.taskscheduler.data.database.NoteDao
-import com.example.taskscheduler.data.database.NotesListDao
-import com.example.taskscheduler.data.datasources.NoteDataSourceImpl
-import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
+import com.example.taskscheduler.data.datasources.NoteDataSource
+import com.example.taskscheduler.data.datasources.NotesListDataSource
+import com.example.taskscheduler.data.entities.NoteEntity
+import com.example.taskscheduler.data.entities.NotesListEntity
 import com.example.taskscheduler.data.mappers.*
 import com.example.taskscheduler.domain.models.CheckNoteItem
 import com.example.taskscheduler.domain.models.Board
@@ -24,22 +24,17 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class NoteRepositoryImpl(
-    noteDao: NoteDao,
-    notesListDao: NotesListDao
+class NoteRepositoryImpl @Inject constructor(
+    private val noteDataSource: NoteDataSource,
+    private val notesListDataSource: NotesListDataSource,
+    private val noteToNoteEntityMapper: Mapper<Note, NoteEntity>,
+    private val noteEntityToNoteMapper: Mapper<NoteEntity, Note>,
+    private val notesListItemToNotesListEntityMapper: Mapper<NotesListItem, NotesListEntity>,
 ) : NoteRepository {
 
     private val database: FirebaseDatabase = Firebase.database
-    private val noteDataSource = NoteDataSourceImpl(noteDao)
-    private val notesListDataSource = NotesListDataSourceImpl(notesListDao)
-    private val checkNoteEntityToCheckNoteItemMapper = CheckNoteEntityToCheckNoteItemMapper()
-    private val checkNoteItemToCheckNoteEntityMapper = CheckNoteItemToCheckNoteEntityMapper()
-    private val noteToNoteEntityMapper =
-        NoteToNoteEntityMapper(checkNoteItemToCheckNoteEntityMapper)
-    private val noteEntityToNoteMapper =
-        NoteEntityToNoteMapper(checkNoteEntityToCheckNoteItemMapper)
-    private val notesListItemToNotesListEntityMapper = NotesListItemToNotesListEntityMapper()
     private val databaseNotesListsReference = database.getReference(NOTES_LIST)
     private val databaseNotesReference = database.getReference(NOTES)
 

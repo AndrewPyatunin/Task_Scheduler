@@ -9,8 +9,9 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentTabsBinding
+import javax.inject.Inject
 
-class TabsFragment : Fragment() {
+class TabsFragment @Inject constructor() : Fragment() {
 
     private lateinit var binding: FragmentTabsBinding
 

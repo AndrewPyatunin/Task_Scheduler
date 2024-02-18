@@ -1,17 +1,14 @@
 package com.example.taskscheduler.data.repos
 
-import android.util.Log
 import com.example.taskscheduler.data.FirebaseConstants.BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
 import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST_IDS
 import com.example.taskscheduler.data.FirebaseConstants.PATH_TITLE
-import com.example.taskscheduler.data.database.BoardDao
-import com.example.taskscheduler.data.database.NotesListDao
-import com.example.taskscheduler.data.datasources.BoardDataSourceImpl
-import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
-import com.example.taskscheduler.data.mappers.BoardToBoardEntityMapper
-import com.example.taskscheduler.data.mappers.NotesListEntityToNotesListItemMapper
-import com.example.taskscheduler.data.mappers.NotesListItemToNotesListEntityMapper
+import com.example.taskscheduler.data.datasources.BoardDataSource
+import com.example.taskscheduler.data.datasources.NotesListDataSource
+import com.example.taskscheduler.data.entities.BoardEntity
+import com.example.taskscheduler.data.entities.NotesListEntity
+import com.example.taskscheduler.data.mappers.Mapper
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
@@ -28,18 +25,16 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import javax.inject.Inject
 
-class NotesListRepositoryImpl(
-    notesListDao: NotesListDao,
-    boardDao: BoardDao,
+class NotesListRepositoryImpl @Inject constructor(
+    private val notesListDataSource: NotesListDataSource,
+    private val boardDataSource: BoardDataSource,
+    private val boardToBoardEntityMapper: Mapper<Board, BoardEntity>,
+    private val notesListEntityToNotesListItemMapper: Mapper<NotesListEntity, NotesListItem>,
+    private val notesListItemToNotesListEntityMapper: Mapper<NotesListItem, NotesListEntity>,
 ) : NotesListRepository {
 
-    private val notesListDataSource = NotesListDataSourceImpl(notesListDao)
-    private val boardDataSource = BoardDataSourceImpl(boardDao)
-
-    private val boardToBoardEntityMapper = BoardToBoardEntityMapper()
-    private val notesListEntityToNotesListItemMapper = NotesListEntityToNotesListItemMapper()
-    private val notesListItemToNotesListEntityMapper = NotesListItemToNotesListEntityMapper()
     private val databaseNotesListReference = Firebase.database.getReference(NOTES_LIST)
     private val databaseBoardsReference = Firebase.database.getReference(BOARDS)
 

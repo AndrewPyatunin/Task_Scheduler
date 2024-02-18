@@ -5,9 +5,9 @@ import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.FirebaseConstants.IMAGES
 import com.example.taskscheduler.data.FirebaseConstants.PATH_ONLINE_STATUS
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.database.UserDao
-import com.example.taskscheduler.data.datasources.UserDataSourceImpl
-import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
+import com.example.taskscheduler.data.datasources.UserDataSource
+import com.example.taskscheduler.data.entities.UserEntity
+import com.example.taskscheduler.data.mappers.Mapper
 import com.example.taskscheduler.domain.UserAuth
 import com.example.taskscheduler.domain.models.User
 import com.google.android.gms.tasks.OnFailureListener
@@ -23,15 +23,15 @@ import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class UserAuthentication(
-    dao: UserDao
+class UserAuthentication @Inject constructor(
+    private val userDataSource: UserDataSource,
+    private val userToUserEntityMapper: Mapper<User, UserEntity>
 ) : UserAuth {
 
-    private val userDataSource = UserDataSourceImpl(dao)
-    private val userToUserEntityMapper = UserToUserEntityMapper()
     private val auth = Firebase.auth
     private val databaseUsersReference = Firebase.database.getReference(USERS)
     private val storageReference = Firebase.storage.getReference(IMAGES)
@@ -67,7 +67,6 @@ class UserAuthentication(
         }
     }
 
-
     override fun updateUserAvatar(uri: Uri, name: String) {
 
         val user = auth.currentUser
@@ -81,7 +80,6 @@ class UserAuthentication(
                 throw RuntimeException(it.message)
             }
     }
-
 
     override suspend fun uploadUserAvatar(
         uri: Uri,
@@ -130,7 +128,6 @@ class UserAuthentication(
                     }
                 })
         }
-
 
     override suspend fun login(email: String, password: String, auth: FirebaseAuth, scope: CoroutineScope) =
         suspendCoroutine { continuation ->

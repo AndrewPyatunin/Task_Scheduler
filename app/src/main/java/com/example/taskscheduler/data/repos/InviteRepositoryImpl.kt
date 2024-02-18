@@ -6,13 +6,11 @@ import com.example.taskscheduler.data.FirebaseConstants.PATH_BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.PATH_INVITES
 import com.example.taskscheduler.data.FirebaseConstants.PATH_MEMBERS
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.database.InviteDao
-import com.example.taskscheduler.data.database.UserDao
-import com.example.taskscheduler.data.datasources.InviteDataSourceImpl
-import com.example.taskscheduler.data.datasources.UserDataSourceImpl
-import com.example.taskscheduler.data.mappers.InviteEntityToInviteMapper
-import com.example.taskscheduler.data.mappers.InviteToInviteEntityMapper
-import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
+import com.example.taskscheduler.data.datasources.InviteDataSource
+import com.example.taskscheduler.data.datasources.UserDataSource
+import com.example.taskscheduler.data.entities.InviteEntity
+import com.example.taskscheduler.data.entities.UserEntity
+import com.example.taskscheduler.data.mappers.Mapper
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
@@ -29,17 +27,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import javax.inject.Inject
 
-class InviteRepositoryImpl(
-    inviteDao: InviteDao,
-    userDao: UserDao
+class InviteRepositoryImpl @Inject constructor(
+    private val inviteDataSource: InviteDataSource,
+    private val userDataSource: UserDataSource,
+    private val inviteEntityToInviteMapper: Mapper<InviteEntity, Invite>,
+    private val inviteToInviteEntityMapper: Mapper<Invite, InviteEntity>,
+    private val userToUserEntityMapper: Mapper<User, UserEntity>,
 ) : InviteRepository {
 
-    private val inviteDataSource = InviteDataSourceImpl(inviteDao)
-    private val userDataSource = UserDataSourceImpl(userDao)
-    private val inviteEntityToInviteMapper = InviteEntityToInviteMapper()
-    private val inviteToInviteEntityMapper = InviteToInviteEntityMapper()
-    private val userToUserEntityMapper = UserToUserEntityMapper()
     private val auth = Firebase.auth
     private val databaseInvitesReference = Firebase.database.getReference(INVITES)
     private val databaseUsersReference = Firebase.database.getReference(USERS)
@@ -75,14 +72,16 @@ class InviteRepositoryImpl(
             .updateChildren(mapOf(Pair(user.id, true)))
         clearInviteInDatabase(user.copy(boards = user.boards.plus(inviteBoardId to true),
             invites = user.invites.filter {
-            it.key != invite.id
-        }), invite)
+                it.key != invite.id
+            }), invite
+        )
         // possible to update board
     }
 
     override suspend fun clearInviteInDatabase(user: User, invite: Invite) {
         databaseInvitesReference.child(user.id).child(invite.boardId).removeValue()
-        databaseUsersReference.child(user.id).child(PATH_INVITES).child(invite.boardId).removeValue()
+        databaseUsersReference.child(user.id).child(PATH_INVITES).child(invite.boardId)
+            .removeValue()
         inviteDataSource.removeInvite(inviteToInviteEntityMapper.map(invite))
         userDataSource.addUser(userToUserEntityMapper.map(user))
     }
@@ -118,7 +117,13 @@ class InviteRepositoryImpl(
                                 continuation.resumeWith(
                                     Result.success(
                                         userDataSource.addUser(
-                                            userToUserEntityMapper.map(userForInvite.copy(invites = (userForInvite.invites.plus(board.id to true))))
+                                            userToUserEntityMapper.map(
+                                                userForInvite.copy(
+                                                    invites = (userForInvite.invites.plus(
+                                                        board.id to true
+                                                    ))
+                                                )
+                                            )
                                         )
                                     )
                                 )
