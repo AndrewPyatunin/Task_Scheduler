@@ -12,7 +12,7 @@ class BoardDataSourceImpl(
         return taskDatabaseDao.getBoardsFlow()
     }
 
-    override suspend fun getBoard(boardId: String): BoardEntity {
+    override fun getBoard(boardId: String): Flow<BoardEntity> {
         return taskDatabaseDao.getBoard(boardId)
     }
 

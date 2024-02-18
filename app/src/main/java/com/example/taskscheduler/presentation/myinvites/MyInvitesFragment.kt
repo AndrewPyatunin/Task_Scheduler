@@ -66,7 +66,6 @@ class MyInvitesFragment : Fragment() {
     }
 
     fun okClicked(invite: Invite) {
-        Log.i("USER_AFTER_INVITE_CLICK", user.name)
         viewModel.acceptInvite(user, invite)
     }
 

@@ -12,7 +12,7 @@ interface NotesListRepository {
 
     suspend fun renameList(notesListItem: NotesListItem, board: Board, title: String)
 
-    suspend fun createNewList(title: String, board: Board, user: User)
+    suspend fun createNewList(title: String, board: Board, user: User): Result<Unit>
 
     suspend fun addListOfNote(notesListItem: NotesListItem)
 

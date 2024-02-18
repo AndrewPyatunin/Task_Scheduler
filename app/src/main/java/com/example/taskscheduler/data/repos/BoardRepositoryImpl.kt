@@ -86,8 +86,8 @@ class BoardRepositoryImpl(
         }
     }
 
-    override suspend fun getBoard(boardId: String): Board {
-        return boardEntityToBoardMapper.map(boardDataSource.getBoard(boardId))
+    override fun getBoard(boardId: String): Flow<Board> {
+        return boardDataSource.getBoard(boardId).map { boardEntityToBoardMapper.map(it) }
     }
 
     override suspend fun updateBoard(

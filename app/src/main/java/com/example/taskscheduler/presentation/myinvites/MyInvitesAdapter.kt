@@ -40,7 +40,6 @@ class MyInvitesAdapter: RecyclerView.Adapter<MyInvitesAdapter.MyInvitesViewHolde
 
     override fun onBindViewHolder(holder: MyInvitesViewHolder, position: Int) {
         val item = invitesList[position]
-        Log.i("USER_INVITE_ITEM", item.userName)
         val context = holder.itemView.context
         holder.textViewInvite.text = context.getString(R.string.invite_from, "${item.userName} ${item.userLastName}")
         holder.textViewInBoard.text = context.getString(R.string.to_board, item.boardName)

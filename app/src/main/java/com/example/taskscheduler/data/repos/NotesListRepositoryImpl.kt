@@ -1,5 +1,6 @@
 package com.example.taskscheduler.data.repos
 
+import android.util.Log
 import com.example.taskscheduler.data.FirebaseConstants.BOARDS
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
 import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST_IDS
@@ -23,6 +24,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -47,13 +49,9 @@ class NotesListRepositoryImpl(
         addListOfNote(notesListItem.copy(title = title))
     }
 
-    override suspend fun createNewList(title: String, board: Board, user: User) {
+    override suspend fun createNewList(title: String, board: Board, user: User): Result<Unit> {
         val ref = databaseNotesListReference.child(board.id).push()
         val listId = ref.key.toString()
-        val item = NotesListItem(listId, title, user.id, emptyMap())
-        ref.setValue(item)
-        databaseBoardsReference.child(board.id)
-            .child(PATH_NOTES_LIST_IDS).updateChildren(mapOf(Pair(listId, true)))
         boardDataSource.addBoard(
             boardToBoardEntityMapper.map(
                 board.copy(
@@ -61,7 +59,14 @@ class NotesListRepositoryImpl(
                 )
             )
         )
+        val item = NotesListItem(listId, title, user.id, emptyMap())
         addListOfNote(item)
+        databaseBoardsReference.child(board.id)
+            .child(PATH_NOTES_LIST_IDS).updateChildren(mapOf(Pair(listId, true)))
+            .addOnSuccessListener {
+                ref.setValue(item)
+            }
+        return Result.success(Unit)
     }
 
     override fun getNotesListsFlow(board: Board): Flow<List<NotesListItem>> {
@@ -71,6 +76,8 @@ class NotesListRepositoryImpl(
             }.map {
                 notesListEntityToNotesListItemMapper.map(it)
             }
+        }.filter {
+            it.size == board.listsOfNotesIds.size
         }
     }
 
@@ -95,7 +102,7 @@ class NotesListRepositoryImpl(
                 val listOfLists = ArrayList<NotesListItem>()
                 snapshot.children.forEach {
                     val listItem = it.getValue(NotesListItem::class.java)
-                    if (listItem != null && listItem !in listOfLists) {
+                    if (listItem != null) {
                         listOfLists.add(listItem)
                     }
                 }

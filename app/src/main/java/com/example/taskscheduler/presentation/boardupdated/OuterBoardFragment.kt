@@ -28,7 +28,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 class OuterBoardFragment : Fragment() {
 
     private lateinit var tabLayout: TabLayout
-    private lateinit var viewModel: OuterBoardViewModel
     private lateinit var binding: FragmentOuterBoardBinding
     private lateinit var board: Board
     private lateinit var user: User
@@ -36,32 +35,37 @@ class OuterBoardFragment : Fragment() {
     private var parentList = emptyList<NotesListItem>()
     private var viewPager: ViewPager2? = null
     private var currentPosition = 0
-    private var isInit = false
+
+    private val viewModel by lazy {
+        ViewModelProvider(this)[OuterBoardViewModel::class.java]
+    }
 
     private val args by navArgs<OuterBoardFragmentArgs>()
+
+    companion object {
+
+        const val KEY_REQUEST_DIALOG = "request_dialog"
+        const val KEY_BUNDLE_DIALOG = "bundle_dialog"
+        const val PAGER_POSITION = "position"
+        const val DIALOG_FRAGMENT_TAG = "CreateNewListDialogFragment"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         parseArgs()
+        childFragmentManager.setFragmentResultListener(KEY_REQUEST_DIALOG, this) { requestKey, bundle ->
+            val listTitle = bundle.getString(KEY_BUNDLE_DIALOG) ?: "title"
+            viewModel.createNewList(listTitle, board, user)
+        }
         MyDatabaseConnection.updated = true
     }
 
     override fun onPause() {
         super.onPause()
         val item = viewPager?.currentItem ?: 0
-        requireArguments().putInt("position", item)
-        Log.i("USER_SAVED", item.toString())
+        requireArguments().putInt(PAGER_POSITION, item)
         parentList = emptyList()
         MyDatabaseConnection.currentPosition = item
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (MyDatabaseConnection.isFromBackStack) {
-            binding.loadingIndicatorBoard.visibility = View.VISIBLE
-            binding.viewPager.visibility = View.INVISIBLE
-            MyDatabaseConnection.isFromBackStack = false
-        }
     }
 
     override fun onCreateView(
@@ -76,16 +80,15 @@ class OuterBoardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[OuterBoardViewModel::class.java]
-        viewModel.fetchNotesLists(board, parentList)
         currentPosition = MyDatabaseConnection.currentPosition
+        viewModel.getBoard(board)
         observeViewModel()
         binding.imageViewInvite.setOnClickListener {
             launchInviteUserFragment()
         }
         val textView = binding.textViewAddList
         textView.setOnClickListener {
-            CreateNewListDialogFragment().show(childFragmentManager, "CreateNewListDialogFragment")
+            CreateNewListDialogFragment().show(childFragmentManager, DIALOG_FRAGMENT_TAG)
         }
         requireActivity().onBackPressedDispatcher
             .addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
@@ -93,12 +96,7 @@ class OuterBoardFragment : Fragment() {
                     retryToListBoard()
                 }
             })
-        savedInstanceState?.putInt("position", viewPager?.currentItem ?: 0)
-        savedInstanceState?.putBoolean("first_init", false)
-    }
-
-    fun createNewList(listTitle: String) {
-        viewModel.createNewList(listTitle, board, user)
+        savedInstanceState?.putInt(PAGER_POSITION, viewPager?.currentItem ?: 0)
     }
 
     private fun parseArgs() {
@@ -120,8 +118,7 @@ class OuterBoardFragment : Fragment() {
     }
 
     private fun initViewPager(list: List<NotesListItem>) {
-        Log.i("OUTER_BOARD_LIST", list.toString())
-        if (list.size != parentList.size && list != parentList || list.isEmpty()) {
+        if (list != parentList || list.isEmpty()) {
             parentAdapter =
                 OuterBoardAdapter(
                     lifecycle =  lifecycle,
@@ -133,6 +130,8 @@ class OuterBoardFragment : Fragment() {
             parentList = list
             if (list.isNotEmpty()) {
                 binding.tabLayout.visibility = View.VISIBLE
+            } else {
+                binding.tabLayout.visibility = View.GONE
             }
             viewPager = binding.viewPager
             Glide.with(this).load(board.backgroundUrl).into(object : CustomTarget<Drawable>() {
@@ -155,20 +154,14 @@ class OuterBoardFragment : Fragment() {
                     tab.text = list[position].title
                 }.attach()
             }
-            viewPager?.currentItem = MyDatabaseConnection.currentPosition
+            viewPager?.setCurrentItem(MyDatabaseConnection.currentPosition, false)
             tabLayout.getTabAt(MyDatabaseConnection.currentPosition)?.select()
-        }
-
-        if (list.isNotEmpty()) {
-            isInit = true
-            binding.viewPager.visibility = View.VISIBLE
         }
     }
 
     private fun observeViewModel() {
 
         viewModel.listReady.observe(viewLifecycleOwner) {
-            Log.i("OUTER_BOARD", board.title)
             viewModel.readData(board)
         }
 
