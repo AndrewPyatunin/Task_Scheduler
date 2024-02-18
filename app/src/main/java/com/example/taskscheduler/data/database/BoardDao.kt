@@ -14,7 +14,7 @@ interface BoardDao {
     fun getBoardsFlow(): Flow<List<BoardEntity>>
 
     @Query("SELECT * FROM boards WHERE id = :id")
-    suspend fun getBoard(id: String): BoardEntity
+    fun getBoard(id: String): Flow<BoardEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addBoard(board: BoardEntity)

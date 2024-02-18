@@ -46,7 +46,6 @@ class InnerBoardViewModel : ViewModel() {
     fun fetchNotes(notesListItem: NotesListItem, listNotes: List<Note>) {
         viewModelScope.launch(Dispatchers.IO) {
             fetchNotesUseCase.execute(notesListItem, listNotes, viewModelScope).let {
-                Log.d("INNER_BOARD", "fetch_notes")
                 _readyLiveData.postValue(it)
             }
         }

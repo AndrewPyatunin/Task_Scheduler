@@ -74,12 +74,11 @@ class BoardListViewModel : ViewModel() {
 
     fun getBoardsFlow(user: User) {
         viewModelScope.launch(Dispatchers.IO) {
-            getBoardsFlowUseCase.execute(user).onEach { Log.d("DataUpdate", "Flow emission: $it") }.map { list ->
+            getBoardsFlowUseCase.execute(user).map { list ->
                 list.filter {
                     it.id in user.boards
                 }
             }.collectLatest {
-                Log.d("DataUpdate", "New data collected: $it") // Log the new data
                 _boardsLiveData.postValue(it)
             }
         }

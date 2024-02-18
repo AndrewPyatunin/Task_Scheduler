@@ -12,6 +12,8 @@ interface BoardRepository {
 
     fun getBoardsFlowFromRoom(user: User): Flow<List<Board>>
 
+    fun getBoard(boardId: String): Flow<Board>
+
     suspend fun updateBoard(board: Board, notesListItem: NotesListItem)
 
     suspend fun deleteBoard(board: Board, user: User)
@@ -26,8 +28,6 @@ interface BoardRepository {
         urlBackground: String,
         board: Board
     ): Result<String>
-
-    suspend fun getBoard(boardId: String): Board
 
     suspend fun deleteList(notesListItem: NotesListItem, board: Board, isList: Boolean)
 

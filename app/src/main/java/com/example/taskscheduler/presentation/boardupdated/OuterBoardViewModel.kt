@@ -1,5 +1,6 @@
 package com.example.taskscheduler.presentation.boardupdated
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,10 +13,8 @@ import com.example.taskscheduler.domain.usecases.AddNotesListItemUseCase
 import com.example.taskscheduler.domain.usecases.FetchNotesListUseCase
 import com.example.taskscheduler.domain.usecases.GetBoardUseCase
 import com.example.taskscheduler.domain.usecases.GetNotesListsUseCase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 class OuterBoardViewModel : ViewModel() {
 
@@ -39,31 +38,32 @@ class OuterBoardViewModel : ViewModel() {
     fun createNewList(title: String, board: Board, user: User) {
         viewModelScope.launch(Dispatchers.IO) {
             addNotesListItemUseCase.execute(title, board, user)
-            getBoard(board)
         }
     }
 
     fun fetchNotesLists(board: Board, listOfNotesList: List<NotesListItem>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            wait(board, listOfNotesList)
-        }
+        fetchListOrDelay(board, listOfNotesList)
     }
 
     fun readData(board: Board) {
         viewModelScope.launch(Dispatchers.IO) {
-            getNotesListsUseCase.execute(board).collect {
+            getNotesListsUseCase.execute(board).distinctUntilChanged().collect {
                 _listLiveData.postValue(it)
             }
         }
     }
 
-    suspend fun getBoard(board: Board) {
-        _boardLiveData.postValue(getBoardUseCase.execute(board.id))
+    fun getBoard(board: Board) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getBoardUseCase.execute(board.id).distinctUntilChanged().collect {
+                _boardLiveData.postValue(it)
+            }
+        }
     }
 
-    private suspend fun wait(board: Board, listOfNotesList: List<NotesListItem>) {
+    private fun fetchListOrDelay(board: Board, listOfNotesList: List<NotesListItem>) {
 
-        val job = viewModelScope.async {
+        val jobFetch = viewModelScope.launch(Dispatchers.IO) {
             _listReady.postValue(
                 fetchNotesListUseCase.execute(
                     board.id,
@@ -72,11 +72,17 @@ class OuterBoardViewModel : ViewModel() {
                 )
             )
         }
-        val result = withTimeoutOrNull(2000) {
-            job.await()
+        val jobDelay = viewModelScope.launch(Dispatchers.IO) {
+            delay(3000)
         }
-        if (result == null) {
-            _listReady.postValue(Unit)
+        viewModelScope.launch(Dispatchers.IO) {
+            jobFetch.join()
+            jobDelay.join()
+            if (listReady.value != null) {
+                return@launch
+            } else {
+                _listReady.value = Unit
+            }
         }
     }
 }

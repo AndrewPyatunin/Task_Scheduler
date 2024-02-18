@@ -8,8 +8,8 @@ class AddNotesListItemUseCase(
     private val repository: NotesListRepository
 ) {
 
-    suspend fun execute(title: String, board: Board, user: User) {
-        repository.createNewList(title, board, user)
+    suspend fun execute(title: String, board: Board, user: User): Result<Unit> {
+        return repository.createNewList(title, board, user)
     }
 
 }

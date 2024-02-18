@@ -12,6 +12,7 @@ import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.AddBoardUseCase
 import com.example.taskscheduler.domain.usecases.GetBoardUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class NewBoardViewModel : ViewModel() {
@@ -45,7 +46,10 @@ class NewBoardViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val result = addBoardUseCase.execute(name, user, urlBackground, board)
             if (result.isSuccess) {
-                _boardLiveData.postValue(getBoardUseCase.execute(result.getOrThrow()))
+                getBoardUseCase.execute(result.getOrThrow()).collectLatest {
+                    _boardLiveData.postValue(it)
+                }
+
             }
         }
     }
