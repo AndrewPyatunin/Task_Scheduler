@@ -8,7 +8,7 @@ import com.example.taskscheduler.data.FirebaseConstants.USERS
 import com.example.taskscheduler.data.datasources.UserDataSource
 import com.example.taskscheduler.data.entities.UserEntity
 import com.example.taskscheduler.data.mappers.Mapper
-import com.example.taskscheduler.domain.UserAuth
+import com.example.taskscheduler.domain.repos.UserAuth
 import com.example.taskscheduler.domain.models.User
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.firebase.auth.FirebaseAuth

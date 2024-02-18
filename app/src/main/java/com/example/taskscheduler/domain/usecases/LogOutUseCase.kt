@@ -1,6 +1,6 @@
 package com.example.taskscheduler.domain.usecases
 
-import com.example.taskscheduler.domain.UserAuth
+import com.example.taskscheduler.domain.repos.UserAuth
 import com.example.taskscheduler.domain.models.User
 import kotlinx.coroutines.CoroutineScope
 
