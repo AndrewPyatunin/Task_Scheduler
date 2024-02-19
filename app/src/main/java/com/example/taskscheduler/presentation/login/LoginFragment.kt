@@ -11,14 +11,16 @@ import androidx.navigation.fragment.findNavController
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentLoginBinding
 import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.presentation.ViewModelFactory
 
 class LoginFragment : Fragment() {
 
+    private lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentLoginBinding
     private var email = ""
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[LoginViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[LoginViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -36,7 +38,7 @@ class LoginFragment : Fragment() {
         binding.buttonLogin.setOnClickListener {
             val password = binding.editTextTextPassword.text.toString().trim()
             email = binding.editTextTextEmailAddress.text.toString().trim()
-            if (email != "" && password != "") {
+            if (email.isNotEmpty() && password.isNotEmpty()) {
                 viewModel.login(email, password)
             } else
                 Toast.makeText(

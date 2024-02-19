@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.GetUsersFlowUseCase
@@ -15,13 +14,13 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class InviteUserViewModel : ViewModel() {
+class InviteUserViewModel @Inject constructor(
+    private val inviteUserUseCase: InviteUserUseCase,
+    private val getUsersUseCase: GetUsersFlowUseCase
+) : ViewModel() {
 
-    private val inviteUserRepository = MyApp.inviteRepository
-    private val userRepository = MyApp.userRepository
-    private val inviteUserUseCase: InviteUserUseCase = InviteUserUseCase(inviteUserRepository)
-    private val getUsersUseCase = GetUsersFlowUseCase(userRepository)
     private val auth = Firebase.auth
 
     private val _user = MutableLiveData<FirebaseUser>()

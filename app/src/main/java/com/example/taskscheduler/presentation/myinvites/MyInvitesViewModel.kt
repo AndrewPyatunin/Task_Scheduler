@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
@@ -13,16 +12,16 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MyInvitesViewModel : ViewModel() {
+class MyInvitesViewModel @Inject constructor(
+    private val acceptInviteUseCase: AcceptInviteUseCase,
+    private val declineInviteUseCase: DeclineInviteUseCase,
+    private val getInviteUseCase: GetInvitesUseCase,
+    private val fetchInvitesUseCase: FetchInvitesUseCase,
+    private val getUserFromRoomUseCase: GetUserFromRoomUseCase
+) : ViewModel() {
 
-    private val inviteRepository = MyApp.inviteRepository
-    private val acceptInviteUseCase = AcceptInviteUseCase(inviteRepository)
-    private val declineInviteUseCase = DeclineInviteUseCase(inviteRepository)
-    private val getInviteUseCase = GetInvitesUseCase(inviteRepository)
-    private val fetchInvitesUseCase = FetchInvitesUseCase(inviteRepository)
-    private val userRepository = MyApp.userRepository
-    private val getUserFromRoomUseCase = GetUserFromRoomUseCase(userRepository)
     val auth = Firebase.auth
 
     private val _user = MutableLiveData<User>()
@@ -75,9 +74,5 @@ class MyInvitesViewModel : ViewModel() {
                 )
             )
         }
-    }
-
-    fun logout() {
-        auth.signOut()
     }
 }

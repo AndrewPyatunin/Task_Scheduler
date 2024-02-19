@@ -1,11 +1,9 @@
 package com.example.taskscheduler.presentation.boardlist
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
@@ -16,26 +14,18 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class BoardListViewModel : ViewModel() {
+class BoardListViewModel @Inject constructor(
+    private val getBoardsFlowUseCase: GetBoardsFlowUseCase,
+    private val logOutUseCase: LogOutUseCase,
+    private val getUserFromRoomUseCase: GetUserFromRoomUseCase,
+    private val addAllUsersUseCase: AddAllUsersUseCase,
+    private val fetchBoardsUseCase: FetchBoardsUseCase,
+    private val clearAllDataInRoomUseCase: ClearAllDataInRoomUseCase
+) : ViewModel() {
 
-    private val boardRepository = MyApp.boardRepository
-    private val userRepository = MyApp.userRepository
-    private val getBoardsFlowUseCase: GetBoardsFlowUseCase = GetBoardsFlowUseCase(boardRepository)
-    private val logOutUseCase: LogOutUseCase = LogOutUseCase(MyApp.userAuthentication)
-    private val getUserFromRoomUseCase: GetUserFromRoomUseCase =
-        GetUserFromRoomUseCase(MyApp.userRepository)
-    private val addAllUsersUseCase = AddAllUsersUseCase(userRepository)
-    private val fetchBoardsUseCase: FetchBoardsUseCase = FetchBoardsUseCase(boardRepository)
-    private val clearAllDataInRoomUseCase = ClearAllDataInRoomUseCase(
-        MyApp.inviteRepository,
-        boardRepository,
-        MyApp.notesListRepository,
-        MyApp.noteRepository,
-        userRepository
-    )
     private val auth: FirebaseAuth = Firebase.auth
 
     private val _userLiveData = MutableLiveData<User>()

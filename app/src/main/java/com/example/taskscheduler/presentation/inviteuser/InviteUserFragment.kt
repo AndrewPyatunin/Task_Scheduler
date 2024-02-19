@@ -14,9 +14,13 @@ import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentInviteUserBinding
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.presentation.ViewModelFactory
+import javax.inject.Inject
 
 class InviteUserFragment : Fragment() {
 
+    @Inject
+    private lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentInviteUserBinding
     private lateinit var recyclerViewUser: RecyclerView
     private lateinit var board: Board
@@ -26,7 +30,7 @@ class InviteUserFragment : Fragment() {
     private val args by navArgs<InviteUserFragmentArgs>()
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[InviteUserViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[InviteUserViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

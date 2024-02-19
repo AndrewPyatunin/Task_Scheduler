@@ -20,9 +20,13 @@ import com.example.taskscheduler.databinding.FragmentBoardListBinding
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
+import com.example.taskscheduler.presentation.ViewModelFactory
+import javax.inject.Inject
 
 class BoardListFragment : Fragment(), MenuProvider {
 
+    @Inject
+    private lateinit var viewModelFactory: ViewModelFactory
     private lateinit var user: User
     private lateinit var recyclerViewBoardList: RecyclerView
     private lateinit var boardsAdapter: BoardListAdapter
@@ -31,7 +35,7 @@ class BoardListFragment : Fragment(), MenuProvider {
         get() = _binding ?: throw RuntimeException("FragmentBoardListBinding==null")
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[BoardListViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[BoardListViewModel::class.java]
     }
 
     override fun onCreateView(

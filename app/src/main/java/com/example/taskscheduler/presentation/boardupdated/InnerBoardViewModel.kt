@@ -1,28 +1,26 @@
 package com.example.taskscheduler.presentation.boardupdated
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyApp
-import com.example.taskscheduler.domain.models.*
+import com.example.taskscheduler.domain.models.Board
+import com.example.taskscheduler.domain.models.Note
+import com.example.taskscheduler.domain.models.NotesListItem
+import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class InnerBoardViewModel : ViewModel() {
-
-    private val boardRepository = MyApp.boardRepository
-    private val notesListRepository = MyApp.notesListRepository
-    private val noteRepository = MyApp.noteRepository
-    private val removeBoardUseCase = RemoveBoardUseCase(boardRepository)
-    private val removeNotesListItemUseCase = RemoveNotesListItemUseCase(boardRepository)
-    private val renameListUseCase = RenameListUseCase(notesListRepository)
-    private val getNotesUseCase = GetNotesUseCase(noteRepository)
-    private val fetchNotesUseCase = FetchNotesUseCase(noteRepository)
+class InnerBoardViewModel @Inject constructor(
+    private val removeBoardUseCase: RemoveBoardUseCase,
+    private val removeNotesListItemUseCase: RemoveNotesListItemUseCase,
+    private val renameListUseCase: RenameListUseCase,
+    private val getNotesUseCase: GetNotesUseCase,
+    private val fetchNotesUseCase: FetchNotesUseCase
+) : ViewModel() {
 
     private val _listNotesLiveData = MutableLiveData<List<Note>>()
     val listNotesLiveData: LiveData<List<Note>>
@@ -34,8 +32,8 @@ class InnerBoardViewModel : ViewModel() {
     fun getNotes(listNotesIds: Map<String, Boolean>) {
         viewModelScope.launch(Dispatchers.IO) {
             getNotesUseCase.execute().map {
-                it.filter {
-                    it.id in listNotesIds
+                it.filter { note ->
+                    note.id in listNotesIds
                 }
             }.collect {
                 _listNotesLiveData.postValue(it)

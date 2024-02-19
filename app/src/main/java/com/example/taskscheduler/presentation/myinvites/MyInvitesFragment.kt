@@ -12,16 +12,32 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.taskscheduler.databinding.FragmentMyInvitesBinding
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.presentation.ViewModelFactory
+import javax.inject.Inject
 
 class MyInvitesFragment : Fragment() {
 
+    @Inject
+    private lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentMyInvitesBinding
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: MyInvitesAdapter
     private lateinit var user: User
+    private lateinit var invite: Invite
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[MyInvitesViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[MyInvitesViewModel::class.java]
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        childFragmentManager.setFragmentResultListener(KEY_REQUEST_REPLY_DIALOG, this) {
+            _, bundle ->
+            when(bundle.getBoolean(KEY_BUNDLE_REPLY_DIALOG)) {
+                true -> viewModel.acceptInvite(user, invite)
+                false -> viewModel.declineInvite(user, invite)
+            }
+        }
     }
 
     override fun onCreateView(
@@ -38,6 +54,7 @@ class MyInvitesFragment : Fragment() {
         observeViewModel()
         initViews()
         adapter.onItemClick = {
+            invite = it
             ReplyToInviteDialogFragment.newInstance(it).show(childFragmentManager, "ReplyDialog")
         }
     }
@@ -75,6 +92,9 @@ class MyInvitesFragment : Fragment() {
 
 
     companion object {
+
+        const val KEY_BUNDLE_REPLY_DIALOG = "bundle_reply_dialog"
+        const val KEY_REQUEST_REPLY_DIALOG = "request_reply_dialog"
 
         const val KEY_USER = "user"
 

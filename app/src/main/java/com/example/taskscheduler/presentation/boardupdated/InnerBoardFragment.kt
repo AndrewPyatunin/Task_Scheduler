@@ -6,8 +6,8 @@ import android.widget.Toast
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,21 +16,24 @@ import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentInnerBoardBinding
 import com.example.taskscheduler.domain.NoteComparator
 import com.example.taskscheduler.domain.models.Board
-import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.Note
+import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.presentation.ViewModelFactory
 import com.google.android.material.tabs.TabLayout
+import javax.inject.Inject
 
 
 class InnerBoardFragment : Fragment(), MenuProvider {
 
+    @Inject
+    private lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentInnerBoardBinding
     private lateinit var list: NotesListItem
     private lateinit var user: User
     private lateinit var board: Board
     private lateinit var recyclerView: RecyclerView
     private lateinit var innerAdapter: InnerBoardAdapter
-    private lateinit var viewModel: InnerBoardViewModel
     private lateinit var listOfLists: ArrayList<NotesListItem>
     private var position: Int = 0
     private var tabLayout: TabLayout? = null
@@ -38,6 +41,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     private var listNotes: List<Note> = emptyList()
     private var isFirst = true
 
+    private val viewModel by viewModels<InnerBoardViewModel>(factoryProducer = { viewModelFactory })
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         position = requireArguments().getInt(POSITION)
@@ -58,7 +62,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         binding = FragmentInnerBoardBinding.inflate(inflater, container, false)
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-        viewModel = ViewModelProvider(this)[InnerBoardViewModel::class.java]
         observeViewModel()
         viewPager = requireActivity().findViewById(R.id.view_pager)
         tabLayout = requireActivity().findViewById(R.id.tab_layout)

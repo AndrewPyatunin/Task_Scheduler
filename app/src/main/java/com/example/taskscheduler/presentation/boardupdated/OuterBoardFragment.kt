@@ -2,7 +2,6 @@ package com.example.taskscheduler.presentation.boardupdated
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,11 +21,15 @@ import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
+import com.example.taskscheduler.presentation.ViewModelFactory
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import javax.inject.Inject
 
 class OuterBoardFragment : Fragment() {
 
+    @Inject
+    private lateinit var viewModelFactory: ViewModelFactory
     private lateinit var tabLayout: TabLayout
     private lateinit var binding: FragmentOuterBoardBinding
     private lateinit var board: Board
@@ -37,7 +40,7 @@ class OuterBoardFragment : Fragment() {
     private var currentPosition = 0
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[OuterBoardViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[OuterBoardViewModel::class.java]
     }
 
     private val args by navArgs<OuterBoardFragmentArgs>()
@@ -53,7 +56,7 @@ class OuterBoardFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         parseArgs()
-        childFragmentManager.setFragmentResultListener(KEY_REQUEST_DIALOG, this) { requestKey, bundle ->
+        childFragmentManager.setFragmentResultListener(KEY_REQUEST_DIALOG, this) { _, bundle ->
             val listTitle = bundle.getString(KEY_BUNDLE_DIALOG) ?: "title"
             viewModel.createNewList(listTitle, board, user)
         }
