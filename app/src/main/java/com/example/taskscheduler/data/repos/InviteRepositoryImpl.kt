@@ -32,7 +32,7 @@ import javax.inject.Inject
 class InviteRepositoryImpl @Inject constructor(
     private val inviteDataSource: InviteDataSource,
     private val userDataSource: UserDataSource,
-    private val inviteEntityToInviteMapper: Mapper<InviteEntity, Invite>,
+    private val inviteEntityToInviteMapper: Mapper<InviteEntity?, Invite>,
     private val inviteToInviteEntityMapper: Mapper<Invite, InviteEntity>,
     private val userToUserEntityMapper: Mapper<User, UserEntity>,
 ) : InviteRepository {

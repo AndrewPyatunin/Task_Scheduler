@@ -31,7 +31,7 @@ class NotesListRepositoryImpl @Inject constructor(
     private val notesListDataSource: NotesListDataSource,
     private val boardDataSource: BoardDataSource,
     private val boardToBoardEntityMapper: Mapper<Board, BoardEntity>,
-    private val notesListEntityToNotesListItemMapper: Mapper<NotesListEntity, NotesListItem>,
+    private val notesListEntityToNotesListItemMapper: Mapper<NotesListEntity?, NotesListItem>,
     private val notesListItemToNotesListEntityMapper: Mapper<NotesListItem, NotesListEntity>,
 ) : NotesListRepository {
 

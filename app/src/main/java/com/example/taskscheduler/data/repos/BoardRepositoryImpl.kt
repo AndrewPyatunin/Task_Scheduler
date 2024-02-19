@@ -36,9 +36,9 @@ class BoardRepositoryImpl @Inject constructor(
     private val userDataSource: UserDataSource,
     private val notesListDataSource: NotesListDataSource,
     private val boardToBoardEntityMapper: Mapper<Board, BoardEntity>,
-    private val boardEntityToBoardMapper: Mapper<BoardEntity, Board>,
+    private val boardEntityToBoardMapper: Mapper<BoardEntity?, Board>,
     private val userToUserEntityMapper: Mapper<User, UserEntity>,
-    private val notesListEntityToNotesListItemMapper: Mapper<NotesListEntity, NotesListItem>,
+    private val notesListEntityToNotesListItemMapper: Mapper<NotesListEntity?, NotesListItem>,
 ) : BoardRepository {
 
     private val databaseNotesListReference = Firebase.database.getReference(NOTES_LIST)

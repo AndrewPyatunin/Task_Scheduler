@@ -34,7 +34,7 @@ import kotlin.coroutines.suspendCoroutine
 class UserRepositoryImpl @Inject constructor(
     private val userDataSource: UserDataSource,
     private val userToUserEntityMapper: Mapper<User, UserEntity>,
-    private val userEntityToUserMapper: Mapper<UserEntity, User>
+    private val userEntityToUserMapper: Mapper<UserEntity?, User>
 ) : UserRepository {
 
     private val auth = Firebase.auth

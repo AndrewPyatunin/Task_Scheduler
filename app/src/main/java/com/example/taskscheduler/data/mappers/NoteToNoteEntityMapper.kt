@@ -4,8 +4,9 @@ import com.example.taskscheduler.data.entities.CheckNoteEntity
 import com.example.taskscheduler.data.entities.NoteEntity
 import com.example.taskscheduler.domain.models.CheckNoteItem
 import com.example.taskscheduler.domain.models.Note
+import javax.inject.Inject
 
-class NoteToNoteEntityMapper(private val mapper: Mapper<CheckNoteItem, CheckNoteEntity>) : Mapper<Note, NoteEntity> {
+class NoteToNoteEntityMapper @Inject constructor(private val mapper: Mapper<CheckNoteItem, CheckNoteEntity>) : Mapper<Note, NoteEntity> {
 
     override fun map(from: Note): NoteEntity {
         return NoteEntity(

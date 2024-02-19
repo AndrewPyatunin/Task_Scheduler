@@ -4,8 +4,9 @@ import android.net.Uri
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.UserRepository
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Inject
 
-class UpdateUserDataUseCase(
+class UpdateUserDataUseCase @Inject constructor(
     private val repository: UserRepository
 ) {
 
