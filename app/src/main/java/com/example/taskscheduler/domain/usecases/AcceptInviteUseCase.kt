@@ -3,8 +3,9 @@ package com.example.taskscheduler.domain.usecases
 import com.example.taskscheduler.domain.models.Invite
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.InviteRepository
+import javax.inject.Inject
 
-class AcceptInviteUseCase(
+class AcceptInviteUseCase @Inject constructor(
     private val repository: InviteRepository
 ) {
 
