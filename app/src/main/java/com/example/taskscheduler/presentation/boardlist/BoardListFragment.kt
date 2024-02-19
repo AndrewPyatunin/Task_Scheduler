@@ -13,6 +13,7 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.MyDatabaseConnection.boardList
 import com.example.taskscheduler.R
@@ -31,6 +32,7 @@ class BoardListFragment : Fragment(), MenuProvider {
     private lateinit var recyclerViewBoardList: RecyclerView
     private lateinit var boardsAdapter: BoardListAdapter
     private var _binding: FragmentBoardListBinding? = null
+    private val component by lazy { (this.requireActivity().application as MyApp).component.fragmentComponent() }
     private val binding: FragmentBoardListBinding
         get() = _binding ?: throw RuntimeException("FragmentBoardListBinding==null")
 
@@ -44,6 +46,7 @@ class BoardListFragment : Fragment(), MenuProvider {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentBoardListBinding.inflate(inflater, container, false)
+        component.inject(this)
         return binding.root
     }
 

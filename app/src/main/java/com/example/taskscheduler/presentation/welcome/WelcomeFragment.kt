@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentWelcomeBinding
 import com.example.taskscheduler.findTopNavController
@@ -21,7 +22,12 @@ class WelcomeFragment : Fragment() {
     private lateinit var binding: FragmentWelcomeBinding
     private lateinit var name: String
     private val viewModel by viewModels<WelcomeViewModel>(factoryProducer = { viewModelFactory })
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        component.inject(this)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

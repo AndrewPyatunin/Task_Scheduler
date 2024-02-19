@@ -14,6 +14,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentOuterBoardBinding
@@ -38,7 +39,7 @@ class OuterBoardFragment : Fragment() {
     private var parentList = emptyList<NotesListItem>()
     private var viewPager: ViewPager2? = null
     private var currentPosition = 0
-
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
     private val viewModel by lazy {
         ViewModelProvider(this, viewModelFactory)[OuterBoardViewModel::class.java]
     }
@@ -55,6 +56,7 @@ class OuterBoardFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        component.inject(this)
         parseArgs()
         childFragmentManager.setFragmentResultListener(KEY_REQUEST_DIALOG, this) { _, bundle ->
             val listTitle = bundle.getString(KEY_BUNDLE_DIALOG) ?: "title"
@@ -69,6 +71,15 @@ class OuterBoardFragment : Fragment() {
         requireArguments().putInt(PAGER_POSITION, item)
         parentList = emptyList()
         MyDatabaseConnection.currentPosition = item
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (MyDatabaseConnection.isFromBackStack) {
+            binding.loadingIndicatorBoard.visibility = View.VISIBLE
+            binding.viewPager.visibility = View.INVISIBLE
+            MyDatabaseConnection.isFromBackStack = false
+        }
     }
 
     override fun onCreateView(

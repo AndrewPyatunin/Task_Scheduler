@@ -24,12 +24,12 @@ import java.util.regex.Pattern
 
 class MainActivity : AppCompatActivity() {
 
-    val auth = Firebase.auth
-    var user = auth.currentUser
+    private val auth = Firebase.auth
     private val databaseUsersRef = Firebase.database.getReference("Users")
-    private var navController: NavController? = null
     private val topLevelDestinations = setOf(getWelcomeDestination(), getLoginDestination())
+    private var navController: NavController? = null
     private var pref: SharedPreferences? = null
+    private var user = auth.currentUser
 
     companion object {
         const val USER_ID_KEY = "user_id"
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
         MyDatabaseConnection.backgroundImages = Converter.fromStringToList(pref?.getString(
             BACKGROUND_IMAGES_KEY, null))
         val navController = getRootNavController()
-        prepareRootNavController(user != null, navController)
+        prepareRootNavController(isSignedIn = user != null, navController = navController)
         onNavControllerActivated(navController)
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, true)
     }
@@ -182,7 +182,6 @@ class MainActivity : AppCompatActivity() {
     private fun getLoginDestination() = R.id.loginFragment
 
     private fun getWelcomeDestination() = R.id.welcomeFragment
-
 
     override fun onBackPressed() {
         if (isStartDestination(navController?.currentDestination)) {

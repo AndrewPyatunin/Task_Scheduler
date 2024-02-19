@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewBoardBinding
 import com.example.taskscheduler.domain.models.Board
@@ -29,13 +30,14 @@ class NewBoardFragment : Fragment() {
     private val args by navArgs<NewBoardFragmentArgs>()
     private val binding: FragmentNewBoardBinding
         get() = _binding ?: throw RuntimeException("FragmentNewBoardBinding==null")
-
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
     private val viewModel by lazy {
         ViewModelProvider(this, viewModelFactory)[NewBoardViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        component.inject(this)
         user = args.user
         board = args.board
     }

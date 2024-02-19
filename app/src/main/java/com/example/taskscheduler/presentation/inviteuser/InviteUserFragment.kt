@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentInviteUserBinding
 import com.example.taskscheduler.domain.models.Board
@@ -28,6 +29,7 @@ class InviteUserFragment : Fragment() {
     private var userAdapter: InviteUserAdapter? = null
     private val listForInvite = ArrayList<User>()
     private val args by navArgs<InviteUserFragmentArgs>()
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
 
     private val viewModel by lazy {
         ViewModelProvider(this, viewModelFactory)[InviteUserViewModel::class.java]
@@ -35,6 +37,7 @@ class InviteUserFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        component.inject(this)
         parseArgs()
     }
 

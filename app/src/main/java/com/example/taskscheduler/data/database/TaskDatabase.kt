@@ -30,7 +30,7 @@ abstract class TaskDatabase : RoomDatabase() {
                     return it
                 }
                 instance =
-                    Room.databaseBuilder(application, TaskDatabase::class.java, DB_NAME).build()
+                    Room.databaseBuilder(application, TaskDatabase::class.java, DB_NAME).enableMultiInstanceInvalidation().build()
                 return instance as TaskDatabase
             }
         }

@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentInnerBoardBinding
 import com.example.taskscheduler.domain.NoteComparator
@@ -40,10 +41,12 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     private var viewPager: ViewPager2? = null
     private var listNotes: List<Note> = emptyList()
     private var isFirst = true
-
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
     private val viewModel by viewModels<InnerBoardViewModel>(factoryProducer = { viewModelFactory })
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        component.inject(this)
         position = requireArguments().getInt(POSITION)
         isFirst = false
         listOfLists =
@@ -52,7 +55,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         user = requireArguments().getParcelable(USER)!!
         board = requireArguments().getParcelable(BOARD)!!
     }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,7 +77,6 @@ class InnerBoardFragment : Fragment(), MenuProvider {
             launchNewNoteFragment(Note())
         }
     }
-
 
     private fun launchNewNoteFragment(note: Note) {
         findNavController().navigate(

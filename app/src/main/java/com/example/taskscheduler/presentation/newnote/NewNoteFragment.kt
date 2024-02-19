@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.MyDatabaseConnection.updated
 import com.example.taskscheduler.R
@@ -40,9 +41,27 @@ class NewNoteFragment : Fragment(), MenuProvider {
     private lateinit var recyclerView: RecyclerView
     private lateinit var listOfLists: Array<NotesListItem>
     private val args by navArgs<NewNoteFragmentArgs>()
-
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
     private val viewModel by lazy {
         ViewModelProvider(this, viewModelFactory)[NewNoteViewModel::class.java]
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        component.inject(this)
+        childFragmentManager.setFragmentResultListener(KEY_REQUEST_NOTES_LIST_DIALOG, this) {
+                _, bundle ->
+            val position = bundle.getInt(KEY_BUNDLE_NOTES_LIST_DIALOG)
+            viewModel.moveNote(
+                note = note,
+                fromNotesListItem = notesListItem,
+                notesListItem = listOfLists[position],
+                board = board,
+                user = user
+            )
+        }
+        MyDatabaseConnection.isFromBackStack = true
+        parseArgs()
     }
 
     override fun onCreateView(
@@ -53,25 +72,6 @@ class NewNoteFragment : Fragment(), MenuProvider {
         binding = FragmentNewNoteBinding.inflate(inflater, container, false)
         binding.calendarView.visibility = View.GONE
         return binding.root
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        childFragmentManager.setFragmentResultListener(KEY_REQUEST_NOTES_LIST_DIALOG, this) {
-            _, bundle ->
-            val position = bundle.getInt(KEY_BUNDLE_NOTES_LIST_DIALOG)
-            viewModel.moveNote(
-                note = note,
-                fromNotesListItem = notesListItem,
-                notesListItem = listOfLists[position],
-                board = board,
-                user = user
-            )
-
-
-        }
-        MyDatabaseConnection.isFromBackStack = true
-        parseArgs()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
