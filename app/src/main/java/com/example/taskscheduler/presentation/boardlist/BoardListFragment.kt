@@ -26,7 +26,7 @@ import javax.inject.Inject
 class BoardListFragment : Fragment(), MenuProvider {
 
     @Inject
-    private lateinit var viewModelFactory: ViewModelFactory
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var user: User
     private lateinit var recyclerViewBoardList: RecyclerView
     private lateinit var boardsAdapter: BoardListAdapter

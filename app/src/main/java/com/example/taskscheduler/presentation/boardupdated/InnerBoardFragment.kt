@@ -27,7 +27,7 @@ import javax.inject.Inject
 class InnerBoardFragment : Fragment(), MenuProvider {
 
     @Inject
-    private lateinit var viewModelFactory: ViewModelFactory
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentInnerBoardBinding
     private lateinit var list: NotesListItem
     private lateinit var user: User

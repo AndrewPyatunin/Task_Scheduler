@@ -23,10 +23,14 @@ import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.presentation.ViewModelFactory
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 class NewNoteFragment : Fragment(), MenuProvider {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentNewNoteBinding
     private lateinit var notesListItem: NotesListItem
     private lateinit var board: Board
@@ -38,7 +42,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
     private val args by navArgs<NewNoteFragmentArgs>()
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[NewNoteViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[NewNoteViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -53,6 +57,19 @@ class NewNoteFragment : Fragment(), MenuProvider {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        childFragmentManager.setFragmentResultListener(KEY_REQUEST_NOTES_LIST_DIALOG, this) {
+            _, bundle ->
+            val position = bundle.getInt(KEY_BUNDLE_NOTES_LIST_DIALOG)
+            viewModel.moveNote(
+                note = note,
+                fromNotesListItem = notesListItem,
+                notesListItem = listOfLists[position],
+                board = board,
+                user = user
+            )
+
+
+        }
         MyDatabaseConnection.isFromBackStack = true
         parseArgs()
     }
@@ -268,6 +285,9 @@ class NewNoteFragment : Fragment(), MenuProvider {
     }
 
     companion object {
+
+        const val KEY_REQUEST_NOTES_LIST_DIALOG = "request_notes_list"
+        const val KEY_BUNDLE_NOTES_LIST_DIALOG = "bundle_notes_list"
 
         private const val KEY_LIST_NOTE = "list"
         private const val KEY_BOARD = "board"

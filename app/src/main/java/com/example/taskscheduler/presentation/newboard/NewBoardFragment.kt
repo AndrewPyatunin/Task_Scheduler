@@ -14,9 +14,13 @@ import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentNewBoardBinding
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.presentation.ViewModelFactory
+import javax.inject.Inject
 
 class NewBoardFragment : Fragment() {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var user: User
     private lateinit var board: Board
     private lateinit var newBoardAdapter: NewBoardAdapter
@@ -27,7 +31,7 @@ class NewBoardFragment : Fragment() {
         get() = _binding ?: throw RuntimeException("FragmentNewBoardBinding==null")
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[NewBoardViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[NewBoardViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

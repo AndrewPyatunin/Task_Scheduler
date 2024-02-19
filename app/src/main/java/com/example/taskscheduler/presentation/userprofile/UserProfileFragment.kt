@@ -24,11 +24,15 @@ import com.example.taskscheduler.databinding.FragmentUserProfileBinding
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
 import com.example.taskscheduler.presentation.TakePhotoActivity
+import com.example.taskscheduler.presentation.ViewModelFactory
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import javax.inject.Inject
 
 class UserProfileFragment : Fragment() {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentUserProfileBinding
     private var uri: Uri? = null
     private var userInfo = ""
@@ -36,7 +40,7 @@ class UserProfileFragment : Fragment() {
     private val auth = Firebase.auth
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[UserProfileViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[UserProfileViewModel::class.java]
     }
 
     override fun onCreateView(

@@ -29,7 +29,7 @@ import javax.inject.Inject
 class OuterBoardFragment : Fragment() {
 
     @Inject
-    private lateinit var viewModelFactory: ViewModelFactory
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var tabLayout: TabLayout
     private lateinit var binding: FragmentOuterBoardBinding
     private lateinit var board: Board

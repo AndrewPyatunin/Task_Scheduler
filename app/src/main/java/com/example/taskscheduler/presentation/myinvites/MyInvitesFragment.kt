@@ -18,7 +18,7 @@ import javax.inject.Inject
 class MyInvitesFragment : Fragment() {
 
     @Inject
-    private lateinit var viewModelFactory: ViewModelFactory
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentMyInvitesBinding
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: MyInvitesAdapter

@@ -1,10 +1,10 @@
-package com.example.taskscheduler
+package com.example.taskscheduler.presentation.registration
 
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.example.taskscheduler.presentation.registration.RegistrationFragment
+import com.example.taskscheduler.R
 
 class ChooseAvatarOptionFragment : DialogFragment() {
 

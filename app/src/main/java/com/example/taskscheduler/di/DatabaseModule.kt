@@ -2,8 +2,10 @@ package com.example.taskscheduler.di
 
 import android.app.Application
 import com.example.taskscheduler.data.database.*
+import dagger.Module
 import dagger.Provides
 
+@Module
 class DatabaseModule {
 
     @Provides

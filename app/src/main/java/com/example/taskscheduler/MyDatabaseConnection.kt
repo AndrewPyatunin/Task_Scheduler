@@ -9,13 +9,12 @@ import com.example.taskscheduler.domain.usecases.AddAllUsersUseCase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Inject
 
 object MyDatabaseConnection : DatabaseConnection {
 
     val database = Firebase.database
     private val databaseImagesReference = database.getReference("ImageUrls")
-    lateinit var repository: UserRepository
-    private var addAllUsersUseCase: AddAllUsersUseCase? = null
     @Volatile var boardList = emptyList<Board>()
     var currentPosition = 0
     var backgroundImages = emptyList<BackgroundImage>()
@@ -41,10 +40,5 @@ object MyDatabaseConnection : DatabaseConnection {
     }
 
     override suspend fun query(application: Application, scope: CoroutineScope) {
-        if (addAllUsersUseCase == null) {
-            repository = MyApp.userRepository
-            addAllUsersUseCase = AddAllUsersUseCase(repository)
-        }
-        addAllUsersUseCase?.execute(scope)
     }
 }

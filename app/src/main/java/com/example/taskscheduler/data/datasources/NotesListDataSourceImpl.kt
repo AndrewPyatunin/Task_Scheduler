@@ -3,8 +3,9 @@ package com.example.taskscheduler.data.datasources
 import com.example.taskscheduler.data.database.NotesListDao
 import com.example.taskscheduler.data.entities.NotesListEntity
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class NotesListDataSourceImpl(
+class NotesListDataSourceImpl @Inject constructor(
     private val taskDatabaseDao: NotesListDao
 ) : NotesListDataSource {
 

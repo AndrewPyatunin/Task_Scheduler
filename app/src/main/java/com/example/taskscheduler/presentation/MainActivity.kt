@@ -15,7 +15,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
-import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.google.firebase.auth.ktx.auth
@@ -55,7 +54,6 @@ class MainActivity : AppCompatActivity() {
         setTheme(R.style.Theme_AppCompat_Main)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
-        MyApp.initialize(application)
         pref = getSharedPreferences("Id", MODE_PRIVATE)
         MyDatabaseConnection.userId = pref?.getString(USER_ID_KEY, "")
         MyDatabaseConnection.backgroundImages = Converter.fromStringToList(pref?.getString(

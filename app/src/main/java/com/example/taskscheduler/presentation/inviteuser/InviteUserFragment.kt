@@ -20,7 +20,7 @@ import javax.inject.Inject
 class InviteUserFragment : Fragment() {
 
     @Inject
-    private lateinit var viewModelFactory: ViewModelFactory
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentInviteUserBinding
     private lateinit var recyclerViewUser: RecyclerView
     private lateinit var board: Board

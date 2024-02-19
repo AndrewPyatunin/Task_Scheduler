@@ -12,10 +12,12 @@ import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentLoginBinding
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.ViewModelFactory
+import javax.inject.Inject
 
 class LoginFragment : Fragment() {
 
-    private lateinit var viewModelFactory: ViewModelFactory
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentLoginBinding
     private var email = ""
 
