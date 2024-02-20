@@ -11,7 +11,14 @@ class MoveNoteUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
 
-    suspend fun execute(fromNotesListItem: NotesListItem, notesListItem: NotesListItem, note: Note, board: Board, user: User) {
-        repository.moveNote(fromNotesListItem, notesListItem, note, board, user)
+    suspend fun execute(
+        fromNotesListItem: NotesListItem,
+        notesListItem: NotesListItem,
+        note: Note,
+        board: Board,
+        user: User,
+        onSuccessListener: (String) -> Unit
+    ) {
+        repository.moveNote(fromNotesListItem, notesListItem, note, board, user, onSuccessListener)
     }
 }

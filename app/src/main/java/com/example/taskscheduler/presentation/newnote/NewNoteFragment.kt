@@ -59,6 +59,8 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 board = board,
                 user = user
             )
+            binding.textInList.text =
+                String.format(getString(R.string.note_in_list), listOfLists[position].title)
         }
         MyDatabaseConnection.isFromBackStack = true
         parseArgs()
@@ -96,16 +98,9 @@ class NewNoteFragment : Fragment(), MenuProvider {
             with(binding) {
                 val title: String = newNoteTitle.text.toString().trim()
                 val description: String = editTextDescription.text.toString().trim()
-                if (note.title.isEmpty()) {
-                    if (title.isNotEmpty()) {
-                        viewModel.createNewNote(title, description, board, notesListItem, user)
-                    }
-                } else {
-//                    switchVisibility(buttonNewNote)
-//                    textViewDescription.text = description.trim()
-//                    switchVisibility(textViewDescription)
-//                    switchVisibility(editTextDescription)
-//                    viewModel.updateNote(note.copy(description = description))
+                if (note.title.isEmpty() && title.isNotEmpty()) {
+                    buttonNewNote.isEnabled = false
+                    viewModel.createNewNote(title, description, board, notesListItem, user)
                 }
             }
         }
@@ -149,6 +144,14 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 buttonAddCheckListItem.visibility = View.VISIBLE
                 editTextCheckTitle.visibility = View.GONE
             }
+        }
+    }
+
+    private fun initNoteInfo() {
+        with(binding) {
+            textViewDescription.text = note.description
+            textViewNewNoteTitle.text = note.title
+            textViewDate.text = note.date
         }
     }
 
@@ -245,15 +248,15 @@ class NewNoteFragment : Fragment(), MenuProvider {
         newNoteAdapter.checkItemsList = ArrayList(note.listOfTasks)
         recyclerView.adapter = newNoteAdapter
         newNoteAdapter.onItemClick = {
-            val newNote = note.copy(listOfTasks = note.listOfTasks.map { item ->
+            note = note.copy(listOfTasks = note.listOfTasks.map { item ->
                 if (item.id == it.id) {
                     item.copy(isChecked = !item.isChecked)
                 } else {
                     item
                 }
             })
-            calculateProgress(newNote)
-            viewModel.updateNote(newNote)
+            calculateProgress(note)
+            viewModel.updateNote(note)
         }
     }
 
@@ -276,7 +279,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
 
         viewModel.noteLiveData.observe(viewLifecycleOwner) {
             note = it
-            binding.textViewDescription.text = note.description
+            initNoteInfo()
         }
     }
 

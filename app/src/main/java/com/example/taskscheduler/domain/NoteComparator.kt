@@ -2,7 +2,7 @@ package com.example.taskscheduler.domain
 
 import com.example.taskscheduler.domain.models.Note
 
-class NoteComparator : Comparator<Note> {
+object NoteComparator : Comparator<Note> {
 
     private fun dateToInt(date: String): Int {
         var dateForm = ""

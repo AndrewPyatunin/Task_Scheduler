@@ -1,7 +1,6 @@
 package com.example.taskscheduler.presentation.boardlist
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -82,7 +81,6 @@ class BoardListFragment : Fragment(), MenuProvider {
         }
 
         viewModel.dataReady.observe(viewLifecycleOwner) {
-            Log.d("DataUpdate", "Start_getting_boards")
         }
 
         viewModel.fetchUser()

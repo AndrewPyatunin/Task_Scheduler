@@ -11,7 +11,7 @@ import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -49,7 +49,7 @@ class NewNoteViewModel @Inject constructor(
 
     fun getNote(noteId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            getNoteUseCase.execute(noteId).collectLatest {
+            getNoteUseCase.execute(noteId).distinctUntilChanged().collect {
                 _noteLiveData.postValue(it)
                 _noteData.postValue(it.listOfTasks)
             }
@@ -72,7 +72,9 @@ class NewNoteViewModel @Inject constructor(
 
     fun moveNote(note: Note, fromNotesListItem: NotesListItem, notesListItem: NotesListItem, board: Board, user: User) {
         viewModelScope.launch(Dispatchers.IO) {
-            moveNoteUseCase.execute(fromNotesListItem, notesListItem, note, board, user)
+            moveNoteUseCase.execute(fromNotesListItem, notesListItem, note, board, user) {
+                getNote(it)
+            }
         }
     }
 }

@@ -23,7 +23,6 @@ class ListDialogFragment(val list: List<NotesListItem>) : DialogFragment() {
         builder.setItems(listTitles.toTypedArray()
         ) { _, which ->
             setFragmentResult(KEY_REQUEST_NOTES_LIST_DIALOG, bundleOf(KEY_BUNDLE_NOTES_LIST_DIALOG to which))
-//            (parentFragment as NewNoteFragment).moveNote(list[which])
         }
         return builder.create()
     }

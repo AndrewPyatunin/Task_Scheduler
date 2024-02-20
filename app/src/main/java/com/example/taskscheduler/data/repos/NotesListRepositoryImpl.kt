@@ -58,9 +58,7 @@ class NotesListRepositoryImpl @Inject constructor(
         addListOfNote(item)
         databaseBoardsReference.child(board.id)
             .child(PATH_NOTES_LIST_IDS).updateChildren(mapOf(Pair(listId, true)))
-            .addOnSuccessListener {
-                ref.setValue(item)
-            }
+        ref.setValue(item)
         return Result.success(Unit)
     }
 

@@ -62,7 +62,7 @@ class OuterBoardFragment : Fragment() {
             val listTitle = bundle.getString(KEY_BUNDLE_DIALOG) ?: "title"
             viewModel.createNewList(listTitle, board, user)
         }
-        MyDatabaseConnection.updated = true
+        MyDatabaseConnection.updated = false
     }
 
     override fun onPause() {
@@ -75,11 +75,11 @@ class OuterBoardFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (MyDatabaseConnection.isFromBackStack) {
-            binding.loadingIndicatorBoard.visibility = View.VISIBLE
-            binding.viewPager.visibility = View.INVISIBLE
-            MyDatabaseConnection.isFromBackStack = false
-        }
+//        if (MyDatabaseConnection.isFromBackStack) {
+//            binding.loadingIndicatorBoard.visibility = View.VISIBLE
+//            binding.viewPager.visibility = View.INVISIBLE
+//            MyDatabaseConnection.isFromBackStack = false
+//        }
     }
 
     override fun onCreateView(
@@ -132,7 +132,7 @@ class OuterBoardFragment : Fragment() {
     }
 
     private fun initViewPager(list: List<NotesListItem>) {
-        if (list != parentList || list.isEmpty()) {
+        if (list != parentList || list.isEmpty() || MyDatabaseConnection.updated) {
             parentAdapter =
                 OuterBoardAdapter(
                     lifecycle =  lifecycle,

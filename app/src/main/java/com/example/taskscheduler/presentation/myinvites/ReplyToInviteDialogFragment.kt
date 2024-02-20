@@ -28,11 +28,9 @@ class ReplyToInviteDialogFragment : DialogFragment() {
                         KEY_REQUEST_REPLY_DIALOG,
                         bundleOf(KEY_BUNDLE_REPLY_DIALOG to true)
                     )
-//                    (parentFragment as MyInvitesFragment).okClicked(invite)
                 }
                 .setNegativeButton(getString(R.string.to_decline)) { _, _ ->
                     setFragmentResult(KEY_REQUEST_REPLY_DIALOG, bundleOf(KEY_BUNDLE_REPLY_DIALOG to false))
-//                    (parentFragment as MyInvitesFragment).cancelClicked(invite)
                 }.create()
         }
 

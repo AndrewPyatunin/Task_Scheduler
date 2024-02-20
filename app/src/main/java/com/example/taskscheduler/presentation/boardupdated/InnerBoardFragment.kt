@@ -91,7 +91,7 @@ class InnerBoardFragment : Fragment(), MenuProvider {
     }
 
     private fun initList(list: List<Note>) {
-        val newList = list.sortedWith(NoteComparator())
+        val newList = list.sortedWith(NoteComparator)
         innerAdapter = InnerBoardAdapter(newList)
         recyclerView.adapter = innerAdapter
         innerAdapter.onItemClick = {
@@ -121,9 +121,8 @@ class InnerBoardFragment : Fragment(), MenuProvider {
         }
         viewModel.fetchNotes(list, listNotes)
 
-        viewModel.getNotes(list.listNotes)
-
         viewModel.readyLiveData.observe(viewLifecycleOwner) {
+            viewModel.getNotes(list.listNotes)
         }
     }
 

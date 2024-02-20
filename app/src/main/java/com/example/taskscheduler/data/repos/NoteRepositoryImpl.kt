@@ -1,5 +1,6 @@
 package com.example.taskscheduler.data.repos
 
+import android.util.Log
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.FirebaseConstants.NOTES
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
@@ -15,6 +16,7 @@ import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.NoteRepository
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -85,6 +87,8 @@ class NoteRepositoryImpl @Inject constructor(
         board: Board,
         notesListItem: NotesListItem,
         user: User,
+        onSuccessListener: (String) -> Unit,
+        date: String,
         checkList: List<CheckNoteItem>
     ) {
         val childListNotesRef = databaseNotesListsReference
@@ -92,12 +96,14 @@ class NoteRepositoryImpl @Inject constructor(
         val url = childListNotesRef.push()
         val idNote = url.key ?: ""
 
-        val note = Note(idNote, title, user.id, emptyList(), description, "", checkList)
-        databaseNotesReference.child(idNote).setValue(note)
+        val note = Note(idNote, title, user.id, emptyList(), description, date, checkList)
+        databaseNotesReference.child(idNote).setValue(note).addOnSuccessListener {
+            onSuccessListener(idNote)
+        }
         addNote(note)
         addListOfNote(notesListItem.copy(listNotes = (notesListItem.listNotes.plus(idNote to true))))
         url.setValue(true)
-        MyDatabaseConnection.updated = true
+//        MyDatabaseConnection.updated = true
     }
 
     override fun getNote(noteId: String): Flow<Note> {
@@ -110,12 +116,12 @@ class NoteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem) {
-        MyDatabaseConnection.updated = true
+//        MyDatabaseConnection.updated = true
         databaseNotesReference.child(note.id).removeValue()
         notesListItem.listNotes.filter {
-            it.key == note.id
+            it.key != note.id
         }.let {
-            addListOfNote(notesListItem.copy(listNotes = it))
+            addListOfNote(notesListItem = notesListItem.copy(listNotes = it))
             databaseNotesListsReference.child(board.id).child(notesListItem.id)
                 .child(NOTES_LIST).setValue(it)
         }
@@ -127,11 +133,12 @@ class NoteRepositoryImpl @Inject constructor(
         notesListItem: NotesListItem,
         note: Note,
         board: Board,
-        user: User
+        user: User,
+        onSuccessListener: (String) -> Unit
     ) {
         MyDatabaseConnection.updated = true
         deleteNote(note, board, fromNotesListItem)
-        createNewNote(note.title, note.description, board, notesListItem, user, note.listOfTasks)
+        createNewNote(note.title, note.description, board, notesListItem, user, onSuccessListener, note.date, note.listOfTasks)
     }
 
     override suspend fun addNote(note: Note) {

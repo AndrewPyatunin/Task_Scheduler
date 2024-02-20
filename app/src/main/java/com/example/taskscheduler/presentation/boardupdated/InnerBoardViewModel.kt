@@ -10,6 +10,7 @@ import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,7 +36,7 @@ class InnerBoardViewModel @Inject constructor(
                 it.filter { note ->
                     note.id in listNotesIds
                 }
-            }.collect {
+            }.distinctUntilChanged().collect {
                 _listNotesLiveData.postValue(it)
             }
         }
@@ -55,7 +56,6 @@ class InnerBoardViewModel @Inject constructor(
         }
     }
 
-
     fun renameList(notesListItem: NotesListItem, board: Board, title: String) {
         viewModelScope.launch(Dispatchers.IO) {
             renameListUseCase.execute(notesListItem, board, title)
@@ -66,6 +66,5 @@ class InnerBoardViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             removeBoardUseCase.execute(board, user)
         }
-
     }
 }
