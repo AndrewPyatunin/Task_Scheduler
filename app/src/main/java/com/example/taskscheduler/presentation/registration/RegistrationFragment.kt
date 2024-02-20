@@ -47,6 +47,13 @@ class RegistrationFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         component.inject(this)
+        childFragmentManager.setFragmentResultListener(KEY_REQUEST_CHOOSE_AVATAR_DIALOG, this) {
+            _, bundle ->
+            when (bundle.getBoolean(KEY_BUNDLE_CHOOSE_AVATAR_DIALOG)) {
+                true -> pickImageFromGallery()
+                false -> takePhotoFromCamera()
+            }
+        }
     }
 
     override fun onCreateView(
@@ -185,8 +192,10 @@ class RegistrationFragment : Fragment() {
     }
 
     companion object {
-
+        const val KEY_REQUEST_CHOOSE_AVATAR_DIALOG = "request_choose_avatar_dialog"
+        const val KEY_BUNDLE_CHOOSE_AVATAR_DIALOG = "bundle_choose_avatar_dialog"
         const val NAME_LAUNCH = "launchBoardListFragment"
+
         fun newInstance(): RegistrationFragment {
             return RegistrationFragment()
         }

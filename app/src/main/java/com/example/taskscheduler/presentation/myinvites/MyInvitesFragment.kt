@@ -84,15 +84,6 @@ class MyInvitesFragment : Fragment() {
         }
     }
 
-    fun okClicked(invite: Invite) {
-        viewModel.acceptInvite(user, invite)
-    }
-
-    fun cancelClicked(invite: Invite) {
-        viewModel.declineInvite(user, invite)
-    }
-
-
     companion object {
 
         const val KEY_BUNDLE_REPLY_DIALOG = "bundle_reply_dialog"

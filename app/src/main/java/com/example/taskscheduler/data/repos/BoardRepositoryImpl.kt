@@ -41,10 +41,11 @@ class BoardRepositoryImpl @Inject constructor(
     private val notesListEntityToNotesListItemMapper: Mapper<NotesListEntity?, NotesListItem>,
 ) : BoardRepository {
 
-    private val databaseNotesListReference = Firebase.database.getReference(NOTES_LIST)
-    private val databaseNoteReference = Firebase.database.getReference(NOTES)
-    private val databaseBoardsReference = Firebase.database.getReference(BOARDS)
-    private val databaseUsersReference = Firebase.database.getReference(USERS)
+    private val database = Firebase.database
+    private val databaseNotesListReference = database.getReference(NOTES_LIST)
+    private val databaseNoteReference = database.getReference(NOTES)
+    private val databaseBoardsReference = database.getReference(BOARDS)
+    private val databaseUsersReference = database.getReference(USERS)
 
     override suspend fun getBoardsFlow(user: User, scope: CoroutineScope, boardList: List<Board>) =
         suspendCancellableCoroutine { continuation ->

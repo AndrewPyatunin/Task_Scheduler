@@ -17,7 +17,7 @@ import com.google.firebase.ktx.Firebase
 class ForgotPasswordFragment : Fragment() {
 
     private lateinit var binding: FragmentForgotPasswordBinding
-    lateinit var auth: FirebaseAuth
+    private val auth = Firebase.auth
     private var email = ""
 
     private val args by navArgs<ForgotPasswordFragmentArgs>()
@@ -36,7 +36,6 @@ class ForgotPasswordFragment : Fragment() {
         binding.editTextEmailAddressForResetPassword.setText(email)
         binding.buttonResetPassword.setOnClickListener {
             email = binding.editTextEmailAddressForResetPassword.text.toString().trim()
-            auth = Firebase.auth
             auth.sendPasswordResetEmail(email).addOnCompleteListener {
                 if (it.isSuccessful) {
                     Toast.makeText(
