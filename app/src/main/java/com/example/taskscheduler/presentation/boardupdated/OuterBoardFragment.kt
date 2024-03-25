@@ -73,15 +73,6 @@ class OuterBoardFragment : Fragment() {
         MyDatabaseConnection.currentPosition = item
     }
 
-    override fun onResume() {
-        super.onResume()
-//        if (MyDatabaseConnection.isFromBackStack) {
-//            binding.loadingIndicatorBoard.visibility = View.VISIBLE
-//            binding.viewPager.visibility = View.INVISIBLE
-//            MyDatabaseConnection.isFromBackStack = false
-//        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

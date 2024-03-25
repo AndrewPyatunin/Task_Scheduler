@@ -1,6 +1,5 @@
 package com.example.taskscheduler.data.repos
 
-import android.util.Log
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.FirebaseConstants.NOTES
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
@@ -16,7 +15,6 @@ import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.NoteRepository
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -63,7 +61,6 @@ class NoteRepositoryImpl @Inject constructor(
                 val notes = ArrayList<Note>()
                 snapshot.children.forEach {
                     if (it.key in notesListItem.listNotes) {
-//                        notes.add(it.getValue(Note::class.java) ?: Note())
                         it.getValue(Note::class.java)?.let { note ->
                             if (note !in listNotes)
                                 notes.add(note)
@@ -103,7 +100,6 @@ class NoteRepositoryImpl @Inject constructor(
         addNote(note)
         addListOfNote(notesListItem.copy(listNotes = (notesListItem.listNotes.plus(idNote to true))))
         url.setValue(true)
-//        MyDatabaseConnection.updated = true
     }
 
     override fun getNote(noteId: String): Flow<Note> {
@@ -116,7 +112,6 @@ class NoteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem) {
-//        MyDatabaseConnection.updated = true
         databaseNotesReference.child(note.id).removeValue()
         notesListItem.listNotes.filter {
             it.key != note.id

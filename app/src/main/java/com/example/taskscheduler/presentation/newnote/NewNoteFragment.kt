@@ -189,7 +189,6 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 switchVisibility(imageViewSaveDescription.includedImageSave)
                 switchVisibility(textViewDescription)
                 switchVisibility(editTextDescription)
-//                switchVisibility(buttonNewNote)
                 editTextDescription.setText(note.description)
             }
             imageViewSaveDescription.includedImageSave.setOnClickListener {
@@ -366,9 +365,4 @@ class NewNoteFragment : Fragment(), MenuProvider {
         }
         return true
     }
-
-    fun moveNote(listItem: NotesListItem) {
-        viewModel.moveNote(note, notesListItem, listItem, board, user)
-    }
-
 }
