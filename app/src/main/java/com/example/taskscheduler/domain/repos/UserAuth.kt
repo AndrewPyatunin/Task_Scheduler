@@ -1,4 +1,4 @@
-package com.example.taskscheduler.domain
+package com.example.taskscheduler.domain.repos
 
 import android.net.Uri
 import com.example.taskscheduler.domain.models.User

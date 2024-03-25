@@ -1,6 +1,6 @@
 package com.example.taskscheduler.data.mappers
 
-interface Mapper<in I, out O> {
+interface Mapper <I, O> {
 
     fun map(from: I): O
 }

@@ -1,12 +1,12 @@
 package com.example.taskscheduler.domain.usecases
 
 import android.net.Uri
-import com.example.taskscheduler.domain.UserAuth
+import com.example.taskscheduler.domain.repos.UserAuth
 import com.example.taskscheduler.domain.models.User
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class RegistrationUseCase(
+class RegistrationUseCase @Inject constructor(
     private val userAuth: UserAuth
 ) {
     suspend fun execute(

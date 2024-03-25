@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.domain.BackgroundImage
 import com.example.taskscheduler.domain.models.Board
@@ -14,20 +13,16 @@ import com.example.taskscheduler.domain.usecases.GetBoardUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NewBoardViewModel : ViewModel() {
-
-    private val boardRepository = MyApp.boardRepository
-    private val addBoardUseCase = AddBoardUseCase(boardRepository)
-    private val getBoardUseCase = GetBoardUseCase(boardRepository)
+class NewBoardViewModel @Inject constructor(
+    private val addBoardUseCase: AddBoardUseCase,
+    private val getBoardUseCase: GetBoardUseCase,
+) : ViewModel() {
 
     private val _boardLiveData = MutableLiveData<Board>()
     val boardLiveData: LiveData<Board>
         get() = _boardLiveData
-
-    private val _user = MutableLiveData<User>()
-    val user: LiveData<User>
-        get() = _user
 
     private val _urlImage = MutableLiveData<List<BackgroundImage>>()
     val urlImage: LiveData<List<BackgroundImage>>

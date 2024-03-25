@@ -7,17 +7,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentWelcomeBinding
 import com.example.taskscheduler.findTopNavController
+import com.example.taskscheduler.presentation.ViewModelFactory
+import javax.inject.Inject
 
 class WelcomeFragment : Fragment() {
 
-    lateinit var binding: FragmentWelcomeBinding
-    lateinit var name: String
-    private lateinit var viewModel: WelcomeViewModel
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+    private lateinit var binding: FragmentWelcomeBinding
+    private lateinit var name: String
+    private val viewModel by viewModels<WelcomeViewModel>(factoryProducer = { viewModelFactory })
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        component.inject(this)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,7 +40,6 @@ class WelcomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[WelcomeViewModel::class.java]
         observeViewModel()
         Handler(Looper.getMainLooper()).postDelayed({ launchTabsFragment() }, 3000)
     }

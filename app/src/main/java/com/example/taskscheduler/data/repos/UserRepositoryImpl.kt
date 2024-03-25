@@ -7,10 +7,9 @@ import com.example.taskscheduler.data.FirebaseConstants.PATH_EMAIL
 import com.example.taskscheduler.data.FirebaseConstants.PATH_ONLINE_STATUS
 import com.example.taskscheduler.data.FirebaseConstants.PATH_URI
 import com.example.taskscheduler.data.FirebaseConstants.USERS
-import com.example.taskscheduler.data.database.UserDao
-import com.example.taskscheduler.data.datasources.UserDataSourceImpl
-import com.example.taskscheduler.data.mappers.UserEntityToUserMapper
-import com.example.taskscheduler.data.mappers.UserToUserEntityMapper
+import com.example.taskscheduler.data.datasources.UserDataSource
+import com.example.taskscheduler.data.entities.UserEntity
+import com.example.taskscheduler.data.mappers.Mapper
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.UserRepository
 import com.google.firebase.auth.ktx.auth
@@ -28,14 +27,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class UserRepositoryImpl(dao: UserDao) : UserRepository {
+class UserRepositoryImpl @Inject constructor(
+    private val userDataSource: UserDataSource,
+    private val userToUserEntityMapper: Mapper<User, UserEntity>,
+    private val userEntityToUserMapper: Mapper<UserEntity?, User>
+) : UserRepository {
 
-    private val userDataSource = UserDataSourceImpl(dao)
-    private val userToUserEntityMapper = UserToUserEntityMapper()
-    private val userEntityToUserMapper = UserEntityToUserMapper()
     private val auth = Firebase.auth
     private val databaseUsersReference = Firebase.database.getReference(USERS)
     private val storageReference = Firebase.storage.getReference(IMAGES)

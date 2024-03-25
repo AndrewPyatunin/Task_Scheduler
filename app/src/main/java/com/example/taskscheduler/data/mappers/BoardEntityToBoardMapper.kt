@@ -2,8 +2,9 @@ package com.example.taskscheduler.data.mappers
 
 import com.example.taskscheduler.data.entities.BoardEntity
 import com.example.taskscheduler.domain.models.Board
+import javax.inject.Inject
 
-class BoardEntityToBoardMapper : Mapper<BoardEntity?, Board> {
+class BoardEntityToBoardMapper @Inject constructor() : Mapper<BoardEntity?, Board> {
 
     override fun map(from: BoardEntity?): Board {
         return Board(

@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.domain.models.CheckNoteItem
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Note
@@ -12,17 +11,17 @@ import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NewNoteViewModel : ViewModel() {
-
-    private val noteRepository = MyApp.noteRepository
-    private val addNoteUseCase = AddNoteUseCase(noteRepository)
-    private val removeNoteUseCase = RemoveNoteUseCase(noteRepository)
-    private val updateNoteUseCase = UpdateNoteUseCase(noteRepository)
-    private val moveNoteUseCase = MoveNoteUseCase(noteRepository)
-    private val getNoteUseCase = GetNoteUseCase(noteRepository)
+class NewNoteViewModel @Inject constructor(
+    private val removeNoteUseCase: RemoveNoteUseCase,
+    private val updateNoteUseCase: UpdateNoteUseCase,
+    private val moveNoteUseCase: MoveNoteUseCase,
+    private val getNoteUseCase: GetNoteUseCase,
+    private val addNoteUseCase: AddNoteUseCase
+) : ViewModel() {
 
     private val _noteLiveData = MutableLiveData<Note>()
     val noteLiveData: LiveData<Note> = _noteLiveData
@@ -50,12 +49,11 @@ class NewNoteViewModel : ViewModel() {
 
     fun getNote(noteId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            getNoteUseCase.execute(noteId).collectLatest {
+            getNoteUseCase.execute(noteId).distinctUntilChanged().collect {
                 _noteLiveData.postValue(it)
                 _noteData.postValue(it.listOfTasks)
             }
         }
-
     }
 
     fun createNewNote(
@@ -74,7 +72,9 @@ class NewNoteViewModel : ViewModel() {
 
     fun moveNote(note: Note, fromNotesListItem: NotesListItem, notesListItem: NotesListItem, board: Board, user: User) {
         viewModelScope.launch(Dispatchers.IO) {
-            moveNoteUseCase.execute(fromNotesListItem, notesListItem, note, board, user)
+            moveNoteUseCase.execute(fromNotesListItem, notesListItem, note, board, user) {
+                getNote(it)
+            }
         }
     }
 }

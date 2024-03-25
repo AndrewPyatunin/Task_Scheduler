@@ -20,26 +20,41 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.example.taskscheduler.ChooseAvatarOptionFragment
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentRegistrationBinding
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.presentation.TakePhotoActivity
 import com.example.taskscheduler.presentation.UserAuthState
+import com.example.taskscheduler.presentation.ViewModelFactory
 import kotlinx.coroutines.launch
 import java.io.File
+import javax.inject.Inject
 
 class RegistrationFragment : Fragment() {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var directory: File
     private lateinit var binding: FragmentRegistrationBinding
     private lateinit var user: User
     private var uri: Uri? = null
-
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
     private val viewModel by lazy {
-        ViewModelProvider(this)[RegistrationViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[RegistrationViewModel::class.java]
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        component.inject(this)
+        childFragmentManager.setFragmentResultListener(KEY_REQUEST_CHOOSE_AVATAR_DIALOG, this) {
+            _, bundle ->
+            when (bundle.getBoolean(KEY_BUNDLE_CHOOSE_AVATAR_DIALOG)) {
+                true -> pickImageFromGallery()
+                false -> takePhotoFromCamera()
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,7 +73,6 @@ class RegistrationFragment : Fragment() {
                 Toast.makeText(requireContext(), "$uri", Toast.LENGTH_SHORT).show()
             }
         }
-
 
     private val pickImageFromGalleryForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -178,8 +192,10 @@ class RegistrationFragment : Fragment() {
     }
 
     companion object {
-
+        const val KEY_REQUEST_CHOOSE_AVATAR_DIALOG = "request_choose_avatar_dialog"
+        const val KEY_BUNDLE_CHOOSE_AVATAR_DIALOG = "bundle_choose_avatar_dialog"
         const val NAME_LAUNCH = "launchBoardListFragment"
+
         fun newInstance(): RegistrationFragment {
             return RegistrationFragment()
         }

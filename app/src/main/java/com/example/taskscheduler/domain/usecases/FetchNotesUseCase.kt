@@ -4,8 +4,9 @@ import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.repos.NoteRepository
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Inject
 
-class FetchNotesUseCase(
+class FetchNotesUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
 

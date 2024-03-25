@@ -19,24 +19,34 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentUserProfileBinding
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
 import com.example.taskscheduler.presentation.TakePhotoActivity
+import com.example.taskscheduler.presentation.ViewModelFactory
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import javax.inject.Inject
 
 class UserProfileFragment : Fragment() {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentUserProfileBinding
     private var uri: Uri? = null
     private var userInfo = ""
     private var user: User? = null
     private val auth = Firebase.auth
-
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
     private val viewModel by lazy {
-        ViewModelProvider(this)[UserProfileViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[UserProfileViewModel::class.java]
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        component.inject(this)
     }
 
     override fun onCreateView(
@@ -119,7 +129,7 @@ class UserProfileFragment : Fragment() {
         viewModel.userLiveData.observe(viewLifecycleOwner) {
             user = it
             userInfo = String.format(getString(R.string.full_name), it.name, it.lastName)
-            viewModel.update(null, userInfo, user!!)
+            viewModel.update(null, userInfo, it)
             Glide.with(this).load(it.uri).listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(
                     e: GlideException?,

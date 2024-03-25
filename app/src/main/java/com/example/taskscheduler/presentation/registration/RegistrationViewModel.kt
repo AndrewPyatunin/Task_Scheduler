@@ -3,7 +3,6 @@ package com.example.taskscheduler.presentation.registration
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.domain.usecases.RegistrationUseCase
 import com.example.taskscheduler.presentation.UserAuthState
 import com.google.firebase.auth.FirebaseAuth
@@ -11,12 +10,13 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class RegistrationViewModel : ViewModel() {
+class RegistrationViewModel @Inject constructor(
+    private val registrationUseCase: RegistrationUseCase
+) : ViewModel() {
 
     private val auth: FirebaseAuth = Firebase.auth
-    private val userAuthentication = MyApp.userAuthentication
-    private val registrationUseCase: RegistrationUseCase = RegistrationUseCase(userAuthentication)
 
     suspend fun signUp(
         email: String,
@@ -41,5 +41,4 @@ class RegistrationViewModel : ViewModel() {
             )
         )
     }
-
 }

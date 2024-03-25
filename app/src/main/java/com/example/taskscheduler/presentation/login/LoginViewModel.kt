@@ -13,11 +13,14 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val getUserFromRoomUseCase: GetUserFromRoomUseCase,
+    private val loginUseCase: LogInUseCase
+) : ViewModel() {
 
-    private val getUserFromRoomUseCase = GetUserFromRoomUseCase(MyApp.userRepository)
-    private val loginUseCase = LogInUseCase(MyApp.userAuthentication)
+
     private val auth = Firebase.auth
 
     private val _error = MutableLiveData<String>()

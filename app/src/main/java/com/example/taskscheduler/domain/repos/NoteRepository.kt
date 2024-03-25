@@ -5,6 +5,7 @@ import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
+import com.google.android.gms.tasks.OnSuccessListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +23,8 @@ interface NoteRepository {
         board: Board,
         notesListItem: NotesListItem,
         user: User,
+        onSuccessListener: (String) -> Unit = {},
+        date: String = "",
         checkList: List<CheckNoteItem> = emptyList()
     )
 
@@ -29,7 +32,7 @@ interface NoteRepository {
 
     suspend fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem)
 
-    suspend fun moveNote(fromNotesListItem: NotesListItem, notesListItem: NotesListItem, note: Note, board: Board, user: User)
+    suspend fun moveNote(fromNotesListItem: NotesListItem, notesListItem: NotesListItem, note: Note, board: Board, user: User, onSuccessListener: (String) -> Unit)
 
     suspend fun addNote(note: Note)
 

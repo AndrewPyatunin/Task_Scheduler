@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.usecases.*
@@ -13,21 +12,16 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class UserProfileViewModel : ViewModel() {
+class UserProfileViewModel @Inject constructor(
+    private val updateUserDataUseCase: UpdateUserDataUseCase,
+    private val updateUserProfileUseCase: UpdateUserProfileUseCase,
+    private val updateStatusUseCase: UpdateStatusUseCase,
+    private val getUserFromRoomUseCase: GetUserFromRoomUseCase,
+    private val clearAllDataInRoomUseCase: ClearAllDataInRoomUseCase
+) : ViewModel() {
 
-    private val userRepository = MyApp.userRepository
-    private val updateUserDataUseCase = UpdateUserDataUseCase(userRepository)
-    private val updateUserProfileUseCase = UpdateUserProfileUseCase(userRepository)
-    private val updateStatusUseCase = UpdateStatusUseCase(userRepository)
-    private val getUserFromRoomUseCase = GetUserFromRoomUseCase(userRepository)
-    private val clearAllDataInRoomUseCase = ClearAllDataInRoomUseCase(
-        MyApp.inviteRepository,
-        MyApp.boardRepository,
-        MyApp.notesListRepository,
-        MyApp.noteRepository,
-        userRepository
-    )
     val auth = Firebase.auth
 
     private val _avatarLiveData = MutableLiveData<Unit>()
@@ -64,7 +58,6 @@ class UserProfileViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             _avatarLiveData.postValue(updateUserDataUseCase.execute(uri, name, user, viewModelScope))
         }
-
     }
 
     fun updateStatus() {

@@ -12,11 +12,12 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class WelcomeViewModel : ViewModel() {
+class WelcomeViewModel @Inject constructor(
+    private val getUserFromRoomUseCase: GetUserFromRoomUseCase
+) : ViewModel() {
 
-    private val userRepository = MyApp.userRepository
-    private val getUserFromRoomUseCase = GetUserFromRoomUseCase(userRepository)
     private val auth = Firebase.auth
 
     private val _launchReady = MutableLiveData<User>()

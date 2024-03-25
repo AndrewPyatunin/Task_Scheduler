@@ -31,7 +31,6 @@ class CreateNewListDialogFragment : DialogFragment() {
         buttonSave?.setOnClickListener {
             val listTitle = editText.text.toString().trim()
             if (listTitle.isNotEmpty()) {
-//                (parentFragment as OuterBoardFragment).createNewList(listTitle)
                 setFragmentResult(KEY_REQUEST_DIALOG, bundleOf(KEY_BUNDLE_DIALOG to listTitle))
                 dismiss()
             } else {

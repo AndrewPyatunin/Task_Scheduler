@@ -2,7 +2,6 @@ package com.example.taskscheduler.presentation.boardupdated
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +14,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.R
 import com.example.taskscheduler.databinding.FragmentOuterBoardBinding
@@ -22,11 +22,15 @@ import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
+import com.example.taskscheduler.presentation.ViewModelFactory
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import javax.inject.Inject
 
 class OuterBoardFragment : Fragment() {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var tabLayout: TabLayout
     private lateinit var binding: FragmentOuterBoardBinding
     private lateinit var board: Board
@@ -35,9 +39,9 @@ class OuterBoardFragment : Fragment() {
     private var parentList = emptyList<NotesListItem>()
     private var viewPager: ViewPager2? = null
     private var currentPosition = 0
-
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
     private val viewModel by lazy {
-        ViewModelProvider(this)[OuterBoardViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[OuterBoardViewModel::class.java]
     }
 
     private val args by navArgs<OuterBoardFragmentArgs>()
@@ -52,12 +56,13 @@ class OuterBoardFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        component.inject(this)
         parseArgs()
-        childFragmentManager.setFragmentResultListener(KEY_REQUEST_DIALOG, this) { requestKey, bundle ->
+        childFragmentManager.setFragmentResultListener(KEY_REQUEST_DIALOG, this) { _, bundle ->
             val listTitle = bundle.getString(KEY_BUNDLE_DIALOG) ?: "title"
             viewModel.createNewList(listTitle, board, user)
         }
-        MyDatabaseConnection.updated = true
+        MyDatabaseConnection.updated = false
     }
 
     override fun onPause() {
@@ -118,7 +123,7 @@ class OuterBoardFragment : Fragment() {
     }
 
     private fun initViewPager(list: List<NotesListItem>) {
-        if (list != parentList || list.isEmpty()) {
+        if (list != parentList || list.isEmpty() || MyDatabaseConnection.updated) {
             parentAdapter =
                 OuterBoardAdapter(
                     lifecycle =  lifecycle,

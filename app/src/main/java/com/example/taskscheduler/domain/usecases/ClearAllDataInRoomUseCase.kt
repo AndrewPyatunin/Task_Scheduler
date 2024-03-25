@@ -1,8 +1,9 @@
 package com.example.taskscheduler.domain.usecases
 
 import com.example.taskscheduler.domain.repos.*
+import javax.inject.Inject
 
-class ClearAllDataInRoomUseCase(
+class ClearAllDataInRoomUseCase @Inject constructor(
     private val inviteRepository: InviteRepository,
     private val boardRepository: BoardRepository,
     private val notesListRepository: NotesListRepository,

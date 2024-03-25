@@ -4,10 +4,10 @@ import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.data.FirebaseConstants.NOTES
 import com.example.taskscheduler.data.FirebaseConstants.NOTES_LIST
 import com.example.taskscheduler.data.FirebaseConstants.PATH_NOTES_LIST
-import com.example.taskscheduler.data.database.NoteDao
-import com.example.taskscheduler.data.database.NotesListDao
-import com.example.taskscheduler.data.datasources.NoteDataSourceImpl
-import com.example.taskscheduler.data.datasources.NotesListDataSourceImpl
+import com.example.taskscheduler.data.datasources.NoteDataSource
+import com.example.taskscheduler.data.datasources.NotesListDataSource
+import com.example.taskscheduler.data.entities.NoteEntity
+import com.example.taskscheduler.data.entities.NotesListEntity
 import com.example.taskscheduler.data.mappers.*
 import com.example.taskscheduler.domain.models.CheckNoteItem
 import com.example.taskscheduler.domain.models.Board
@@ -24,22 +24,17 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class NoteRepositoryImpl(
-    noteDao: NoteDao,
-    notesListDao: NotesListDao
+class NoteRepositoryImpl @Inject constructor(
+    private val noteDataSource: NoteDataSource,
+    private val notesListDataSource: NotesListDataSource,
+    private val noteToNoteEntityMapper: Mapper<Note, NoteEntity>,
+    private val noteEntityToNoteMapper: Mapper<NoteEntity?, Note>,
+    private val notesListItemToNotesListEntityMapper: Mapper<NotesListItem, NotesListEntity>,
 ) : NoteRepository {
 
     private val database: FirebaseDatabase = Firebase.database
-    private val noteDataSource = NoteDataSourceImpl(noteDao)
-    private val notesListDataSource = NotesListDataSourceImpl(notesListDao)
-    private val checkNoteEntityToCheckNoteItemMapper = CheckNoteEntityToCheckNoteItemMapper()
-    private val checkNoteItemToCheckNoteEntityMapper = CheckNoteItemToCheckNoteEntityMapper()
-    private val noteToNoteEntityMapper =
-        NoteToNoteEntityMapper(checkNoteItemToCheckNoteEntityMapper)
-    private val noteEntityToNoteMapper =
-        NoteEntityToNoteMapper(checkNoteEntityToCheckNoteItemMapper)
-    private val notesListItemToNotesListEntityMapper = NotesListItemToNotesListEntityMapper()
     private val databaseNotesListsReference = database.getReference(NOTES_LIST)
     private val databaseNotesReference = database.getReference(NOTES)
 
@@ -66,7 +61,6 @@ class NoteRepositoryImpl(
                 val notes = ArrayList<Note>()
                 snapshot.children.forEach {
                     if (it.key in notesListItem.listNotes) {
-//                        notes.add(it.getValue(Note::class.java) ?: Note())
                         it.getValue(Note::class.java)?.let { note ->
                             if (note !in listNotes)
                                 notes.add(note)
@@ -90,6 +84,8 @@ class NoteRepositoryImpl(
         board: Board,
         notesListItem: NotesListItem,
         user: User,
+        onSuccessListener: (String) -> Unit,
+        date: String,
         checkList: List<CheckNoteItem>
     ) {
         val childListNotesRef = databaseNotesListsReference
@@ -97,12 +93,13 @@ class NoteRepositoryImpl(
         val url = childListNotesRef.push()
         val idNote = url.key ?: ""
 
-        val note = Note(idNote, title, user.id, emptyList(), description, "", checkList)
-        databaseNotesReference.child(idNote).setValue(note)
+        val note = Note(idNote, title, user.id, emptyList(), description, date, checkList)
+        databaseNotesReference.child(idNote).setValue(note).addOnSuccessListener {
+            onSuccessListener(idNote)
+        }
         addNote(note)
         addListOfNote(notesListItem.copy(listNotes = (notesListItem.listNotes.plus(idNote to true))))
         url.setValue(true)
-        MyDatabaseConnection.updated = true
     }
 
     override fun getNote(noteId: String): Flow<Note> {
@@ -115,12 +112,11 @@ class NoteRepositoryImpl(
     }
 
     override suspend fun deleteNote(note: Note, board: Board, notesListItem: NotesListItem) {
-        MyDatabaseConnection.updated = true
         databaseNotesReference.child(note.id).removeValue()
         notesListItem.listNotes.filter {
-            it.key == note.id
+            it.key != note.id
         }.let {
-            addListOfNote(notesListItem.copy(listNotes = it))
+            addListOfNote(notesListItem = notesListItem.copy(listNotes = it))
             databaseNotesListsReference.child(board.id).child(notesListItem.id)
                 .child(NOTES_LIST).setValue(it)
         }
@@ -132,11 +128,12 @@ class NoteRepositoryImpl(
         notesListItem: NotesListItem,
         note: Note,
         board: Board,
-        user: User
+        user: User,
+        onSuccessListener: (String) -> Unit
     ) {
         MyDatabaseConnection.updated = true
         deleteNote(note, board, fromNotesListItem)
-        createNewNote(note.title, note.description, board, notesListItem, user, note.listOfTasks)
+        createNewNote(note.title, note.description, board, notesListItem, user, onSuccessListener, note.date, note.listOfTasks)
     }
 
     override suspend fun addNote(note: Note) {

@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.MyDatabaseConnection.updated
 import com.example.taskscheduler.R
@@ -23,10 +24,14 @@ import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
+import com.example.taskscheduler.presentation.ViewModelFactory
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 class NewNoteFragment : Fragment(), MenuProvider {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var binding: FragmentNewNoteBinding
     private lateinit var notesListItem: NotesListItem
     private lateinit var board: Board
@@ -36,9 +41,29 @@ class NewNoteFragment : Fragment(), MenuProvider {
     private lateinit var recyclerView: RecyclerView
     private lateinit var listOfLists: Array<NotesListItem>
     private val args by navArgs<NewNoteFragmentArgs>()
-
+    private val component by lazy { (requireActivity().application as MyApp).component.fragmentComponent() }
     private val viewModel by lazy {
-        ViewModelProvider(this)[NewNoteViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[NewNoteViewModel::class.java]
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        component.inject(this)
+        childFragmentManager.setFragmentResultListener(KEY_REQUEST_NOTES_LIST_DIALOG, this) {
+                _, bundle ->
+            val position = bundle.getInt(KEY_BUNDLE_NOTES_LIST_DIALOG)
+            viewModel.moveNote(
+                note = note,
+                fromNotesListItem = notesListItem,
+                notesListItem = listOfLists[position],
+                board = board,
+                user = user
+            )
+            binding.textInList.text =
+                String.format(getString(R.string.note_in_list), listOfLists[position].title)
+        }
+        MyDatabaseConnection.isFromBackStack = true
+        parseArgs()
     }
 
     override fun onCreateView(
@@ -49,12 +74,6 @@ class NewNoteFragment : Fragment(), MenuProvider {
         binding = FragmentNewNoteBinding.inflate(inflater, container, false)
         binding.calendarView.visibility = View.GONE
         return binding.root
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        MyDatabaseConnection.isFromBackStack = true
-        parseArgs()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -79,16 +98,9 @@ class NewNoteFragment : Fragment(), MenuProvider {
             with(binding) {
                 val title: String = newNoteTitle.text.toString().trim()
                 val description: String = editTextDescription.text.toString().trim()
-                if (note.title.isEmpty()) {
-                    if (title.isNotEmpty()) {
-                        viewModel.createNewNote(title, description, board, notesListItem, user)
-                    }
-                } else {
-//                    switchVisibility(buttonNewNote)
-//                    textViewDescription.text = description.trim()
-//                    switchVisibility(textViewDescription)
-//                    switchVisibility(editTextDescription)
-//                    viewModel.updateNote(note.copy(description = description))
+                if (note.title.isEmpty() && title.isNotEmpty()) {
+                    buttonNewNote.isEnabled = false
+                    viewModel.createNewNote(title, description, board, notesListItem, user)
                 }
             }
         }
@@ -135,6 +147,14 @@ class NewNoteFragment : Fragment(), MenuProvider {
         }
     }
 
+    private fun initNoteInfo() {
+        with(binding) {
+            textViewDescription.text = note.description
+            textViewNewNoteTitle.text = note.title
+            textViewDate.text = note.date
+        }
+    }
+
     private fun initViews() {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
@@ -169,7 +189,6 @@ class NewNoteFragment : Fragment(), MenuProvider {
                 switchVisibility(imageViewSaveDescription.includedImageSave)
                 switchVisibility(textViewDescription)
                 switchVisibility(editTextDescription)
-//                switchVisibility(buttonNewNote)
                 editTextDescription.setText(note.description)
             }
             imageViewSaveDescription.includedImageSave.setOnClickListener {
@@ -228,15 +247,15 @@ class NewNoteFragment : Fragment(), MenuProvider {
         newNoteAdapter.checkItemsList = ArrayList(note.listOfTasks)
         recyclerView.adapter = newNoteAdapter
         newNoteAdapter.onItemClick = {
-            val newNote = note.copy(listOfTasks = note.listOfTasks.map { item ->
+            note = note.copy(listOfTasks = note.listOfTasks.map { item ->
                 if (item.id == it.id) {
                     item.copy(isChecked = !item.isChecked)
                 } else {
                     item
                 }
             })
-            calculateProgress(newNote)
-            viewModel.updateNote(newNote)
+            calculateProgress(note)
+            viewModel.updateNote(note)
         }
     }
 
@@ -259,7 +278,7 @@ class NewNoteFragment : Fragment(), MenuProvider {
 
         viewModel.noteLiveData.observe(viewLifecycleOwner) {
             note = it
-            binding.textViewDescription.text = note.description
+            initNoteInfo()
         }
     }
 
@@ -268,6 +287,9 @@ class NewNoteFragment : Fragment(), MenuProvider {
     }
 
     companion object {
+
+        const val KEY_REQUEST_NOTES_LIST_DIALOG = "request_notes_list"
+        const val KEY_BUNDLE_NOTES_LIST_DIALOG = "bundle_notes_list"
 
         private const val KEY_LIST_NOTE = "list"
         private const val KEY_BOARD = "board"
@@ -343,9 +365,4 @@ class NewNoteFragment : Fragment(), MenuProvider {
         }
         return true
     }
-
-    fun moveNote(listItem: NotesListItem) {
-        viewModel.moveNote(note, notesListItem, listItem, board, user)
-    }
-
 }

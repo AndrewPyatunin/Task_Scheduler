@@ -1,7 +1,6 @@
 package com.example.taskscheduler.presentation.boardlist
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -13,6 +12,7 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.MyDatabaseConnection
 import com.example.taskscheduler.MyDatabaseConnection.boardList
 import com.example.taskscheduler.R
@@ -20,18 +20,23 @@ import com.example.taskscheduler.databinding.FragmentBoardListBinding
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.findTopNavController
+import com.example.taskscheduler.presentation.ViewModelFactory
+import javax.inject.Inject
 
 class BoardListFragment : Fragment(), MenuProvider {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
     private lateinit var user: User
     private lateinit var recyclerViewBoardList: RecyclerView
     private lateinit var boardsAdapter: BoardListAdapter
     private var _binding: FragmentBoardListBinding? = null
+    private val component by lazy { (this.requireActivity().application as MyApp).component.fragmentComponent() }
     private val binding: FragmentBoardListBinding
         get() = _binding ?: throw RuntimeException("FragmentBoardListBinding==null")
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[BoardListViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[BoardListViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -40,6 +45,7 @@ class BoardListFragment : Fragment(), MenuProvider {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentBoardListBinding.inflate(inflater, container, false)
+        component.inject(this)
         return binding.root
     }
 
@@ -75,7 +81,6 @@ class BoardListFragment : Fragment(), MenuProvider {
         }
 
         viewModel.dataReady.observe(viewLifecycleOwner) {
-            Log.d("DataUpdate", "Start_getting_boards")
         }
 
         viewModel.fetchUser()

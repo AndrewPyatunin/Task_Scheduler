@@ -1,11 +1,9 @@
 package com.example.taskscheduler.presentation.boardupdated
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskscheduler.MyApp
 import com.example.taskscheduler.domain.models.Board
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
@@ -13,16 +11,18 @@ import com.example.taskscheduler.domain.usecases.AddNotesListItemUseCase
 import com.example.taskscheduler.domain.usecases.FetchNotesListUseCase
 import com.example.taskscheduler.domain.usecases.GetBoardUseCase
 import com.example.taskscheduler.domain.usecases.GetNotesListsUseCase
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class OuterBoardViewModel : ViewModel() {
-
-    private val notesListRepository = MyApp.notesListRepository
-    private val addNotesListItemUseCase = AddNotesListItemUseCase(notesListRepository)
-    private val getNotesListsUseCase = GetNotesListsUseCase(notesListRepository)
-    private val fetchNotesListUseCase = FetchNotesListUseCase(notesListRepository)
-    private val getBoardUseCase = GetBoardUseCase(MyApp.boardRepository)
+class OuterBoardViewModel @Inject constructor(
+    private val addNotesListItemUseCase: AddNotesListItemUseCase,
+    private val getNotesListsUseCase: GetNotesListsUseCase,
+    private val fetchNotesListUseCase: FetchNotesListUseCase,
+    private val getBoardUseCase: GetBoardUseCase
+) : ViewModel() {
 
     private val _boardLiveData = MutableLiveData<Board>()
     val boardLiveData: LiveData<Board>

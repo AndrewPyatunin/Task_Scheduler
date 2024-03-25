@@ -5,12 +5,20 @@ import com.example.taskscheduler.domain.models.Note
 import com.example.taskscheduler.domain.models.NotesListItem
 import com.example.taskscheduler.domain.models.User
 import com.example.taskscheduler.domain.repos.NoteRepository
+import javax.inject.Inject
 
-class MoveNoteUseCase(
+class MoveNoteUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
 
-    suspend fun execute(fromNotesListItem: NotesListItem, notesListItem: NotesListItem, note: Note, board: Board, user: User) {
-        repository.moveNote(fromNotesListItem, notesListItem, note, board, user)
+    suspend fun execute(
+        fromNotesListItem: NotesListItem,
+        notesListItem: NotesListItem,
+        note: Note,
+        board: Board,
+        user: User,
+        onSuccessListener: (String) -> Unit
+    ) {
+        repository.moveNote(fromNotesListItem, notesListItem, note, board, user, onSuccessListener)
     }
 }

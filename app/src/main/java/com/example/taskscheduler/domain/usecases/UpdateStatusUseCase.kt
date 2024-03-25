@@ -1,8 +1,9 @@
 package com.example.taskscheduler.domain.usecases
 
 import com.example.taskscheduler.domain.repos.UserRepository
+import javax.inject.Inject
 
-class UpdateStatusUseCase(
+class UpdateStatusUseCase @Inject constructor(
     private val repository: UserRepository
 ) {
 
